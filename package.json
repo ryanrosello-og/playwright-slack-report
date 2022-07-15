@@ -1,5 +1,25 @@
 {
   "dependencies": {
+    "@playwright/test": "^1.23.3",
+    "playwright": "^1.23.3",
     "typescript": "^4.7.4"
-  }
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.30.6",
+    "@typescript-eslint/parser": "^5.30.6",
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-node": "^4.1.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.7.1"
+  },
+  "name": "playwright-slack-report",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
+  "author": "Ryan Rosello <ryanrosello@hotmail.com>",
+  "license": "MIT"
 }
