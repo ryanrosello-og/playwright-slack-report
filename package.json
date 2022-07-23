@@ -17,6 +17,9 @@
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.7.1"
   },
+  "scripts": {
+    "prettier": "prettier --write --loglevel warn \"**/**/*.ts\""
+  },
   "name": "playwright-slack-report",
   "version": "1.0.0",
   "main": "index.js",

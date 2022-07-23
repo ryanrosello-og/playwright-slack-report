@@ -24,16 +24,17 @@ export default class SlackReporter {
 
   constructor() {
     if (!process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
-      throw new Error(
-        'SLACK_BOT_USER_OAUTH_TOKEN was not found',
-      );
+      throw new Error('SLACK_BOT_USER_OAUTH_TOKEN was not found');
     }
     this.slackClient = new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
       logLevel: LogLevel.DEBUG,
     });
   }
 
-  async sendMessage(channelId: string | undefined, summaryResults: testSummary) {
+  async sendMessage(
+    channelId: string | undefined,
+    summaryResults: testSummary,
+  ) {
     const maxNumberOfFailures = 10;
     const maxNumberOfFailureLength = 650;
     const fails = [];
@@ -83,14 +84,18 @@ export default class SlackReporter {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `:white_check_mark: *${summaryResults.passed
-            }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
-            }* Tests failed \n\n ${summaryResults.skipped > 0
-              ? `:fast_forward: *${summaryResults.skipped}* skipped`
-              : ''
-            } \n\n ${summaryResults.aborted > 0
-              ? `:exclamation: *${summaryResults.aborted}* aborted`
-              : ''
+            text: `:white_check_mark: *${
+              summaryResults.passed
+            }* Tests ran successfully \n\n :red_circle: *${
+              summaryResults.failed
+            }* Tests failed \n\n ${
+              summaryResults.skipped > 0
+                ? `:fast_forward: *${summaryResults.skipped}* skipped`
+                : ''
+            } \n\n ${
+              summaryResults.aborted > 0
+                ? `:exclamation: *${summaryResults.aborted}* aborted`
+                : ''
             }`,
           },
         },
