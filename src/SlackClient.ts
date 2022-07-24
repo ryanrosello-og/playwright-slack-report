@@ -19,7 +19,7 @@ export type testSummary = {
   }[];
 };
 
-export default class SlackReporter {
+export default class SlackClient {
   private slackClient: WebClient;
 
   constructor() {
