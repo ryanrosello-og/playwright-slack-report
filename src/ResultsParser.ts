@@ -46,8 +46,6 @@ export default class ResultsParser {
   constructor(results: any) {
     this.result = [];
     this.resultsData = results;
-    // eslint-disable-next-line no-console
-    console.log(this.resultsData);
   }
 
   async getParsedResults(): Promise<testSummary> {
