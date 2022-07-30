@@ -19,10 +19,8 @@ const config: PlaywrightTestConfig = {
     [
       './src/SlackReporter.ts',
       {
-        reporterBaseUrl: 'https://default.zebrunner.com',
-        projectKey: 'DEF',
+        channels: ['zeb', 'pw'],
         enabled: true,
-        concurrentTasks: 19,
       },
     ],
   ],

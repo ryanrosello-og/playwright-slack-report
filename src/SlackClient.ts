@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable import/no-extraneous-dependencies */
 import { WebClient, LogLevel } from '@slack/web-api';
 
@@ -30,96 +32,100 @@ export default class SlackClient {
   }
 
   async sendMessage(
-    channelId: string | undefined,
+    channelIds: Array<string>,
     summaryResults: testSummary,
   ) {
     const maxNumberOfFailures = 10;
     const maxNumberOfFailureLength = 650;
     const fails = [];
-    if (!channelId) {
-      throw new Error(`Channel id [${channelId}] is not valid`);
+    if (!channelIds) {
+      throw new Error(`Channel ids [${channelIds}] is not valid`);
     }
-    const slackChannel = channelId.toString();
 
-    for (let i = 0; i < summaryResults.failures.length; i += 1) {
-      const {
-        failureReason,
-        test,
-      } = summaryResults.failures[i];
-      const formattedFailure = failureReason
-        .substring(0, maxNumberOfFailureLength)
-        .split('\n')
-        .map((l) => `>${l}`)
-        .join('\n');
-      fails.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*${test}*
-          \n\n${formattedFailure}`,
-        },
-      });
-      if (i > maxNumberOfFailures) {
+    for (const channelId of channelIds) {
+      const slackChannel = channelId?.toString();
+
+      for (let i = 0; i < summaryResults.failures.length; i += 1) {
+        const {
+          failureReason,
+          test,
+        } = summaryResults.failures[i];
+        const formattedFailure = failureReason
+          .substring(0, maxNumberOfFailureLength)
+          .split('\n')
+          .map((l) => `>${l}`)
+          .join('\n');
         fails.push({
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*There are too many failures to display, view the full results in BuildKite*',
+            text: `*${test}*
+          \n\n${formattedFailure}`,
           },
         });
-        break;
+        if (i > maxNumberOfFailures) {
+          fails.push({
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: '*There are too many failures to display, view the full results in BuildKite*',
+            },
+          });
+          break;
+        }
       }
-    }
 
-    let chatResponse;
-    try {
-      chatResponse = await this.slackClient.chat.postMessage({
-        channel: slackChannel,
-        text: ' ',
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `:white_check_mark: *${summaryResults.passed
-              }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
-              }* Tests failed \n\n ${summaryResults.skipped > 0
-                ? `:fast_forward: *${summaryResults.skipped}* skipped`
-                : ''
-              } \n\n ${summaryResults.aborted > 0
-                ? `:exclamation: *${summaryResults.aborted}* aborted`
-                : ''
-              }`,
-            },
-          },
-          {
-            type: 'section',
-            fields: [
-              {
+      let chatResponse;
+      try {
+        chatResponse = await this.slackClient.chat.postMessage({
+          channel: slackChannel,
+          text: ' ',
+          blocks: [
+            {
+              type: 'section',
+              text: {
                 type: 'mrkdwn',
-                text: `*Environment:*\n${summaryResults.environment}`,
+                text: `:white_check_mark: *${summaryResults.passed
+                }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
+                }* Tests failed \n\n ${summaryResults.skipped > 0
+                  ? `:fast_forward: *${summaryResults.skipped}* skipped`
+                  : ''
+                } \n\n ${summaryResults.aborted > 0
+                  ? `:exclamation: *${summaryResults.aborted}* aborted`
+                  : ''
+                }`,
               },
-            ],
-          },
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `\n${summaryResults.build}`,
             },
-          },
-          {
-            type: 'divider',
-          },
-          ...fails,
-        ],
-      });
-      if (chatResponse.ok) {
+            {
+              type: 'section',
+              fields: [
+                {
+                  type: 'mrkdwn',
+                  text: `*Environment:*\n${summaryResults.environment}`,
+                },
+              ],
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `\n${summaryResults.build}`,
+              },
+            },
+            {
+              type: 'divider',
+            },
+            ...fails,
+          ],
+        });
+        if (chatResponse.ok) {
         // eslint-disable-next-line no-console
-        console.log(`✅ Message sent to ${slackChannel}`);
+          console.log(`✅ Message sent to ${slackChannel}`);
+        }
+      } catch (error: any) {
+        // eslint-disable-next-line no-console
+        console.error(error.message);
       }
-    } catch (error) {
-      console.error(error.message);
     }
   }
 }

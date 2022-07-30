@@ -105,3 +105,5 @@ dist
 
 # trace files
 *.zip
+
+test-results/
