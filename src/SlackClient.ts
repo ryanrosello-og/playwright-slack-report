@@ -31,25 +31,27 @@ export default class SlackClient {
     });
   }
 
-  async sendMessage(
+  async sendMessage(options: {
     channelIds: Array<string>,
     summaryResults: testSummary,
-  ) {
+    meta: Array<{ key: string, value: string }>,
+  }) {
     const maxNumberOfFailures = 10;
     const maxNumberOfFailureLength = 650;
     const fails = [];
-    if (!channelIds) {
-      throw new Error(`Channel ids [${channelIds}] is not valid`);
+    const meta = [];
+    if (!options.channelIds) {
+      throw new Error(`Channel ids [${options.channelIds}] is not valid`);
     }
 
-    for (const channelId of channelIds) {
+    for (const channelId of options.channelIds) {
       const slackChannel = channelId?.toString();
 
-      for (let i = 0; i < summaryResults.failures.length; i += 1) {
+      for (let i = 0; i < options.summaryResults.failures.length; i += 1) {
         const {
           failureReason,
           test,
-        } = summaryResults.failures[i];
+        } = options.summaryResults.failures[i];
         const formattedFailure = failureReason
           .substring(0, maxNumberOfFailureLength)
           .split('\n')
@@ -75,6 +77,19 @@ export default class SlackClient {
         }
       }
 
+      for (let i = 0; i < options.meta.length; i += 1) {
+        const { key, value } = options.meta[i];
+        meta.push(
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `\n*${key}* :\t${value}`,
+            },
+          },
+        );
+      }
+
       let chatResponse;
       try {
         chatResponse = await this.slackClient.chat.postMessage({
@@ -85,33 +100,18 @@ export default class SlackClient {
               type: 'section',
               text: {
                 type: 'mrkdwn',
-                text: `:white_check_mark: *${summaryResults.passed
-                }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
-                }* Tests failed \n\n ${summaryResults.skipped > 0
-                  ? `:fast_forward: *${summaryResults.skipped}* skipped`
+                text: `:white_check_mark: *${options.summaryResults.passed
+                }* Tests ran successfully \n\n :red_circle: *${options.summaryResults.failed
+                }* Tests failed \n\n ${options.summaryResults.skipped > 0
+                  ? `:fast_forward: *${options.summaryResults.skipped}* skipped`
                   : ''
-                } \n\n ${summaryResults.aborted > 0
-                  ? `:exclamation: *${summaryResults.aborted}* aborted`
+                } \n\n ${options.summaryResults.aborted > 0
+                  ? `:exclamation: *${options.summaryResults.aborted}* aborted`
                   : ''
                 }`,
               },
             },
-            {
-              type: 'section',
-              fields: [
-                {
-                  type: 'mrkdwn',
-                  text: `*Environment:*\n${summaryResults.environment}`,
-                },
-              ],
-            },
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: `\n${summaryResults.build}`,
-              },
-            },
+            ...meta,
             {
               type: 'divider',
             },
@@ -119,7 +119,7 @@ export default class SlackClient {
           ],
         });
         if (chatResponse.ok) {
-        // eslint-disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.log(`✅ Message sent to ${slackChannel}`);
         }
       } catch (error: any) {

@@ -20,7 +20,14 @@ const config: PlaywrightTestConfig = {
       './src/SlackReporter.ts',
       {
         channels: ['zeb', 'pw'],
-        enabled: true,
+        sendResults: 'on-failure', // "always" , "on-failure", "off"
+        meta: [
+          {
+            key: 'vsvs', value: true,
+          },
+          {
+            key: 'BK', value: process.env.BK,
+          }],
       },
     ],
   ],

@@ -7,19 +7,19 @@ import SlackClient from './SlackClient';
 class SlackReporter implements Reporter {
   private suite!: Suite;
 
-  private config!: FullConfig;
-
-  private enabled: boolean | undefined;
+  private sendResults: 'always' | 'on-failure' | 'off' = 'on-failure';
 
   private slackChannels: string[] = [];
+
+  private meta: Array<{ key: string, value: string }> = [];
 
   onBegin(config: FullConfig, suite: Suite) {
     const slackReporterConfig = config.reporter.filter(
       (f) => f[0].toLowerCase().includes('slackreporter') || f[1]?.toLowerCase().includes('slackreporter'),
     );
     this.suite = suite;
-    this.config = config;
-    this.enabled = slackReporterConfig[0][1].enabled || false;
+    this.meta = slackReporterConfig[0][1].meta || [];
+    this.sendResults = slackReporterConfig[0][1].sendResults;
     if (slackReporterConfig[0][1].channels) {
       this.slackChannels = slackReporterConfig[0][1].channels;
     } else {
@@ -28,7 +28,7 @@ class SlackReporter implements Reporter {
   }
 
   async onEnd() {
-    if (!this.enabled) {
+    if (this.sendResults === 'off') {
       // eslint-disable-next-line no-console
       console.log('⏩ Slack reporter is disabled');
       return;
@@ -36,8 +36,19 @@ class SlackReporter implements Reporter {
     const resultsParser = new ResultsParser(this.suite);
     await resultsParser.parse();
     const resultSummary = await resultsParser.getParsedResults();
+
+    if (this.sendResults === 'on-failure' && resultSummary.failures.length === 0) {
+      // eslint-disable-next-line no-console
+      console.log('⏩ Slack reporter - no failures found');
+      return;
+    }
+
     const slackClient = new SlackClient();
-    await slackClient.sendMessage(this.slackChannels, resultSummary);
+    await slackClient.sendMessage({
+      channelIds: this.slackChannels,
+      summaryResults: resultSummary,
+      meta: this.meta,
+    });
   }
 }
 export default SlackReporter;
