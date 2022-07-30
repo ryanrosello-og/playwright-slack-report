@@ -1,6 +1,11 @@
+/* eslint-disable import/extensions */
 /* eslint-disable no-control-regex */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
+
+// eslint-disable-next-line import/no-unresolved
+import { failure, testSummary } from './SlackClient';
+
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
   suiteName: string;
@@ -45,8 +50,45 @@ export default class ResultsParser {
     console.log(this.resultsData);
   }
 
-  async getParsedResults(): Promise<testSuite[]> {
-    return this.result;
+  async getParsedResults(): Promise<testSummary> {
+    const summary: testSummary = {
+      passed: 0,
+      failed: 0,
+      skipped: 0,
+      aborted: 0,
+      build: '',
+      environment: '',
+      failures: await this.getFailures(),
+    };
+    for (const suite of this.result) {
+      for (const test of suite.testSuite.tests) {
+        if (test.status === 'passed') {
+          summary.passed += 1;
+        } else if (test.status === 'failed') {
+          summary.failed += 1;
+        } else if (test.status === 'skipped') {
+          summary.skipped += 1;
+        } else if (test.status === 'aborted') {
+          summary.aborted += 1;
+        }
+      }
+    }
+    return summary;
+  }
+
+  async getFailures(): Promise<Array<failure>> {
+    const failures: Array<failure> = [];
+    for (const suite of this.result) {
+      for (const test of suite.testSuite.tests) {
+        if (test.status === 'failed') {
+          failures.push({
+            test: test.name,
+            failureReason: test.reason,
+          });
+        }
+      }
+    }
+    return failures;
   }
 
   async parse() {
@@ -123,16 +165,12 @@ export default class ResultsParser {
     return testResults;
   }
 
-  cleanseReason(rawReason: string) {
-    return rawReason
-      ? rawReason
-        .replace(/\u001b\[2m/g, '')
-        .replace(/\u001b\[22m/g, '')
-        .replace(/\u001b\[31m/g, '')
-        .replace(/\u001b\[39m/g, '')
-        .replace(/\u001b\[32m/g, '')
-        .replace(/\u001b\[27m/g, '')
-        .replace(/\u001b\[7m/g, '')
-      : '';
+  cleanseReason(rawReaseon: string): string {
+    // eslint-disable-next-line prefer-regex-literals
+    const ansiRegex = new RegExp(
+      '([\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~])))',
+      'g',
+    );
+    return rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
   }
 }

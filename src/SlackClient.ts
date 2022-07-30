@@ -8,15 +8,13 @@ export type testSummary = {
   failed: number;
   skipped: number;
   aborted: number;
-  duration: string;
-  failures: {
-    resultLink: string;
-    test: string;
-    failureReason: string;
-    mostRecentOccurrenceOfFailure: string;
-    countOfTestFailureEncounters: string;
-    last10Results: string;
-  }[];
+  // eslint-disable-next-line no-use-before-define
+  failures: Array<failure>;
+};
+
+export type failure = {
+  test: string;
+  failureReason: string;
 };
 
 export default class SlackClient {
@@ -46,9 +44,6 @@ export default class SlackClient {
     for (let i = 0; i < summaryResults.failures.length; i += 1) {
       const {
         failureReason,
-        resultLink,
-        last10Results,
-        mostRecentOccurrenceOfFailure,
         test,
       } = summaryResults.failures[i];
       const formattedFailure = failureReason
@@ -60,8 +55,8 @@ export default class SlackClient {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*${test}* <${resultLink}|:information_source:>
-          \n${last10Results}\n${mostRecentOccurrenceOfFailure}\n\n${formattedFailure}`,
+          text: `*${test}*
+          \n\n${formattedFailure}`,
         },
       });
       if (i > maxNumberOfFailures) {
@@ -76,54 +71,55 @@ export default class SlackClient {
       }
     }
 
-    await this.slackClient.chat.postMessage({
-      channel: slackChannel,
-      text: ' ',
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `:white_check_mark: *${
-              summaryResults.passed
-            }* Tests ran successfully \n\n :red_circle: *${
-              summaryResults.failed
-            }* Tests failed \n\n ${
-              summaryResults.skipped > 0
+    let chatResponse;
+    try {
+      chatResponse = await this.slackClient.chat.postMessage({
+        channel: slackChannel,
+        text: ' ',
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `:white_check_mark: *${summaryResults.passed
+              }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
+              }* Tests failed \n\n ${summaryResults.skipped > 0
                 ? `:fast_forward: *${summaryResults.skipped}* skipped`
                 : ''
-            } \n\n ${
-              summaryResults.aborted > 0
+              } \n\n ${summaryResults.aborted > 0
                 ? `:exclamation: *${summaryResults.aborted}* aborted`
                 : ''
-            }`,
-          },
-        },
-        {
-          type: 'section',
-          fields: [
-            {
-              type: 'mrkdwn',
-              text: `*Environment:*\n${summaryResults.environment}`,
+              }`,
             },
-            {
-              type: 'mrkdwn',
-              text: `*Duration:*\n${summaryResults.duration}`,
-            },
-          ],
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `\n${summaryResults.build}`,
           },
-        },
-        {
-          type: 'divider',
-        },
-        ...fails,
-      ],
-    });
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*Environment:*\n${summaryResults.environment}`,
+              },
+            ],
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `\n${summaryResults.build}`,
+            },
+          },
+          {
+            type: 'divider',
+          },
+          ...fails,
+        ],
+      });
+      if (chatResponse.ok) {
+        // eslint-disable-next-line no-console
+        console.log(`✅ Message sent to ${slackChannel}`);
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 }

@@ -2,6 +2,7 @@
 /* eslint-disable import/no-unresolved */
 import { FullConfig, Reporter, Suite } from '@playwright/test/reporter';
 import ResultsParser from './ResultsParser';
+import SlackClient from './SlackClient';
 
 class SlackReporter implements Reporter {
   private suite!: Suite;
@@ -13,8 +14,10 @@ class SlackReporter implements Reporter {
   async onEnd() {
     const resultsParser = new ResultsParser(this.suite);
     await resultsParser.parse();
-    const r = await resultsParser.getParsedResults();
-    console.log(r);
+    const resultSummary = await resultsParser.getParsedResults();
+    console.log(resultSummary);
+    const slackClient = new SlackClient();
+    await slackClient.sendMessage('zeb', resultSummary);
   }
 }
 export default SlackReporter;

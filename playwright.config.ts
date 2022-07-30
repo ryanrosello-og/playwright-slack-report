@@ -1,6 +1,8 @@
 // playwright.config.ts
 import { PlaywrightTestConfig, devices } from '@playwright/test';
 
+require('dotenv').config();
+
 const config: PlaywrightTestConfig = {
   forbidOnly: !!process.env.CI,
   use: {

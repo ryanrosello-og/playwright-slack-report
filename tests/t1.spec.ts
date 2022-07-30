@@ -5,3 +5,9 @@ test('basic test', async ({ page }) => {
   const title = page.locator('.navbar__inner .navbar__title');
   await expect(title).toHaveText('Playwright');
 });
+
+test('basic test failure ', async ({ page }) => {
+  await page.goto('https://playwright.dev/');
+  const title = page.locator('.navbar__inner .navbar__title');
+  await expect(title).toHaveText('Playwright Fail', { timeout: 1000 });
+});
