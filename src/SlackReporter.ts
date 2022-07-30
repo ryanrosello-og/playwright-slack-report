@@ -36,7 +36,7 @@ class SlackReporter implements Reporter {
     const resultsParser = new ResultsParser(this.suite);
     await resultsParser.parse();
     const resultSummary = await resultsParser.getParsedResults();
-
+    resultSummary.meta = this.meta;
     if (this.sendResults === 'on-failure' && resultSummary.failures.length === 0) {
       // eslint-disable-next-line no-console
       console.log('⏩ Slack reporter - no failures found');
@@ -47,7 +47,6 @@ class SlackReporter implements Reporter {
     await slackClient.sendMessage({
       channelIds: this.slackChannels,
       summaryResults: resultSummary,
-      meta: this.meta,
     });
   }
 }

@@ -54,8 +54,6 @@ export default class ResultsParser {
       failed: 0,
       skipped: 0,
       aborted: 0,
-      build: '',
-      environment: '',
       failures: await this.getFailures(),
     };
     for (const suite of this.result) {
