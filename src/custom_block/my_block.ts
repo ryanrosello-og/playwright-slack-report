@@ -1,0 +1,96 @@
+const generateCustomLayout = (
+  summaryResults: {
+    passed: number;
+    failed: number;
+    skipped: number;
+    aborted: number;
+    failures: Array<{
+      test: string;
+      failureReason: string;
+    }>;
+    meta?: Array<{ key: string, value: string }>;
+  },
+) => {
+  const maxNumberOfFailures = 10;
+  const maxNumberOfFailureLength = 650;
+  const fails = [];
+  const meta = [];
+
+  for (let i = 0; i < summaryResults.failures.length; i += 1) {
+    const {
+      failureReason,
+      test,
+    } = summaryResults.failures[i];
+    const formattedFailure = failureReason
+      .substring(0, maxNumberOfFailureLength)
+      .split('\n')
+      .map((l) => `>${l}`)
+      .join('\n');
+    fails.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*${test}*
+        \n\n${formattedFailure}`,
+      },
+    });
+    if (i > maxNumberOfFailures) {
+      fails.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '*There are too many failures to display, view the full results in BuildKite*',
+        },
+      });
+      break;
+    }
+  }
+
+  if (summaryResults.meta) {
+    for (let i = 0; i < summaryResults.meta.length; i += 1) {
+      const { key, value } = summaryResults.meta[i];
+      meta.push(
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `\n*${key}* :\t${value}`,
+          },
+        },
+      );
+    }
+  }
+
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: '**Thisi is cusomter block**',
+      },
+    },
+    ...meta,
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `:white_check_mark: *${summaryResults.passed
+        }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
+        }* Tests failed \n\n ${summaryResults.skipped > 0
+          ? `:fast_forward: *${summaryResults.skipped}* skipped`
+          : ''
+        } \n\n ${summaryResults.aborted > 0
+          ? `:exclamation: *${summaryResults.aborted}* aborted`
+          : ''
+        }`,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    ...fails,
+  ];
+};
+
+// eslint-disable-next-line import/prefer-default-export
+export { generateCustomLayout };
