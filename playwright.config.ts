@@ -1,5 +1,7 @@
 // playwright.config.ts
 import { PlaywrightTestConfig, devices } from '@playwright/test';
+// eslint-disable-next-line import/no-unresolved, import/extensions
+import { generateCustomLayout } from './src/custom_block/my_block';
 
 require('dotenv').config();
 
@@ -21,6 +23,7 @@ const config: PlaywrightTestConfig = {
       {
         channels: ['zeb', 'pw'],
         sendResults: 'on-failure', // "always" , "on-failure", "off"
+        layout: generateCustomLayout,
         meta: [
           {
             key: 'vsvs', value: true,

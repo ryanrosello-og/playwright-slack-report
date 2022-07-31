@@ -37,7 +37,7 @@ export default class SlackClient {
   // eslint-disable-next-line class-methods-use-this
   async generateBlocks(
     summaryResults: testSummary,
-  ) :Promise<Array<KnownBlock | Block>> {
+  ): Promise<Array<KnownBlock | Block>> {
     const maxNumberOfFailures = 10;
     const maxNumberOfFailureLength = 650;
     const fails = [];
@@ -115,25 +115,29 @@ export default class SlackClient {
   async sendMessage(options: {
     channelIds: Array<string>,
     summaryResults: testSummary,
+    customLayout: Function | undefined,
   }) {
-    const blocks = await this.generateBlocks(options.summaryResults);
+    let blocks;
+    if (options.customLayout) {
+      blocks = options.customLayout(options.summaryResults);
+    } else {
+      blocks = await this.generateBlocks(options.summaryResults);
+    }
     if (!options.channelIds) {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
     }
 
-    for (const channelId of options.channelIds) {
-      const slackChannel = channelId?.toString();
-
+    for (const channel of options.channelIds) {
       let chatResponse;
       try {
         chatResponse = await this.slackClient.chat.postMessage({
-          channel: slackChannel,
+          channel,
           text: ' ',
           blocks,
         });
         if (chatResponse.ok) {
           // eslint-disable-next-line no-console
-          console.log(`✅ Message sent to ${slackChannel}`);
+          console.log(`✅ Message sent to ${channel}`);
         }
       } catch (error: any) {
         // eslint-disable-next-line no-console

@@ -13,13 +13,17 @@ class SlackReporter implements Reporter {
 
   private meta: Array<{ key: string, value: string }> = [];
 
-  onBegin(config: FullConfig, suite: Suite) {
+  private customLayout: Function | undefined;
+
+  onBegin(config: FullConfig, suite: Suite): void {
     const slackReporterConfig = config.reporter.filter(
       (f) => f[0].toLowerCase().includes('slackreporter') || f[1]?.toLowerCase().includes('slackreporter'),
     );
     this.suite = suite;
     this.meta = slackReporterConfig[0][1].meta || [];
     this.sendResults = slackReporterConfig[0][1].sendResults;
+    this.customLayout = slackReporterConfig[0][1].layout;
+
     if (slackReporterConfig[0][1].channels) {
       this.slackChannels = slackReporterConfig[0][1].channels;
     } else {
@@ -47,6 +51,7 @@ class SlackReporter implements Reporter {
     await slackClient.sendMessage({
       channelIds: this.slackChannels,
       summaryResults: resultSummary,
+      customLayout: this.customLayout,
     });
   }
 }
