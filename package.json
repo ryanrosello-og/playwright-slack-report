@@ -3,10 +3,10 @@
     "@playwright/test": "^1.23.3",
     "playwright": "^1.23.3",
     "typescript": "^4.7.4",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "@slack/web-api": "^6.7.2"
   },
   "devDependencies": {
-    "@slack/web-api": "^6.7.2",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
     "eslint": "^7.32.0 || ^8.2.0",

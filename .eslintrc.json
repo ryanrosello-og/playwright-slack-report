@@ -15,5 +15,7 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "import/extensions": ["never"],
+        "import/no-extraneous-dependencies": "never"
     }
 }

@@ -5,6 +5,7 @@
 import {
   WebClient, LogLevel, KnownBlock, Block,
 } from '@slack/web-api';
+import { testResult } from './ResultsParser';
 
 export type testSummary = {
   passed: number;
@@ -13,6 +14,7 @@ export type testSummary = {
   aborted: number;
   failures: Array<failure>;
   meta?: additionalInfo;
+  tests: Array<testResult>;
 };
 
 export type failure = {

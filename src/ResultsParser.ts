@@ -10,24 +10,12 @@ import { failure, testSummary } from './SlackClient';
 export type testResult = {
   suiteName: string;
   name: string;
-  testId?: number;
-  testRunId?: number;
-  attachment?: string;
   browser?: string;
   endedAt: string;
   reason: string;
   retry: number;
   startedAt: string;
   status: 'failed' | 'passed' | 'skipped' | 'aborted';
-  // eslint-disable-next-line no-use-before-define
-  steps?: Array<testStep>;
-};
-
-export type testStep = {
-  level: 'INFO' | 'ERROR';
-  timestamp: string;
-  message: string;
-  testId?: number;
 };
 
 export type testSuite = {
@@ -55,8 +43,10 @@ export default class ResultsParser {
       skipped: 0,
       aborted: 0,
       failures: await this.getFailures(),
+      tests: [],
     };
     for (const suite of this.result) {
+      summary.tests = summary.tests.concat(suite.testSuite.tests);
       for (const test of suite.testSuite.tests) {
         if (test.status === 'passed') {
           summary.passed += 1;

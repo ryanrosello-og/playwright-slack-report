@@ -9,6 +9,16 @@ const generateCustomLayout = (
       failureReason: string;
     }>;
     meta?: Array<{ key: string, value: string }>;
+    tests: Array<{
+      suiteName: string;
+      name: string;
+      browser?: string;
+      endedAt: string;
+      reason: string;
+      retry: number;
+      startedAt: string;
+      status: 'failed' | 'passed' | 'skipped' | 'aborted';
+    }>;
   },
 ) => {
   const maxNumberOfFailures = 10;
@@ -67,6 +77,13 @@ const generateCustomLayout = (
       text: {
         type: 'mrkdwn',
         text: '**Thisi is cusomter block**',
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `**The first test is:**\n${summaryResults.tests[0].name}`,
       },
     },
     ...meta,
