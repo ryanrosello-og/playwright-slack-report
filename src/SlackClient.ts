@@ -25,15 +25,10 @@ export type failure = {
 export type additionalInfo = Array<{ key: string, value: string }>
 
 export default class SlackClient {
-  private slackClient: WebClient;
+  private slackWebClient: WebClient;
 
-  constructor() {
-    if (!process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
-      throw new Error('SLACK_BOT_USER_OAUTH_TOKEN was not found');
-    }
-    this.slackClient = new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
-      logLevel: LogLevel.DEBUG,
-    });
+  constructor(slackClient: WebClient) {
+    this.slackWebClient = slackClient;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -132,7 +127,7 @@ export default class SlackClient {
     for (const channel of options.channelIds) {
       let chatResponse;
       try {
-        chatResponse = await this.slackClient.chat.postMessage({
+        chatResponse = await this.slackWebClient.chat.postMessage({
           channel,
           text: ' ',
           blocks,
