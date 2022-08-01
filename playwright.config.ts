@@ -9,7 +9,8 @@ const config: PlaywrightTestConfig = {
   forbidOnly: !!process.env.CI,
   use: {
     trace: 'on',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
+    video: 'on',
   },
   projects: [
     {

@@ -18,7 +18,14 @@ const generateCustomLayout = (
       retry: number;
       startedAt: string;
       status: 'failed' | 'passed' | 'skipped' | 'aborted';
+      attachments?: {
+        body: string | undefined | Buffer;
+        contentType: string;
+        name: string;
+        path: string;
+      }[];
     }>;
+
   },
 ) => {
   const maxNumberOfFailures = 10;
@@ -71,6 +78,8 @@ const generateCustomLayout = (
     }
   }
 
+  const testWithStringAttachment = summaryResults.tests.filter(t => t.attachments)[0];
+
   return [
     {
       type: 'section',
@@ -86,20 +95,27 @@ const generateCustomLayout = (
         text: `**The first test is:**\n${summaryResults.tests[0].name}`,
       },
     },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `**Test with attachment:**\n${testWithStringAttachment.attachments?.filter(a => a.contentType === 'text/plain').map(a => a.body?.toString())}`,
+      },
+    },
     ...meta,
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
         text: `:white_check_mark: *${summaryResults.passed
-        }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
-        }* Tests failed \n\n ${summaryResults.skipped > 0
-          ? `:fast_forward: *${summaryResults.skipped}* skipped`
-          : ''
-        } \n\n ${summaryResults.aborted > 0
-          ? `:exclamation: *${summaryResults.aborted}* aborted`
-          : ''
-        }`,
+          }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
+          }* Tests failed \n\n ${summaryResults.skipped > 0
+            ? `:fast_forward: *${summaryResults.skipped}* skipped`
+            : ''
+          } \n\n ${summaryResults.aborted > 0
+            ? `:exclamation: *${summaryResults.aborted}* aborted`
+            : ''
+          }`,
       },
     },
     {

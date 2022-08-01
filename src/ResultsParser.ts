@@ -16,6 +16,12 @@ export type testResult = {
   retry: number;
   startedAt: string;
   status: 'failed' | 'passed' | 'skipped' | 'aborted';
+  attachments?: {
+    body: string | undefined | Buffer;
+    contentType: string;
+    name: string;
+    path: string;
+  }[];
 };
 
 export type testSuite = {
@@ -145,6 +151,7 @@ export default class ResultsParser {
           reason: `${this.cleanseReason(
             result.error?.message,
           )} \n ${this.cleanseReason(result.error?.stack)}`,
+          attachments: result.attachments,
         });
       }
     }
