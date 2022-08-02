@@ -34,6 +34,7 @@ const config: PlaywrightTestConfig = {
           }],
       },
     ],
+    ['dot']
   ],
 };
 export default config;

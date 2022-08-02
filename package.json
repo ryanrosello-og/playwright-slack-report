@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "@playwright/test": "^1.23.3",
-    "playwright": "^1.23.3",
-    "typescript": "^4.7.4",
+    "@slack/web-api": "^6.7.2",
     "dotenv": "^16.0.1",
-    "@slack/web-api": "^6.7.2"
+    "playwright": "^1.23.3",
+    "typescript": "^4.7.4"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.30.6",
@@ -16,7 +16,8 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "ts-mockito": "^2.6.1"
   },
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\""
