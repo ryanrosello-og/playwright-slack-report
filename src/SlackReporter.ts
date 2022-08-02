@@ -16,36 +16,24 @@ class SlackReporter implements Reporter {
 
   private customLayout: Function | undefined;
 
-  onBegin(config: FullConfig, suite: Suite): void {
-
-    // TODO: implement better fetching of the config
-    const slackReporterConfig = config.reporter.filter(
-      (f) => f[0].toLowerCase().includes('slackreporter') || f[1]?.toLowerCase().includes('slackreporter'),
-    );
+  onBegin(fullConfig: FullConfig, suite: Suite): void {
     this.suite = suite;
-    this.meta = slackReporterConfig[0][1].meta || [];
-    this.sendResults = slackReporterConfig[0][1].sendResults;
-    this.customLayout = slackReporterConfig[0][1].layout;
-    this.slackChannels = slackReporterConfig[0][1].channels;
+    const slackReporterConfig = fullConfig.reporter.filter(
+      (f) => f[0].toLowerCase().includes('slackreporter'),
+    )[0][1];
+
+    if (slackReporterConfig) {
+      this.meta = slackReporterConfig.meta || [];
+      this.sendResults = slackReporterConfig.sendResults || 'always';
+      this.customLayout = slackReporterConfig.layout;
+      this.slackChannels = slackReporterConfig.channels;
+    }
   }
 
   async onEnd() {
-    if(!SlackReporter.okToProceed()) {
-
-    }
-    if (this.sendResults === 'off') {
-      // eslint-disable-next-line no-console
-      console.log('⏩ Slack reporter is disabled');
-      return;
-    }
-
-    if (!process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
-      console.log('❌ SLACK_BOT_USER_OAUTH_TOKEN was not found');
-      return;
-    }
-
-    if (this.slackChannels.length === 0) {
-      console.log('❌ Slack channel(s) was not provided in the config');
+    const { okToProceed, message } = this.preChecks();
+    if (!okToProceed) {
+      console.log(message);
       return;
     }
 
@@ -69,10 +57,31 @@ class SlackReporter implements Reporter {
     });
   }
 
+  private preChecks(): { okToProceed: boolean, message?: string } {
+    if (this.sendResults === 'off') {
+      return { okToProceed: false, message: '❌ Slack reporter is disabled' };
+    }
 
-  // TODO: implement 
-  static okToProceed() {
+    if (!this.sendResults || !['always', 'on-failure', 'off'].includes(this.sendResults)) {
+      return { okToProceed: false, message: `❌ "sendResults" is not valid. Expecting one of ['always', 'on-failure', 'off'].` };
+    }
 
+    if (!process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
+      return { okToProceed: false, message: '❌ SLACK_BOT_USER_OAUTH_TOKEN was not found' };
+    }
+
+    if (!this.sendResults || this.slackChannels.length === 0) {
+      return { okToProceed: false, message: '❌ Slack channel(s) was not provided in the config' };
+    }
+
+    if (this.customLayout && typeof this.customLayout !== 'function') {
+      return { okToProceed: false, message: '❌ Custom layout is not a function' };
+    }
+
+    if (this.meta && !Array.isArray(this.meta)) {
+      return { okToProceed: false, message: '❌ Meta is not an array' };
+    }
+    return { okToProceed: true }
   }
 }
 export default SlackReporter;
