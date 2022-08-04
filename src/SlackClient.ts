@@ -91,14 +91,14 @@ export default class SlackClient {
         text: {
           type: 'mrkdwn',
           text: `:white_check_mark: *${summaryResults.passed
-          }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
-          }* Tests failed \n\n ${summaryResults.skipped > 0
-            ? `:fast_forward: *${summaryResults.skipped}* skipped`
-            : ''
-          } \n\n ${summaryResults.aborted > 0
-            ? `:exclamation: *${summaryResults.aborted}* aborted`
-            : ''
-          }`,
+            }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
+            }* Tests failed \n\n ${summaryResults.skipped > 0
+              ? `:fast_forward: *${summaryResults.skipped}* skipped`
+              : ''
+            } \n\n ${summaryResults.aborted > 0
+              ? `:exclamation: *${summaryResults.aborted}* aborted`
+              : ''
+            }`,
         },
       },
       ...meta,
@@ -124,22 +124,30 @@ export default class SlackClient {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
     }
 
+    let result =[]
     for (const channel of options.channelIds) {
       let chatResponse;
       try {
-        chatResponse = await this.slackWebClient.chat.postMessage({
+        chatResponse = await this.doPostRequest(
           channel,
-          text: ' ',
           blocks,
-        });
+        );
         if (chatResponse.ok) {
-          // eslint-disable-next-line no-console
-          console.log(`✅ Message sent to ${channel}`);
+          result.push({channel,outcome:`✅ Message sent to ${channel}`});
         }
       } catch (error: any) {
-        // eslint-disable-next-line no-console
-        console.error(error.message);
+        result.push({channel,outcome:`❌ Message not sent to ${channel} \r\n ${error.message}`});
       }
     }
+    return result;
+  }
+
+  async doPostRequest(channel: string, blocks: never[]) {
+    let chatResponse = await this.slackWebClient.chat.postMessage({
+      channel,
+      text: ' ',
+      blocks,
+    });
+    return chatResponse
   }
 }

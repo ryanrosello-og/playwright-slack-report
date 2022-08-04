@@ -14,8 +14,8 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: 'chrome',
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
   reporter: [
@@ -23,7 +23,7 @@ const config: PlaywrightTestConfig = {
       './src/SlackReporter.ts',
       {
         channels: ['zeb', 'pw'],
-        sendResults: 'off', // "always" , "on-failure", "off"
+        sendResults: 'always', // "always" , "on-failure", "off"
         layout: generateCustomLayout,
         meta: [
           {

@@ -1,10 +1,11 @@
 import { test as base, expect } from '@playwright/test';
 import SlackClient from '../src/SlackClient';
-import { mock, instance } from 'ts-mockito';
-import { WebClient } from '@slack/web-api';
+import { mock, instance, when } from 'ts-mockito';
+import { ChatPostMessageResponse, WebClient } from '@slack/web-api';
 
 type SlackClientFixture = {
   fakeSlackClient: SlackClient
+  stubbedSlackClient: SlackClient
 };
 
 export const test = base.extend<SlackClientFixture>({
@@ -16,6 +17,13 @@ export const test = base.extend<SlackClientFixture>({
 
     }))
     await use(fakeSlackClient);
+  },
+  stubbedSlackClient: async ({ }, use) => {
+    let mockedClient: SlackClient = mock(SlackClient);
+    let response: ChatPostMessageResponse = { ok: true }
+    when(mockedClient.doPostRequest('test' ,[])).thenResolve(response);
+    let client: SlackClient = instance(mockedClient);
+    await use(client);
   },
 });
 
@@ -118,4 +126,21 @@ test('SlackClient.generateBlocks() creates blocks when test with attachment is p
       type: "divider",
     },
   ])
+})
+
+test('SlackClient.sendMessage() ', async ({ stubbedSlackClient }) => {
+  let result = await stubbedSlackClient.sendMessage({
+    channelIds: ['test'], summaryResults: {
+      aborted: 1, failed: 1, passed: 1, skipped: 1,
+      failures: [
+        { test: 'test', failureReason: 'message' },
+      ],
+      tests: [
+
+      ]
+    }, customLayout: undefined
+  });
+  console.log('🪵 -----------------------------------------------------------------🪵');
+  console.log('🪵 > file: SlackClient.spec.ts > line 143 > test > result', result);
+  console.log('🪵 -----------------------------------------------------------------🪵');
 })
