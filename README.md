@@ -9,3 +9,4 @@
 - Github pages
 - post to npm
 - global.types.d
+- enable auto publish package
