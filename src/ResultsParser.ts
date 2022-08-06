@@ -106,7 +106,7 @@ export default class ResultsParser {
       testResults = await this.parseTests(suite.title, suite.tests);
       this.updateResults({
         testSuite: {
-          title: suite.parent.title
+          title: suite.parent?.title
             ? `${suite.parent.title} > ${suite.title}`
             : suite.title,
           tests: testResults,
@@ -117,7 +117,7 @@ export default class ResultsParser {
       testResults = await this.parseTests(suite.title, suite.tests);
       this.updateResults({
         testSuite: {
-          title: suite.parent.title
+          title: suite.parent?.title
             ? `${suite.parent.title} > ${suite.title}`
             : suite.title,
           tests: testResults,
