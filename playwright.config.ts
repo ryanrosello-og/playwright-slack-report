@@ -27,14 +27,17 @@ const config: PlaywrightTestConfig = {
         layout: generateCustomLayout,
         meta: [
           {
-            key: 'vsvs', value: true,
+            key: 'vsvs',
+            value: true,
           },
           {
-            key: 'BK', value: process.env.BK,
-          }],
+            key: 'BK',
+            value: process.env.BK,
+          },
+        ],
       },
     ],
-    ['dot']
+    ['dot'],
   ],
 };
 export default config;
