@@ -16,11 +16,13 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "nyc": "^15.1.0",
     "prettier": "^2.7.1",
     "ts-mockito": "^2.6.1"
   },
   "scripts": {
-    "prettier": "prettier --write --loglevel warn \"**/**/*.ts\""
+    "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
+    "pw": "nyc yarn playwright test"
   },
   "name": "playwright-slack-report",
   "version": "1.0.0",
