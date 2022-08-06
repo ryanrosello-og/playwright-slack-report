@@ -3,7 +3,11 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable import/no-extraneous-dependencies */
 import {
-  WebClient, LogLevel, KnownBlock, Block,
+  WebClient,
+  LogLevel,
+  KnownBlock,
+  Block,
+  ChatPostMessageResponse,
 } from '@slack/web-api';
 import { testResult } from './ResultsParser';
 
@@ -22,7 +26,7 @@ export type failure = {
   failureReason: string;
 };
 
-export type additionalInfo = Array<{ key: string, value: string }>
+export type additionalInfo = Array<{ key: string; value: string }>;
 
 export default class SlackClient {
   private slackWebClient: WebClient;
@@ -41,10 +45,7 @@ export default class SlackClient {
     const meta = [];
 
     for (let i = 0; i < summaryResults.failures.length; i += 1) {
-      const {
-        failureReason,
-        test,
-      } = summaryResults.failures[i];
+      const { failureReason, test } = summaryResults.failures[i];
       const formattedFailure = failureReason
         .substring(0, maxNumberOfFailureLength)
         .split('\n')
@@ -73,15 +74,13 @@ export default class SlackClient {
     if (summaryResults.meta) {
       for (let i = 0; i < summaryResults.meta.length; i += 1) {
         const { key, value } = summaryResults.meta[i];
-        meta.push(
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `\n*${key}* :\t${value}`,
-            },
+        meta.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `\n*${key}* :\t${value}`,
           },
-        );
+        });
       }
     }
 
@@ -90,15 +89,19 @@ export default class SlackClient {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `:white_check_mark: *${summaryResults.passed
-            }* Tests ran successfully \n\n :red_circle: *${summaryResults.failed
-            }* Tests failed \n\n ${summaryResults.skipped > 0
+          text: `:white_check_mark: *${
+            summaryResults.passed
+          }* Tests ran successfully \n\n :red_circle: *${
+            summaryResults.failed
+          }* Tests failed \n\n ${
+            summaryResults.skipped > 0
               ? `:fast_forward: *${summaryResults.skipped}* skipped`
               : ''
-            } \n\n ${summaryResults.aborted > 0
+          } \n\n ${
+            summaryResults.aborted > 0
               ? `:exclamation: *${summaryResults.aborted}* aborted`
               : ''
-            }`,
+          }`,
         },
       },
       ...meta,
@@ -110,10 +113,11 @@ export default class SlackClient {
   }
 
   async sendMessage(options: {
-    channelIds: Array<string>,
-    summaryResults: testSummary,
-    customLayout: Function | undefined,
-  }) {
+    channelIds: Array<string>;
+    summaryResults: testSummary;
+    customLayout: Function | undefined;
+    fakeRequest?: Function;
+  }): Promise<Array<{ channel: string; outcome: string }>> {
     let blocks;
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
@@ -124,30 +128,39 @@ export default class SlackClient {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
     }
 
-    let result =[]
+    let result = [];
     for (const channel of options.channelIds) {
-      let chatResponse;
+      let chatResponse: ChatPostMessageResponse;
       try {
-        chatResponse = await this.doPostRequest(
-          channel,
-          blocks,
-        );
+        // under test
+        if (options.fakeRequest) {
+          chatResponse = await options.fakeRequest();
+        } else {
+          // send request for reals
+          chatResponse = await this.doPostRequest(channel, blocks);
+        }
         if (chatResponse.ok) {
-          result.push({channel,outcome:`✅ Message sent to ${channel}`});
+          result.push({ channel, outcome: `✅ Message sent to ${channel}` });
         }
       } catch (error: any) {
-        result.push({channel,outcome:`❌ Message not sent to ${channel} \r\n ${error.message}`});
+        result.push({
+          channel,
+          outcome: `❌ Message not sent to ${channel} \r\n ${error.message}`,
+        });
       }
     }
     return result;
   }
 
-  async doPostRequest(channel: string, blocks: never[]) {
+  async doPostRequest(
+    channel: string,
+    blocks: never[],
+  ): Promise<ChatPostMessageResponse> {
     let chatResponse = await this.slackWebClient.chat.postMessage({
       channel,
       text: ' ',
       blocks,
     });
-    return chatResponse
+    return chatResponse;
   }
 }
