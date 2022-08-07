@@ -107,19 +107,22 @@ const test = base.extend<{
     };
     use(fakeSuite);
   },
-  fakeSlackReporter: async ({ fullConfig }: any, use) => {
+  fakeSlackReporter: async ({}: any, use) => {
     const slackReporter = new SlackReporter();
     await use(slackReporter);
   },
 });
 
 test.describe('SlackReporter - preChecks', () => {
+  test.beforeEach(async ({}) => {
+    process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
+  });
+
   test('okToProceed flag is set when no errors encountered', async ({
     fakeSlackReporter,
     suite,
     fullConfig,
   }) => {
-    process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
     fakeSlackReporter.onBegin(fullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
@@ -132,13 +135,13 @@ test.describe('SlackReporter - preChecks', () => {
     fullConfig,
   }) => {
     delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
-    fullConfig.reporter = [
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         { sendResults: 'on-failure' },
       ],
     ];
-    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
@@ -153,13 +156,13 @@ test.describe('SlackReporter - preChecks', () => {
     suite,
     fullConfig,
   }) => {
-    fullConfig.reporter = [
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         { sendResults: 'off' },
       ],
     ];
-    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
@@ -174,13 +177,13 @@ test.describe('SlackReporter - preChecks', () => {
     suite,
     fullConfig,
   }) => {
-    fullConfig.reporter = [
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         { sendResults: 'NO!' },
       ],
     ];
-    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
@@ -195,13 +198,13 @@ test.describe('SlackReporter - preChecks', () => {
     suite,
     fullConfig,
   }) => {
-    fullConfig.reporter = [
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         { channels: [] },
       ],
     ];
-    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
@@ -216,13 +219,13 @@ test.describe('SlackReporter - preChecks', () => {
     suite,
     fullConfig,
   }) => {
-    fullConfig.reporter = [
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         { layout: 'not a function' },
       ],
     ];
-    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
@@ -237,13 +240,13 @@ test.describe('SlackReporter - preChecks', () => {
     suite,
     fullConfig,
   }) => {
-    fullConfig.reporter = [
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         { meta: 'not a array' },
       ],
     ];
-    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
     let result = fakeSlackReporter.preChecks();
