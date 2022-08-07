@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { ChatPostMessageResponse } from '@slack/web-api';
+import { generateCustomLayout } from '../src/custom_block/my_block';
 import { test } from './fixtures';
 
 test.describe('SlackClient.sendMessage()', () => {
@@ -37,15 +38,11 @@ test.describe('SlackClient.sendMessage()', () => {
       };
     };
 
-    const customLayout = (summaryResults: never): never[] => {
-      return [];
-    };
-
     const channelId = 'C12345';
     const clientResponse = await testSlackClient.sendMessage({
       channelIds: [channelId],
       summaryResults: testSummaryAllTestsPassed,
-      customLayout: customLayout,
+      customLayout: generateCustomLayout,
       fakeRequest,
     });
     expect(clientResponse).toEqual([

@@ -25,7 +25,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
-      # - uses: tintef/nyc-reporter-action
-      #   with:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     REPORTER: 'text' # defaults to 'text-summary'
