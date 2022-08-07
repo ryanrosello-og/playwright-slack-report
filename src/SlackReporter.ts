@@ -16,8 +16,11 @@ class SlackReporter implements Reporter {
 
   private customLayout: Function | undefined;
 
+  logs: string[] = [];
+
   onBegin(fullConfig: FullConfig, suite: Suite): void {
     this.suite = suite;
+    this.logs = [];
     const slackReporterConfig = fullConfig.reporter.filter((f) =>
       f[0].toLowerCase().includes('slackreporter'),
     )[0][1];
@@ -33,7 +36,7 @@ class SlackReporter implements Reporter {
   async onEnd() {
     const { okToProceed, message } = this.preChecks();
     if (!okToProceed) {
-      console.log(message);
+      this.log(message);
       return;
     }
 
@@ -45,8 +48,7 @@ class SlackReporter implements Reporter {
       this.sendResults === 'on-failure' &&
       resultSummary.failures.length === 0
     ) {
-      // eslint-disable-next-line no-console
-      console.log('⏩ Slack reporter - no failures found');
+      this.log('⏩ Slack reporter - no failures found');
       return;
     }
 
@@ -102,6 +104,14 @@ class SlackReporter implements Reporter {
       return { okToProceed: false, message: '❌ Meta is not an array' };
     }
     return { okToProceed: true };
+  }
+
+  log(message: string | undefined): void {
+    // eslint-disable-next-line no-console
+    console.log(message);
+    if (message) {
+      this.logs.push(message);
+    }
   }
 }
 export default SlackReporter;

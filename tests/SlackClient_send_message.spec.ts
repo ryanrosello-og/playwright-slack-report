@@ -30,7 +30,7 @@ test.describe('SlackClient.sendMessage()', () => {
 
   test('sends message using a custom block layout', async ({
     testSlackClient,
-    testSummaryAllTestsPassed,
+    testSummaryAllTestsFailed,
   }) => {
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
       return {
@@ -41,7 +41,7 @@ test.describe('SlackClient.sendMessage()', () => {
     const channelId = 'C12345';
     const clientResponse = await testSlackClient.sendMessage({
       channelIds: [channelId],
-      summaryResults: testSummaryAllTestsPassed,
+      summaryResults: testSummaryAllTestsFailed,
       customLayout: generateCustomLayout,
       fakeRequest,
     });

@@ -113,7 +113,51 @@ const test = base.extend<{
   },
 });
 
-test.describe('SlackReporter - preChecks', () => {
+test.describe('SlackReporter - onEnd()', () => {
+  test('onEnd should halt when configured to stop when no failures are encountered', async ({
+    fakeSlackReporter,
+    suite,
+    fullConfig,
+  }) => {
+    process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
+      [
+        '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
+        { sendResults: 'on-failure' },
+      ],
+    ];
+    fakeSlackReporter.onBegin(cloneFullConfig, suite);
+    await fakeSlackReporter.onEnd();
+    expect(
+      fakeSlackReporter.logs.includes('⏩ Slack reporter - no failures found'),
+    ).toBeTruthy();
+  });
+
+  test('onEnd should halt when the preChecks fail', async ({
+    fakeSlackReporter,
+    suite,
+    fullConfig,
+  }) => {
+    delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
+      [
+        '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
+        { sendResults: 'on-failure' },
+      ],
+    ];
+    fakeSlackReporter.onBegin(cloneFullConfig, suite);
+    await fakeSlackReporter.onEnd();
+    expect(
+      fakeSlackReporter.logs.includes(
+        '❌ SLACK_BOT_USER_OAUTH_TOKEN was not found',
+      ),
+    ).toBeTruthy();
+  });
+});
+
+test.describe('SlackReporter - preChecks()', () => {
   test.beforeEach(async ({}) => {
     process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
   });
