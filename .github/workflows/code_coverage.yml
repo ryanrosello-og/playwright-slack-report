@@ -1,2 +1,0 @@
-- name: NYC Coverage Report
-  uses: Tintef/nyc-reporter-action@0.1.0
