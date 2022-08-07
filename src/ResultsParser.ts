@@ -2,10 +2,6 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
-
-// eslint-disable-next-line import/no-unresolved
-import { failure, testSummary } from './SlackClient';
-
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
   suiteName: string;
@@ -42,8 +38,8 @@ export default class ResultsParser {
     this.resultsData = results;
   }
 
-  async getParsedResults(): Promise<testSummary> {
-    const summary: testSummary = {
+  async getParsedResults(): Promise<SummaryResults> {
+    const summary: SummaryResults = {
       passed: 0,
       failed: 0,
       skipped: 0,

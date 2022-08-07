@@ -6,10 +6,7 @@ declare global {
     failed: number;
     skipped: number;
     aborted: number;
-    failures: Array<{
-      test: string;
-      failureReason: string;
-    }>;
+    failures: Array<failure>;
     meta?: Array<{ key: string; value: string }>;
     tests: Array<{
       suiteName: string;
@@ -27,5 +24,10 @@ declare global {
         path: string;
       }[];
     }>;
+  };
+
+  type failure = {
+    test: string;
+    failureReason: string;
   };
 }

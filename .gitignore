@@ -107,3 +107,5 @@ dist
 *.zip
 
 test-results/
+build/
+dist/

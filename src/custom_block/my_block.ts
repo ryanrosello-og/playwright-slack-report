@@ -1,8 +1,8 @@
-const generateCustomLayout = (summaryResults: SummaryResults) => {
+export function generateCustomLayout(summaryResults: SummaryResults)  {
   const maxNumberOfFailures = 10;
   const maxNumberOfFailureLength = 650;
-  const fails = [];
-  const meta = [];
+  const fails: any[] = [];
+  const meta: any[] = [];
 
   for (let i = 0; i < summaryResults.failures.length; i += 1) {
     const { failureReason, test } = summaryResults.failures[i];
@@ -98,6 +98,3 @@ const generateCustomLayout = (summaryResults: SummaryResults) => {
     ...fails,
   ];
 };
-
-// eslint-disable-next-line import/prefer-default-export
-export { generateCustomLayout };
