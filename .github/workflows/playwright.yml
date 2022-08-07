@@ -15,6 +15,10 @@ jobs:
           node-version: '14.x'
       - name: Install dependencies
         run: yarn
+      - name: tsc
+        uses: icrawl/action-tsc@v1
+        with:
+          project: ./tsconfig.json        
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
