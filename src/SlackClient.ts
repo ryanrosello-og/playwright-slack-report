@@ -11,21 +11,6 @@ import {
 } from '@slack/web-api';
 import { testResult } from './ResultsParser';
 
-export type testSummary = {
-  passed: number;
-  failed: number;
-  skipped: number;
-  aborted: number;
-  failures: Array<failure>;
-  meta?: additionalInfo;
-  tests: Array<testResult>;
-};
-
-export type failure = {
-  test: string;
-  failureReason: string;
-};
-
 export type additionalInfo = Array<{ key: string; value: string }>;
 
 export default class SlackClient {
@@ -37,7 +22,7 @@ export default class SlackClient {
 
   // eslint-disable-next-line class-methods-use-this
   async generateBlocks(
-    summaryResults: testSummary,
+    summaryResults: SummaryResults,
   ): Promise<Array<KnownBlock | Block>> {
     const maxNumberOfFailures = 10;
     const maxNumberOfFailureLength = 650;
@@ -114,7 +99,7 @@ export default class SlackClient {
 
   async sendMessage(options: {
     channelIds: Array<string>;
-    summaryResults: testSummary;
+    summaryResults: SummaryResults;
     customLayout: Function | undefined;
     fakeRequest?: Function;
   }): Promise<Array<{ channel: string; outcome: string }>> {
