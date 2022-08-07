@@ -11,6 +11,8 @@
 - global.types.d
 - enable auto publish package
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report>)
+
 # Installation
 
 # How do I find my Slack bot oauth token?
