@@ -1,3 +1,5 @@
+import { SummaryResults } from '..';
+
 const generateCustomLayout = (summaryResults: SummaryResults) => {
   const maxNumberOfFailures = 10;
   const maxNumberOfFailureLength = 650;

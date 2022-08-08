@@ -29,6 +29,7 @@
   "name": "playwright-slack-report",
   "version": "1.0.2",
   "main": "index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
   "author": "Ryan Rosello <ryanrosello@hotmail.com>",
   "license": "MIT",

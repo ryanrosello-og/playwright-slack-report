@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-pattern */
 import { test as base } from '@playwright/test';
 import { WebClient } from '@slack/web-api';
+import { SummaryResults } from '../src';
 // eslint-disable-next-line import/no-unresolved
 import SlackClient from '../src/SlackClient';
 

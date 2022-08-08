@@ -1,4 +1,3 @@
-/// <reference path="global.d.ts" />
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
@@ -9,6 +8,7 @@ import {
   Block,
   ChatPostMessageResponse,
 } from '@slack/web-api';
+import { SummaryResults } from '.';
 
 export type additionalInfo = Array<{ key: string; value: string }>;
 

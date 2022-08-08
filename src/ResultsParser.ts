@@ -2,6 +2,9 @@
 /* eslint-disable no-control-regex */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
+
+import { failure, SummaryResults } from '.';
+
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
   suiteName: string;
