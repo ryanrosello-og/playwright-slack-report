@@ -12,10 +12,16 @@
         "sourceType": "module"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "prettier"
     ],
     "rules": {
-        "import/extensions": ["never"],
-        "import/no-extraneous-dependencies": "never"
+        "import/extensions": 0,
+        "import/no-extraneous-dependencies": 0,
+        "import/no-unresolved": [0
+         ],
+         "no-empty-pattern": 0,
+         "no-undef": 0,
+         "no-use-before-define": 0
     }
 }

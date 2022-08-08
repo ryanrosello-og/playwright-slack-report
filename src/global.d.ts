@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-  type SummaryResults = {
+  export type SummaryResults = {
     passed: number;
     failed: number;
     skipped: number;
@@ -26,7 +26,7 @@ declare global {
     }>;
   };
 
-  type failure = {
+  export type failure = {
     test: string;
     failureReason: string;
   };

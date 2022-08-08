@@ -1,5 +1,7 @@
+/* eslint-disable no-empty-pattern */
 import { test as base } from '@playwright/test';
 import { WebClient } from '@slack/web-api';
+// eslint-disable-next-line import/no-unresolved
 import SlackClient from '../src/SlackClient';
 
 type SlackClientFixture = {
@@ -8,10 +10,11 @@ type SlackClientFixture = {
   testSummaryAllTestsFailed: SummaryResults;
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export const test = base.extend<SlackClientFixture>({
   testSlackClient: async ({}, use) => {
     const webClient = new WebClient('xoxb...', {});
-    let fakeSlackClient: SlackClient = new SlackClient(webClient);
+    const fakeSlackClient: SlackClient = new SlackClient(webClient);
     await use(fakeSlackClient);
   },
   testSummaryAllTestsPassed: {

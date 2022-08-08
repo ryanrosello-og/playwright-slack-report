@@ -1,4 +1,4 @@
-import { expect, FullConfig, test as base } from '@playwright/test';
+import { expect, test as base } from '@playwright/test';
 import { Suite, TestCase } from '@playwright/test/reporter';
 import SlackReporter from '../src/SlackReporter';
 
@@ -93,21 +93,21 @@ const test = base.extend<{
     _testGroupsCount: 1,
   },
   suite: ({ fullConfig }, use) => {
-    let fakeSuite = {
+    const fakeSuite = {
       project: fullConfig,
-      allTests: function (): TestCase[] {
+      allTests(): TestCase[] {
         return [];
       },
       suites: [],
       tests: [],
       title: '',
-      titlePath: function (): string[] {
+      titlePath(): string[] {
         return [];
       },
     };
     use(fakeSuite);
   },
-  fakeSlackReporter: async ({}: any, use) => {
+  fakeSlackReporter: async ({}, use) => {
     const slackReporter = new SlackReporter();
     await use(slackReporter);
   },
@@ -169,7 +169,7 @@ test.describe('SlackReporter - preChecks()', () => {
   }) => {
     fakeSlackReporter.onBegin(fullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result.okToProceed).toBeTruthy();
   });
 
@@ -188,10 +188,10 @@ test.describe('SlackReporter - preChecks()', () => {
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: `❌ SLACK_BOT_USER_OAUTH_TOKEN was not found`,
+      message: '❌ SLACK_BOT_USER_OAUTH_TOKEN was not found',
     });
   });
 
@@ -209,7 +209,7 @@ test.describe('SlackReporter - preChecks()', () => {
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
       message: '❌ Slack reporter is disabled',
@@ -230,10 +230,11 @@ test.describe('SlackReporter - preChecks()', () => {
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: `❌ "sendResults" is not valid. Expecting one of ['always', 'on-failure', 'off'].`,
+      message:
+        "❌ \"sendResults\" is not valid. Expecting one of ['always', 'on-failure', 'off'].",
     });
   });
 
@@ -251,10 +252,10 @@ test.describe('SlackReporter - preChecks()', () => {
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: `❌ Slack channel(s) was not provided in the config`,
+      message: '❌ Slack channel(s) was not provided in the config',
     });
   });
 
@@ -272,10 +273,10 @@ test.describe('SlackReporter - preChecks()', () => {
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: `❌ Custom layout is not a function`,
+      message: '❌ Custom layout is not a function',
     });
   });
 
@@ -293,10 +294,10 @@ test.describe('SlackReporter - preChecks()', () => {
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
 
-    let result = fakeSlackReporter.preChecks();
+    const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: `❌ Meta is not an array`,
+      message: '❌ Meta is not an array',
     });
   });
 });

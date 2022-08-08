@@ -1,4 +1,4 @@
-export function generateCustomLayout(summaryResults: SummaryResults)  {
+const generateCustomLayout = (summaryResults: SummaryResults) => {
   const maxNumberOfFailures = 10;
   const maxNumberOfFailureLength = 650;
   const fails: any[] = [];
@@ -98,3 +98,5 @@ export function generateCustomLayout(summaryResults: SummaryResults)  {
     ...fails,
   ];
 };
+
+export default generateCustomLayout;

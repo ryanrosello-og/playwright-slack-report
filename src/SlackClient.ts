@@ -96,11 +96,15 @@ export default class SlackClient {
     ];
   }
 
-  async sendMessage(options: {
-    channelIds: Array<string>;
-    summaryResults: SummaryResults;
-    customLayout: Function | undefined;
-    fakeRequest?: Function;
+  async sendMessage({
+    options,
+  }: {
+    options: {
+      channelIds: Array<string>;
+      summaryResults: SummaryResults;
+      customLayout: Function | undefined;
+      fakeRequest?: Function;
+    };
   }): Promise<Array<{ channel: string; outcome: string }>> {
     let blocks;
     if (options.customLayout) {
@@ -112,7 +116,7 @@ export default class SlackClient {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
     }
 
-    let result = [];
+    const result = [];
     for (const channel of options.channelIds) {
       let chatResponse: ChatPostMessageResponse;
       try {
@@ -140,7 +144,7 @@ export default class SlackClient {
     channel: string,
     blocks: never[],
   ): Promise<ChatPostMessageResponse> {
-    let chatResponse = await this.slackWebClient.chat.postMessage({
+    const chatResponse = await this.slackWebClient.chat.postMessage({
       channel,
       text: ' ',
       blocks,

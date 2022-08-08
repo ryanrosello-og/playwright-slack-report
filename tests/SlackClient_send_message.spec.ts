@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { ChatPostMessageResponse } from '@slack/web-api';
-import { generateCustomLayout } from '../src/custom_block/my_block';
+import generateCustomLayout from '../src/custom_block/my_block';
 import { test } from './fixtures';
 
 test.describe('SlackClient.sendMessage()', () => {
@@ -8,17 +8,17 @@ test.describe('SlackClient.sendMessage()', () => {
     testSlackClient,
     testSummaryAllTestsPassed,
   }) => {
-    const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
-      return {
-        ok: true,
-      };
-    };
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
+      ok: true,
+    });
     const channelId = 'C12345';
     const clientResponse = await testSlackClient.sendMessage({
-      channelIds: [channelId],
-      summaryResults: testSummaryAllTestsPassed,
-      customLayout: undefined,
-      fakeRequest,
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsPassed,
+        customLayout: undefined,
+        fakeRequest,
+      },
     });
     expect(clientResponse).toEqual([
       {
@@ -32,18 +32,18 @@ test.describe('SlackClient.sendMessage()', () => {
     testSlackClient,
     testSummaryAllTestsFailed,
   }) => {
-    const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
-      return {
-        ok: true,
-      };
-    };
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
+      ok: true,
+    });
 
     const channelId = 'C12345';
     const clientResponse = await testSlackClient.sendMessage({
-      channelIds: [channelId],
-      summaryResults: testSummaryAllTestsFailed,
-      customLayout: generateCustomLayout,
-      fakeRequest,
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsFailed,
+        customLayout: generateCustomLayout,
+        fakeRequest,
+      },
     });
     expect(clientResponse).toEqual([
       {
@@ -62,10 +62,12 @@ test.describe('SlackClient.sendMessage()', () => {
     };
     const channelId = 'C12345';
     const clientResponse = await testSlackClient.sendMessage({
-      channelIds: [channelId],
-      summaryResults: testSummaryAllTestsPassed,
-      customLayout: undefined,
-      fakeRequest: fakeFailedRequest,
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsPassed,
+        customLayout: undefined,
+        fakeRequest: fakeFailedRequest,
+      },
     });
     expect(clientResponse).toEqual([
       {

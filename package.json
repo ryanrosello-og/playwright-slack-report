@@ -23,7 +23,8 @@
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
     "pw": "nyc playwright test",
-    "build": "tsc -p ./tsconfig.json"
+    "build": "tsc -p ./tsconfig.json",
+    "lint":"npx eslint . --ext .ts"
   },
   "name": "playwright-slack-report",
   "version": "1.0.2",

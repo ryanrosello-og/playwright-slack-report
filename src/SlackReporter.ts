@@ -21,9 +21,7 @@ class SlackReporter implements Reporter {
   onBegin(fullConfig: FullConfig, suite: Suite): void {
     this.suite = suite;
     this.logs = [];
-    const slackReporterConfig = fullConfig.reporter.filter((f) =>
-      f[0].toLowerCase().includes('slackreporter'),
-    )[0][1];
+    const slackReporterConfig = fullConfig.reporter.filter((f) => f[0].toLowerCase().includes('slackreporter'))[0][1];
 
     if (slackReporterConfig) {
       this.meta = slackReporterConfig.meta || [];
@@ -45,8 +43,8 @@ class SlackReporter implements Reporter {
     const resultSummary = await resultsParser.getParsedResults();
     resultSummary.meta = this.meta;
     if (
-      this.sendResults === 'on-failure' &&
-      resultSummary.failures.length === 0
+      this.sendResults === 'on-failure'
+      && resultSummary.failures.length === 0
     ) {
       this.log('⏩ Slack reporter - no failures found');
       return;
@@ -58,9 +56,11 @@ class SlackReporter implements Reporter {
       }),
     );
     await slackClient.sendMessage({
-      channelIds: this.slackChannels,
-      summaryResults: resultSummary,
-      customLayout: this.customLayout,
+      options: {
+        channelIds: this.slackChannels,
+        summaryResults: resultSummary,
+        customLayout: this.customLayout,
+      },
     });
   }
 
@@ -77,12 +77,13 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      !this.sendResults ||
-      !['always', 'on-failure', 'off'].includes(this.sendResults)
+      !this.sendResults
+      || !['always', 'on-failure', 'off'].includes(this.sendResults)
     ) {
       return {
         okToProceed: false,
-        message: `❌ "sendResults" is not valid. Expecting one of ['always', 'on-failure', 'off'].`,
+        message:
+          "❌ \"sendResults\" is not valid. Expecting one of ['always', 'on-failure', 'off'].",
       };
     }
 
