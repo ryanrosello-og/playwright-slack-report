@@ -129,6 +129,8 @@ export default class SlackClient {
         }
         if (chatResponse.ok) {
           result.push({ channel, outcome: `✅ Message sent to ${channel}` });
+          // eslint-disable-next-line no-console
+          console.log(`✅ Message sent to ${channel}`);
         }
       } catch (error: any) {
         result.push({
