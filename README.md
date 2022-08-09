@@ -43,19 +43,19 @@ You will need to have Slack administrator rights to perform the steps below.
 1. Navigate to https://api.slack.com/apps
 2. Click the Create New App button and select "From scratch"
 
-![Navigate to https://api.slack.com/apps](hhttps://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-37-11.png?raw=true)
+![Navigate to https://api.slack.com/apps](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-37-11.png?raw=true)
 
 3. Input a name for your app and select the target workspace, then click on the "Create app" button
 
-[Input a name for your app and select the target workspace](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-40-51.png?raw=true)
+![Input a name for your app and select the target workspace](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-40-51.png?raw=true)
 
 4. Under the Features menu, select "OAuth & Permissions" and scroll down to "Scopes" section
 
-[Under the Features menu select](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-44-29.png?raw=true)
+![Under the Features menu select](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-44-29.png?raw=true)
 
 5. Click the "Add an OAuth Scope" button and select the following scopes:
 
-[Click the Add an OAuth Scope](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-48-30.png?raw=true)
+![Click the Add an OAuth Scope](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-48-30.png?raw=true)
 
 * chat:write 
 * chat:write.public 
@@ -65,13 +65,13 @@ You will need to have Slack administrator rights to perform the steps below.
 
 You will be prompted with the message below, click the Allow button
 
-[click the Allow button](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-49-49.png?raw=true)
+![click the Allow button](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-49-49.png?raw=true)
 
 The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT_USER_OAUTH_TOKEN`.  
 
 >**Treat this token as a secret.**
 
-[Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-53-17.png?raw=true)
+![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-53-17.png?raw=true)
 
 # Configuration
 
