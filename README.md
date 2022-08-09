@@ -2,10 +2,9 @@
 
 Publish your Playwright test results to your favorite Slack channel(s).
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report>)
-
-# Installation
+# Installation 
 
 Run following commands:
 
@@ -45,15 +44,15 @@ You will need to have Slack administrator rights to perform the steps below.
 
 ![Navigate to https://api.slack.com/apps](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-37-11.png?raw=true)
 
-3. Input a name for your app and select the target workspace, then click on the "Create app" button
+3. Input a name for your app and select the target workspace, then click on the **Create App** button
 
 ![Input a name for your app and select the target workspace](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-40-51.png?raw=true)
 
-4. Under the Features menu, select "OAuth & Permissions" and scroll down to "Scopes" section
+4. Under the Features menu, select **OAuth & Permissions** and scroll down to **Scopes** section
 
 ![Under the Features menu select](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-44-29.png?raw=true)
 
-5. Click the "Add an OAuth Scope" button and select the following scopes:
+5. Click the **Add an OAuth Scope** button and select the following scopes:
 
 ![Click the Add an OAuth Scope](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-48-30.png?raw=true)
 
@@ -61,9 +60,11 @@ You will need to have Slack administrator rights to perform the steps below.
 * chat:write.public 
 * chat:write.customize  
 
-6. Scroll up to the OAuth Tokens for Your Workspace and click the  Install to Workspace button
+6. Scroll up to the OAuth Tokens for Your Workspace and click the **Install to Workspace** button
 
-You will be prompted with the message below, click the Allow button
+![Install](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-55-22.png?raw=true)
+
+> You will be prompted with the message below, click the Allow button
 
 ![click the Allow button](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-49-49.png?raw=true)
 
