@@ -32,13 +32,10 @@ export type testSuite = {
 };
 
 export default class ResultsParser {
-  private resultsData: any;
-
   private result: testSuite[];
 
-  constructor(results: any) {
+  constructor() {
     this.result = [];
-    this.resultsData = results;
   }
 
   async getParsedResults(): Promise<SummaryResults> {
@@ -82,55 +79,36 @@ export default class ResultsParser {
     return failures;
   }
 
-  async parse() {
-    for (const project of this.resultsData.suites) {
-      for (const suite of project.suites) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.parseTestSuite(suite);
-      }
-    }
-  }
-
-  async parseTestSuite(
-    suite: {
-      suites: string | any[];
-      title: any;
-      tests: any;
-      parent: { title: any };
-    },
-    suiteIndex = 0,
-  ) {
-    let testResults = [];
-    if (suite.suites?.length > 0) {
-      testResults = await this.parseTests(suite.title, suite.tests);
-      this.updateResults({
-        testSuite: {
-          title: suite.parent?.title
-            ? `${suite.parent.title} > ${suite.title}`
-            : suite.title,
-          tests: testResults,
-        },
-      });
-      await this.parseTestSuite(suite.suites[suiteIndex], (suiteIndex += 1));
-    } else {
-      testResults = await this.parseTests(suite.title, suite.tests);
-      this.updateResults({
-        testSuite: {
-          title: suite.parent?.title
-            ? `${suite.parent.title} > ${suite.title}`
-            : suite.title,
-          tests: testResults,
-        },
-      });
-      // eslint-disable-next-line no-useless-return
-      return;
-    }
-  }
-
   updateResults(data: { testSuite: any }) {
     if (data.testSuite.tests.length > 0) {
       this.result.push(data);
     }
+  }
+
+  addTestResult(suiteName: any, test: any) {
+    const testResults: testResult[] = [];
+    for (const result of test.results) {
+      testResults.push({
+        suiteName,
+        name: test.title,
+        status: result.status,
+        retry: result.retry,
+        startedAt: new Date(result.startTime).toISOString(),
+        endedAt: new Date(
+          new Date(result.startTime).getTime() + result.duration,
+        ).toISOString(),
+        reason: `${this.cleanseReason(
+          result.error?.message,
+        )} \n ${this.cleanseReason(result.error?.stack)}`,
+        attachments: result.attachments,
+      });
+    }
+    this.updateResults({
+      testSuite: {
+        title: suiteName,
+        tests: testResults,
+      },
+    });
   }
 
   async parseTests(suiteName: any, tests: any) {

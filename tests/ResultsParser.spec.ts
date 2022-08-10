@@ -90,8 +90,11 @@ const test = base.extend<{ testData: any }>({
 
 test.describe('ResultsParser', () => {
   test('parses results successfully', async ({ testData }) => {
-    const resultsParser = new ResultsParser(testData);
-    await resultsParser.parse();
+    const resultsParser = new ResultsParser();
+    resultsParser.addTestResult(
+      testData.suites[0].suites[0].title,
+      testData.suites[0].suites[0].tests[0],
+    );
     const results = await resultsParser.getParsedResults();
     expect(results).toEqual({
       passed: 0,

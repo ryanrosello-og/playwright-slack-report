@@ -1,6 +1,8 @@
 /* eslint-disable import/extensions */
 /* eslint-disable import/no-unresolved */
-import { FullConfig, Reporter, Suite } from '@playwright/test/reporter';
+import {
+  FullConfig, Reporter, Suite, TestCase, TestResult,
+} from '@playwright/test/reporter';
 import { LogLevel, WebClient } from '@slack/web-api';
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
@@ -16,6 +18,8 @@ class SlackReporter implements Reporter {
 
   private customLayout: Function | undefined;
 
+  private resultsParser: ResultsParser;
+
   logs: string[] = [];
 
   onBegin(fullConfig: FullConfig, suite: Suite): void {
@@ -29,18 +33,22 @@ class SlackReporter implements Reporter {
       this.customLayout = slackReporterConfig.layout;
       this.slackChannels = slackReporterConfig.channels;
     }
+    this.resultsParser = new ResultsParser();
   }
 
-  async onEnd() {
+  // eslint-disable-next-line class-methods-use-this
+  onTestEnd(test: TestCase, result: TestResult): void {
+    this.resultsParser.addTestResult(test.parent.title, test);
+  }
+
+  async onEnd(): Promise<void> {
     const { okToProceed, message } = this.preChecks();
     if (!okToProceed) {
       this.log(message);
       return;
     }
 
-    const resultsParser = new ResultsParser(this.suite);
-    await resultsParser.parse();
-    const resultSummary = await resultsParser.getParsedResults();
+    const resultSummary = await this.resultsParser.getParsedResults();
     resultSummary.meta = this.meta;
     if (
       this.sendResults === 'on-failure'
