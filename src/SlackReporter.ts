@@ -36,7 +36,7 @@ class SlackReporter implements Reporter {
     this.resultsParser = new ResultsParser();
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
   onTestEnd(test: TestCase, result: TestResult): void {
     this.resultsParser.addTestResult(test.parent.title, test);
   }
