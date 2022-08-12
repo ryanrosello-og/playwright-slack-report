@@ -1,8 +1,10 @@
 # playwright-slack-report ![Biulds](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryanrosello-og/playwright-slack-report/blob/master/LICENSE)
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
+
 Publish your Playwright test results to your favorite Slack channel(s).
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
+![Gif](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-13_8-35-26.gif?raw=true)
 
 ## 🚀 Features
 
@@ -107,7 +109,7 @@ An example advanced configuration is shown below:
         },
         {
           key: 'WHATEVER_ENV_VARIABLE',
-          value: process.env.SOME_ENV_VARIABLE,
+          value: process.env.SOME_ENV_VARIABLE, // depending on your CI environment, this can be the branch name, build id, etc
         },
       ],      
     ],
@@ -313,10 +315,10 @@ e.g.
   }
 ```
 
-Execute `npm install`
-Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
-Modify the `playwright.config.ts` as above
-Run the tests using `npx playwright text`
+*Execute `npm install`
+*Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
+*Modify the `playwright.config.ts` as above
+*Run the tests using `npx playwright text`
 
 # 🐛 Something not working for you?
 
