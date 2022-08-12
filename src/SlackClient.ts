@@ -106,7 +106,7 @@ export default class SlackClient {
       fakeRequest?: Function;
     };
   }): Promise<Array<{ channel: string; outcome: string }>> {
-    let blocks;
+    let blocks: Array<Block | KnownBlock>;
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
     } else {
@@ -144,7 +144,7 @@ export default class SlackClient {
 
   async doPostRequest(
     channel: string,
-    blocks: never[],
+    blocks: Array<KnownBlock | Block>,
   ): Promise<ChatPostMessageResponse> {
     const chatResponse = await this.slackWebClient.chat.postMessage({
       channel,

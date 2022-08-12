@@ -4,7 +4,8 @@
     "@slack/web-api": "^6.7.2",
     "dotenv": "^16.0.1",
     "playwright": "^1.23.3",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "@slack/types": "^2.7.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.30.6",
