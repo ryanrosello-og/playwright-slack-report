@@ -139,11 +139,45 @@ meta: [
 
 # Define your own Slack message custom layout
 
-You can define your own Slack message layout us
+You can define your own Slack message layout to suit your needs.
 
-This function must return
+Firstly, install the necessary type definitions:
 
-See https://api.slack.com/block-kit/building
+`yarn add @slack/types -D`
+
+
+Next, define your layout function.  The signature of this should adhere to example below:
+
+```typescript
+import { Block, KnownBlock } from "@slack/types";
+import { SummaryResults } from "playwright-slack-report/dist/src";
+
+export function generateCustomLayout(summaryResults: SummaryResults) :Array<Block | KnownBlock>{
+  // your implementation goes here
+}
+```
+
+In your, `playwright.confing.ts` file, add your function into the config.
+
+```typescript
+  import { generateCustomLayout } from "./my_custom_layout";
+
+  ...
+
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        channels: ["pw-tests", "ci"], // provide one or more Slack channels
+        sendResults: "always", // "always" , "on-failure", "off"
+      },
+      layout: generateCustomLayout,
+      ...   
+    ],
+  ],
+```
+
+>Pro Tip:  You can use the [block-kit provided by Slack when creating your layout.](https://api.slack.com/block-kit/building)
 
 # License
 
