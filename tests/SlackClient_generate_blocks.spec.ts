@@ -1,11 +1,9 @@
-import { expect } from '@playwright/test';
-import { test } from './fixtures';
+import { expect, test } from '@playwright/test';
+import generateBlocks from '../src/LayoutGenerator';
 
 test.describe('SlackClient.generateBlocks()', () => {
-  test('creates blocks with correct stats summary', async ({
-    testSlackClient: fakeSlackClient,
-  }) => {
-    const generatedBlock = await fakeSlackClient.generateBlocks({
+  test('creates blocks with correct stats summary', async () => {
+    const generatedBlock = await generateBlocks({
       aborted: 1,
       failed: 1,
       passed: 1,
@@ -34,10 +32,8 @@ test.describe('SlackClient.generateBlocks()', () => {
     ]);
   });
 
-  test('creates blocks when meta provided', async ({
-    testSlackClient: fakeSlackClient,
-  }) => {
-    const generatedBlock = await fakeSlackClient.generateBlocks({
+  test('creates blocks when meta provided', async () => {
+    const generatedBlock = await generateBlocks({
       aborted: 0,
       failed: 0,
       passed: 1,
@@ -72,10 +68,8 @@ test.describe('SlackClient.generateBlocks()', () => {
     ]);
   });
 
-  test('creates blocks when test with attachment is provided', async ({
-    testSlackClient: fakeSlackClient,
-  }) => {
-    const generatedBlock = await fakeSlackClient.generateBlocks({
+  test('creates blocks when test with attachment is provided', async () => {
+    const generatedBlock = await generateBlocks({
       aborted: 0,
       failed: 1,
       passed: 0,

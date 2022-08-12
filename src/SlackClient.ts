@@ -9,6 +9,7 @@ import {
   ChatPostMessageResponse,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
+import generateBlocks from './LayoutGenerator';
 
 export type additionalInfo = Array<{ key: string; value: string }>;
 
@@ -17,83 +18,6 @@ export default class SlackClient {
 
   constructor(slackClient: WebClient) {
     this.slackWebClient = slackClient;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  async generateBlocks(
-    summaryResults: SummaryResults,
-  ): Promise<Array<KnownBlock | Block>> {
-    const maxNumberOfFailures = 10;
-    const maxNumberOfFailureLength = 650;
-    const fails = [];
-    const meta = [];
-
-    for (let i = 0; i < summaryResults.failures.length; i += 1) {
-      const { failureReason, test } = summaryResults.failures[i];
-      const formattedFailure = failureReason
-        .substring(0, maxNumberOfFailureLength)
-        .split('\n')
-        .map((l) => `>${l}`)
-        .join('\n');
-      fails.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*${test}*
-          \n\n${formattedFailure}`,
-        },
-      });
-      if (i > maxNumberOfFailures) {
-        fails.push({
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '*There are too many failures to display, view the full results in BuildKite*',
-          },
-        });
-        break;
-      }
-    }
-
-    if (summaryResults.meta) {
-      for (let i = 0; i < summaryResults.meta.length; i += 1) {
-        const { key, value } = summaryResults.meta[i];
-        meta.push({
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `\n*${key}* :\t${value}`,
-          },
-        });
-      }
-    }
-
-    return [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `:white_check_mark: *${
-            summaryResults.passed
-          }* Tests ran successfully \n\n :red_circle: *${
-            summaryResults.failed
-          }* Tests failed \n\n ${
-            summaryResults.skipped > 0
-              ? `:fast_forward: *${summaryResults.skipped}* skipped`
-              : ''
-          } \n\n ${
-            summaryResults.aborted > 0
-              ? `:exclamation: *${summaryResults.aborted}* aborted`
-              : ''
-          }`,
-        },
-      },
-      ...meta,
-      {
-        type: 'divider',
-      },
-      ...fails,
-    ];
   }
 
   async sendMessage({
@@ -106,11 +30,11 @@ export default class SlackClient {
       fakeRequest?: Function;
     };
   }): Promise<Array<{ channel: string; outcome: string }>> {
-    let blocks: Array<Block | KnownBlock>;
+    let blocks: (Block | KnownBlock)[];
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
     } else {
-      blocks = await this.generateBlocks(options.summaryResults);
+      blocks = await generateBlocks(options.summaryResults);
     }
     if (!options.channelIds) {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
