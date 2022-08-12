@@ -191,8 +191,33 @@ In your, `playwright.confing.ts` file, add your function into the config.
 
 ### Examples:
 
-**Example 1:**
+**Example 1: - very simple summary**
 
+```typescript
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from '..';
+
+export default function generateCustomLayoutSimpleExample(
+  summaryResults: SummaryResults,
+): Array<Block | KnownBlock> {
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text:
+          summaryResults.failed === 0
+            ? ':tada: All tests passed!'
+            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+      },
+    },
+  ];
+}
+```
+
+Generates the following message in Slack:
+
+![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-13_8-02-54.png?raw=true)
 
 
 # 🔑 License
