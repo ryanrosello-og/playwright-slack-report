@@ -4,7 +4,15 @@ Publish your Playwright test results to your favorite Slack channel(s).
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
 
-# Installation 
+## 🚀 Features
+
+- 💌 Send results your Playwright test results to one or more Slack channels
+- 📊 Conditionally send results to Slack channels based on test results
+- 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
+- 🧑‍🎨 Define your own custom Slack message layout!
+
+
+# 📦 Installation 
 
 Run following commands:
 
@@ -74,7 +82,7 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-09_5-53-17.png?raw=true)
 
-# Configuration
+# ⚙️ Configuration
 
 An example advanced configuration is shown below:
 
@@ -137,7 +145,7 @@ meta: [
 ...
 ```
 
-# Define your own Slack message custom layout
+# 🎨 Define your own Slack message custom layout
 
 You can define your own Slack message layout to suit your needs.
 
@@ -146,15 +154,17 @@ Firstly, install the necessary type definitions:
 `yarn add @slack/types -D`
 
 
-Next, define your layout function.  The signature of this should adhere to example below:
+Next, define your layout function.  The signature of this function should adhere to example below:
 
 ```typescript
 import { Block, KnownBlock } from "@slack/types";
 import { SummaryResults } from "playwright-slack-report/dist/src";
 
-export function generateCustomLayout(summaryResults: SummaryResults) :Array<Block | KnownBlock>{
+const generateCustomLayout = (summaryResults: SummaryResults):Array<KnownBlock | Block> => {
   // your implementation goes here
 }
+
+export default generateCustomLayout;
 ```
 
 In your, `playwright.confing.ts` file, add your function into the config.
@@ -179,10 +189,12 @@ In your, `playwright.confing.ts` file, add your function into the config.
 
 >Pro Tip:  You can use the [block-kit provided by Slack when creating your layout.](https://api.slack.com/block-kit/building)
 
-# License
+# 🔑 License
 
-# Contributing
+[MIT](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/LICENSE)
 
-# Something not working for you?
+# ✨ Contributing
+
+# 🐛 Something not working for you?
 
 Feel free to [raise a github issue](https://github.com/ryanrosello-og/playwright-slack-report/issues) for any bugs or feature requests.
