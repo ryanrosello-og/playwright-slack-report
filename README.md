@@ -220,6 +220,73 @@ Generates the following message in Slack:
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-13_8-02-54.png?raw=true)
 
 
+**Example 2: - very simple summary (with Meta information)**
+
+Add the meta block in your config:
+
+```typescript
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        channels: ["demo"],
+        sendResults: "always", // "always" , "on-failure", "off",
+        layout: generateCustomLayout,
+        meta: [
+          {
+            key: 'EXAMPLE_META_node_env',
+            value: process.env.HOME ,
+          },
+        ],
+      },
+      
+    ],
+  ],
+```
+
+Create the function to generate the layout:
+
+```typescript
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from '..';
+
+export default function generateCustomLayoutSimpleMeta(
+  summaryResults: SummaryResults,
+): Array<Block | KnownBlock> {
+  const meta: { type: string; text: { type: string; text: string; }; }[] = [];
+  if (summaryResults.meta) {
+    for (let i = 0; i < summaryResults.meta.length; i += 1) {
+      const { key, value } = summaryResults.meta[i];
+      meta.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `\n*${key}* :\t${value}`,
+        },
+      });
+    }
+  }
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text:
+          summaryResults.failed === 0
+            ? ':tada: All tests passed!'
+            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+      },
+    },
+    ...meta,
+  ];
+}
+
+```
+
+Generates the following message in Slack:
+
+![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/dev/assets/2022-08-13_8-17-46.png?raw=true)
+
 # 🔑 License
 
 [MIT](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/LICENSE)
