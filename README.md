@@ -187,13 +187,44 @@ In your, `playwright.confing.ts` file, add your function into the config.
   ],
 ```
 
->Pro Tip:  You can use the [block-kit provided by Slack when creating your layout.](https://api.slack.com/block-kit/building)
+>Pro Tip:  You can use the [block-kit provided by Slack when creating your layout.](https://app.slack.com/block-kit-builder/)
+
+### Examples:
+
+**Example 1:**
+
+
 
 # 🔑 License
 
 [MIT](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/LICENSE)
 
 # ✨ Contributing
+
+Clone the project and run `npm install`
+
+Make your changes
+Run the tests using `npm run pw`
+
+**To execute and test the entire package:**
+
+Run `npm pack`
+
+Create a new playwright project using `yarn create playwright`
+Modify the `package.json` and a local dependancy to the generated `tgz` file 
+
+e.g.
+
+```
+  "dependencies": {
+    "playwright-slack-report": "/home/ry/_repo/playwright-slack-report/playwright-slack-report-1.0.3.tgz"
+  }
+```
+
+Execute `npm install`
+Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
+Modify the `playwright.config.ts` as above
+Run the tests using `npx playwright text`
 
 # 🐛 Something not working for you?
 

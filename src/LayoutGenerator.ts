@@ -9,6 +9,26 @@ const generateBlocks = async (
   const fails = [];
   const meta = [];
 
+  const summary = {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: `:white_check_mark: *${
+        summaryResults.passed
+      }* Tests ran successfully \n\n :red_circle: *${
+        summaryResults.failed
+      }* Tests failed \n\n ${
+        summaryResults.skipped > 0
+          ? `:fast_forward: *${summaryResults.skipped}* skipped`
+          : ''
+      } \n\n ${
+        summaryResults.aborted > 0
+          ? `:exclamation: *${summaryResults.aborted}* aborted`
+          : ''
+      }`,
+    },
+  };
+
   for (let i = 0; i < summaryResults.failures.length; i += 1) {
     const { failureReason, test } = summaryResults.failures[i];
     const formattedFailure = failureReason
@@ -29,7 +49,7 @@ const generateBlocks = async (
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*There are too many failures to display, view the full results in BuildKite*',
+          text: '*There are too many failures to display*',
         },
       });
       break;
@@ -50,25 +70,7 @@ const generateBlocks = async (
   }
 
   return [
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `:white_check_mark: *${
-          summaryResults.passed
-        }* Tests ran successfully \n\n :red_circle: *${
-          summaryResults.failed
-        }* Tests failed \n\n ${
-          summaryResults.skipped > 0
-            ? `:fast_forward: *${summaryResults.skipped}* skipped`
-            : ''
-        } \n\n ${
-          summaryResults.aborted > 0
-            ? `:exclamation: *${summaryResults.aborted}* aborted`
-            : ''
-        }`,
-      },
-    },
+    summary,
     ...meta,
     {
       type: 'divider',
