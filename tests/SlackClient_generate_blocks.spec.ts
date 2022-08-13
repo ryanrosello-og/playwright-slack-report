@@ -4,7 +4,6 @@ import generateBlocks from '../src/LayoutGenerator';
 test.describe('SlackClient.generateBlocks()', () => {
   test('creates blocks with correct stats summary', async () => {
     const generatedBlock = await generateBlocks({
-      aborted: 1,
       failed: 1,
       passed: 1,
       skipped: 1,
@@ -16,7 +15,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: ':white_check_mark: *1* Tests ran successfully \n\n :red_circle: *1* Tests failed \n\n :fast_forward: *1* skipped \n\n :exclamation: *1* aborted',
+          text: ':white_check_mark: *1* Tests ran successfully \n\n :red_circle: *1* Tests failed \n\n :fast_forward: *1* skipped \n\n ',
         },
       },
       {
@@ -34,7 +33,6 @@ test.describe('SlackClient.generateBlocks()', () => {
 
   test('creates blocks when meta provided', async () => {
     const generatedBlock = await generateBlocks({
-      aborted: 0,
       failed: 0,
       passed: 1,
       skipped: 1,
@@ -70,7 +68,6 @@ test.describe('SlackClient.generateBlocks()', () => {
 
   test('creates blocks when test with attachment is provided', async () => {
     const generatedBlock = await generateBlocks({
-      aborted: 0,
       failed: 1,
       passed: 0,
       skipped: 1,

@@ -19,7 +19,6 @@ export const test = base.extend<SlackClientFixture>({
     await use(fakeSlackClient);
   },
   testSummaryAllTestsPassed: {
-    aborted: 0,
     failed: 0,
     passed: 1,
     skipped: 0,
@@ -37,7 +36,6 @@ export const test = base.extend<SlackClientFixture>({
     ],
   },
   testSummaryAllTestsFailed: {
-    aborted: 0,
     failed: 1,
     passed: 0,
     skipped: 0,

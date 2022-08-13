@@ -21,11 +21,7 @@ const generateBlocks = async (
         summaryResults.skipped > 0
           ? `:fast_forward: *${summaryResults.skipped}* skipped`
           : ''
-      } \n\n ${
-        summaryResults.aborted > 0
-          ? `:exclamation: *${summaryResults.aborted}* aborted`
-          : ''
-      }`,
+      } \n\n `,
     },
   };
 
