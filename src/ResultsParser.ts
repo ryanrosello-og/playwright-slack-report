@@ -94,9 +94,7 @@ export default class ResultsParser {
         endedAt: new Date(
           new Date(result.startTime).getTime() + result.duration,
         ).toISOString(),
-        reason: `${this.cleanseReason(
-          result.error?.message,
-        )} \n ${this.cleanseReason(result.error?.stack)}`,
+        reason: this.safelyDetermineFailure(result),
         attachments: result.attachments,
       });
     }
@@ -108,33 +106,11 @@ export default class ResultsParser {
     });
   }
 
-  async parseTests(suiteName: any, tests: any) {
-    const testResults: testResult[] = [];
-
-    for (const test of tests) {
-      for (const result of test.results) {
-        testResults.push({
-          suiteName,
-          name: test.title,
-          status: result.status,
-          retry: result.retry,
-          startedAt: new Date(result.startTime).toISOString(),
-          endedAt: new Date(
-            new Date(result.startTime).getTime() + result.duration,
-          ).toISOString(),
-          reason: this.safelyDetermineFailure(result),
-          attachments: result.attachments,
-        });
-      }
-    }
-    return testResults;
-  }
-
   safelyDetermineFailure(result:
     { errors: any[]; error: { message: string; stack: string; };
   }) : string {
     if (result.errors.length > 0) {
-      const fullError = result.errors.map((e) => `${e.message}\r\n${e.stack}\r\n`).join();
+      const fullError = result.errors.map((e) => `${e.message}\r\n${e.stack ? e.stack : ''}\r\n`).join();
       return this.cleanseReason(fullError);
     }
     return `${this.cleanseReason(
