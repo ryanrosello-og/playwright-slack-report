@@ -14,7 +14,7 @@ export type testResult = {
   reason: string;
   retry: number;
   startedAt: string;
-  status: 'failed' | 'passed' | 'skipped' | 'aborted';
+  status: 'passed' | 'failed' | 'timedOut' | 'skipped';
   attachments?: {
     body: string | undefined | Buffer;
     contentType: string;
@@ -51,7 +51,7 @@ export default class ResultsParser {
       for (const test of suite.testSuite.tests) {
         if (test.status === 'passed') {
           summary.passed += 1;
-        } else if (test.status === 'failed') {
+        } else if (test.status === 'failed' || test.status === 'timedOut') {
           summary.failed += 1;
         } else if (test.status === 'skipped') {
           summary.skipped += 1;
@@ -65,7 +65,7 @@ export default class ResultsParser {
     const failures: Array<failure> = [];
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
-        if (test.status === 'failed') {
+        if (test.status === 'failed' || test.status === 'timedOut') {
           failures.push({
             test: test.name,
             failureReason: test.reason,
@@ -122,14 +122,24 @@ export default class ResultsParser {
           endedAt: new Date(
             new Date(result.startTime).getTime() + result.duration,
           ).toISOString(),
-          reason: `${this.cleanseReason(
-            result.error?.message,
-          )} \n ${this.cleanseReason(result.error?.stack)}`,
+          reason: this.safelyDetermineFailure(result),
           attachments: result.attachments,
         });
       }
     }
     return testResults;
+  }
+
+  safelyDetermineFailure(result:
+    { errors: any[]; error: { message: string; stack: string; };
+  }) : string {
+    if (result.errors.length > 0) {
+      const fullError = result.errors.map((e) => `${e.message}\r\n${e.stack}\r\n`).join();
+      return this.cleanseReason(fullError);
+    }
+    return `${this.cleanseReason(
+      result.error?.message,
+    )} \n ${this.cleanseReason(result.error?.stack)}`;
   }
 
   cleanseReason(rawReaseon: string): string {

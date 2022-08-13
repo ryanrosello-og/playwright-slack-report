@@ -12,7 +12,7 @@ export type SummaryResults = {
     reason: string;
     retry: number;
     startedAt: string;
-    status: 'failed' | 'passed' | 'skipped' | 'aborted';
+    status: 'passed' | 'failed' | 'timedOut' | 'skipped';
     attachments?: {
       body: string | undefined | Buffer;
       contentType: string;
