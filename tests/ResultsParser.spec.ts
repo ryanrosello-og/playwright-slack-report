@@ -100,7 +100,6 @@ test.describe('ResultsParser', () => {
       passed: 0,
       failed: 1,
       skipped: 0,
-      aborted: 0,
       failures: [
         {
           test: 'basic test failure ',

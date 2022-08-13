@@ -43,7 +43,6 @@ export default class ResultsParser {
       passed: 0,
       failed: 0,
       skipped: 0,
-      aborted: 0,
       failures: await this.getFailures(),
       tests: [],
     };
@@ -56,8 +55,6 @@ export default class ResultsParser {
           summary.failed += 1;
         } else if (test.status === 'skipped') {
           summary.skipped += 1;
-        } else if (test.status === 'aborted') {
-          summary.aborted += 1;
         }
       }
     }

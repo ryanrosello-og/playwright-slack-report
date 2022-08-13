@@ -2,7 +2,6 @@ export type SummaryResults = {
   passed: number;
   failed: number;
   skipped: number;
-  aborted: number;
   failures: Array<failure>;
   meta?: Array<{ key: string; value: string }>;
   tests: Array<{
