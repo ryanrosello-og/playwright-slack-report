@@ -8,20 +8,18 @@ const generateBlocks = async (
   const maxNumberOfFailureLength = 650;
   const fails = [];
   const meta = [];
-
+  const header = {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: '🎭 *Playwright Results*',
+    },
+  };
   const summary = {
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `:white_check_mark: *${
-        summaryResults.passed
-      }* Tests ran successfully \n\n :red_circle: *${
-        summaryResults.failed
-      }* Tests failed \n\n ${
-        summaryResults.skipped > 0
-          ? `:fast_forward: *${summaryResults.skipped}* skipped`
-          : ''
-      } \n\n `,
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
     },
   };
 
@@ -66,6 +64,7 @@ const generateBlocks = async (
   }
 
   return [
+    header,
     summary,
     ...meta,
     {
