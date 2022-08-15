@@ -15,7 +15,14 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: ':white_check_mark: *1* Tests ran successfully \n\n :red_circle: *1* Tests failed \n\n :fast_forward: *1* skipped \n\n ',
+          text: '🎭 *Playwright Results*',
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '✅ *1* | ❌ *1* | ⏩ *1*',
         },
       },
       {
@@ -50,7 +57,14 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: ':white_check_mark: *1* Tests ran successfully \n\n :red_circle: *0* Tests failed \n\n :fast_forward: *1* skipped \n\n ',
+          text: '🎭 *Playwright Results*',
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '✅ *1* | ❌ *0* | ⏩ *1*',
         },
       },
       {
@@ -98,7 +112,14 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: ':white_check_mark: *0* Tests ran successfully \n\n :red_circle: *1* Tests failed \n\n :fast_forward: *1* skipped \n\n ',
+          text: '🎭 *Playwright Results*',
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '✅ *0* | ❌ *1* | ⏩ *1*',
         },
       },
       {

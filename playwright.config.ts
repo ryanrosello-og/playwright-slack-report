@@ -22,17 +22,17 @@ const config: PlaywrightTestConfig = {
     [
       './src/SlackReporter.ts',
       {
-        channels: ['zeb', 'pw'],
+        channels: ['qa-automation'],
         sendResults: 'always', // "always" , "on-failure", "off"
         // layout: generateCustomLayout,
         meta: [
           {
-            key: 'BUILD_NUMBER',
-            value: '323332-2341',
+            key: 'BuildID',
+            value: '0181ec91-6d2e-4ac9-8587-7612858a57a7',
           },
           {
-            key: 'WHATEVER_ENV_VARIABLE',
-            value: process.env.SOME_ENV_VARIABLE,
+            key: 'Branch',
+            value: 'feat/create-secondary-account',
           },
         ],
       },

@@ -4,7 +4,7 @@
 
 Publish your Playwright test results to your favorite Slack channel(s).
 
-![Gif](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-35-26.gif?raw=true)
+![Gif](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-15_20-22-59.png?raw=true)
 
 ## 🚀 Features
 
