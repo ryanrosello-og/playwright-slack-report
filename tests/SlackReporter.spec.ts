@@ -119,6 +119,7 @@ test.describe('SlackReporter - onEnd()', () => {
     suite,
     fullConfig,
   }) => {
+    test.fixme();
     process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
