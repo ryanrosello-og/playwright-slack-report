@@ -35,7 +35,7 @@ const generateBlocks = async (
       text: {
         type: 'mrkdwn',
         text: `*${test}*
-        \n\n${formattedFailure}`,
+        \n${formattedFailure}`,
       },
     });
     if (i > maxNumberOfFailures) {
