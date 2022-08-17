@@ -66,7 +66,8 @@ export default class ResultsParser {
       for (const test of suite.testSuite.tests) {
         if (test.status === 'failed' || test.status === 'timedOut') {
           // dont add duplicate results (retries)
-          const failureExists = failures.find((f) => f.test === test.name);
+          const failureExists = failures.find((f) => f.test === test.name
+          && f.failureReason === test.reason);
           if (!failureExists) {
             failures.push({
               test: test.name,
