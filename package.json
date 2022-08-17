@@ -28,11 +28,12 @@
     "lint":"npx eslint . --ext .ts"
   },
   "name": "playwright-slack-report",
-  "version": "1.0.10",
+  "version": "1.0.12",
   "main": "index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
   "author": "Ryan Rosello <ryanrosello@hotmail.com>",
   "license": "MIT",
-  "files": ["/dist/src"]
+  "files": ["/dist/src"],
+  "keywords": ["slack", "report", "playwright", "typescript"]
 }

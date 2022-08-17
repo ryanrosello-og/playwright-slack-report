@@ -32,7 +32,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*test*\n        \n\n>message',
+          text: '*test*\n        \n>message',
         },
       },
     ]);

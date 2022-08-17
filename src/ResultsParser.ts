@@ -39,11 +39,12 @@ export default class ResultsParser {
   }
 
   async getParsedResults(): Promise<SummaryResults> {
+    const failures = await this.getFailures();
     const summary: SummaryResults = {
       passed: 0,
-      failed: 0,
+      failed: failures.length,
       skipped: 0,
-      failures: await this.getFailures(),
+      failures,
       tests: [],
     };
     for (const suite of this.result) {
@@ -51,8 +52,6 @@ export default class ResultsParser {
       for (const test of suite.testSuite.tests) {
         if (test.status === 'passed') {
           summary.passed += 1;
-        } else if (test.status === 'failed' || test.status === 'timedOut') {
-          summary.failed += 1;
         } else if (test.status === 'skipped') {
           summary.skipped += 1;
         }
@@ -66,10 +65,15 @@ export default class ResultsParser {
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
         if (test.status === 'failed' || test.status === 'timedOut') {
-          failures.push({
-            test: test.name,
-            failureReason: test.reason,
-          });
+          // dont add duplicate results (retries)
+          const failureExists = failures.find((f) => f.test === test.name
+          && f.failureReason === test.reason);
+          if (!failureExists) {
+            failures.push({
+              test: test.name,
+              failureReason: test.reason,
+            });
+          }
         }
       }
     }
