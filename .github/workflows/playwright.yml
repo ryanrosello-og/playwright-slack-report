@@ -24,7 +24,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
-        run: npx nyc@15.1.0 yarn playwright test
+        run: yarn run pw
       - uses: actions/upload-artifact@v2
         if: always()
         with:
