@@ -31,3 +31,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+      - name: Coveralls
+          uses: coverallsapp/github-action@master
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}          
