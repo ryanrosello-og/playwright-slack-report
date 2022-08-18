@@ -23,7 +23,7 @@
   },
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
-    "pw": "nyc playwright test",
+    "pw": "nyc --reporter=lcov playwright test",
     "build": "tsc -p ./tsconfig.json",
     "lint":"npx eslint . --ext .ts"
   },
