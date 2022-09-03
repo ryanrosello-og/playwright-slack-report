@@ -55,6 +55,8 @@ export default class SlackClient {
           result.push({ channel, outcome: `✅ Message sent to ${channel}` });
           // eslint-disable-next-line no-console
           console.log(`✅ Message sent to ${channel}`);
+        } else {
+          result.push({ channel, outcome: `❌ Message not sent to ${channel} \r\n ${JSON.stringify(chatResponse, null, 2)}` });
         }
       } catch (error: any) {
         result.push({
