@@ -64,13 +64,15 @@ class SlackReporter implements Reporter {
         logLevel: LogLevel.DEBUG,
       }),
     );
-    await slackClient.sendMessage({
+    const result = await slackClient.sendMessage({
       options: {
         channelIds: this.slackChannels,
         summaryResults: resultSummary,
         customLayout: this.customLayout,
       },
     });
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(result, null, 2));
   }
 
   preChecks(): { okToProceed: boolean; message?: string } {
