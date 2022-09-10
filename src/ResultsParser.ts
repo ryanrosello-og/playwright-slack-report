@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable import/extensions */
 /* eslint-disable no-control-regex */
 /* eslint-disable class-methods-use-this */
@@ -10,6 +12,7 @@ export type testResult = {
   suiteName: string;
   name: string;
   browser?: string;
+  projectName: string;
   endedAt: string;
   reason: string;
   retry: number;
@@ -69,7 +72,7 @@ export default class ResultsParser {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
             failures.push({
-              test: test.name,
+              test: this.getTestName(test),
               failureReason: test.reason,
             });
           }
@@ -79,21 +82,37 @@ export default class ResultsParser {
     return failures;
   }
 
+  getTestName(failedTest: any) {
+    const testName = failedTest.name;
+    if (failedTest.browser && failedTest.projectName) {
+      if (failedTest.browser === failedTest.projectName) {
+        return `${testName} [${failedTest.browser}]`;
+      }
+      return `${testName} [Project Name: ${failedTest.projectName}] using ${failedTest.browser}`;
+    }
+
+    return testName;
+  }
+
   updateResults(data: { testSuite: any }) {
     if (data.testSuite.tests.length > 0) {
       this.result.push(data);
     }
   }
 
-  addTestResult(suiteName: any, test: any) {
+  addTestResult(suiteName: any, testCase: any) {
     const testResults: testResult[] = [];
-    for (const result of test.results) {
+    for (const result of testCase.results) {
       testResults.push({
         suiteName,
-        name: test.title,
+        name: testCase.title,
         status: result.status,
+        // eslint-disable-next-line no-underscore-dangle
+        browser: testCase.parent.parent._projectConfig.use.defaultBrowserType,
+        // eslint-disable-next-line no-underscore-dangle
+        projectName: testCase.parent.parent._projectConfig.name,
         retry: result.retry,
-        retries: test.retries,
+        retries: testCase.retries,
         startedAt: new Date(result.startTime).toISOString(),
         endedAt: new Date(
           new Date(result.startTime).getTime() + result.duration,
@@ -133,9 +152,19 @@ export default class ResultsParser {
     );
 
     const ansiCleansed = rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
-    const logsStripped = ansiCleansed.replaceAll('============================================================\n', '')
-      .replaceAll('============================================================\r\n', '')
-      .replaceAll('=========================== logs ===========================\n', '');
+    const logsStripped = ansiCleansed
+      .replaceAll(
+        '============================================================\n',
+        '',
+      )
+      .replaceAll(
+        '============================================================\r\n',
+        '',
+      )
+      .replaceAll(
+        '=========================== logs ===========================\n',
+        '',
+      );
     return logsStripped;
   }
 }
