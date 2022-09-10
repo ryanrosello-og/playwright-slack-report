@@ -108,11 +108,11 @@ export default class ResultsParser {
         name: testCase.title,
         status: result.status,
         // eslint-disable-next-line no-underscore-dangle
-        browser: testCase.parent?.parent?._projectConfig.use.defaultBrowserType
+        browser: testCase.parent?.parent?._projectConfig?.use?.defaultBrowserType
           ? testCase.parent.parent._projectConfig.use.defaultBrowserType
           : '',
         // eslint-disable-next-line no-underscore-dangle
-        projectName: testCase.parent?.parent?._projectConfig.name
+        projectName: testCase.parent?.parent?._projectConfig?.name
           ? testCase.parent.parent._projectConfig.name
           : '',
         retry: result.retry,
@@ -157,16 +157,16 @@ export default class ResultsParser {
 
     const ansiCleansed = rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
     const logsStripped = ansiCleansed
-      .replaceAll(
-        '============================================================\n',
+      .replace(
+        /============================================================\n/g,
         '',
       )
-      .replaceAll(
-        '============================================================\r\n',
+      .replace(
+        /============================================================\r\n/g,
         '',
       )
-      .replaceAll(
-        '=========================== logs ===========================\n',
+      .replace(
+        /=========================== logs ===========================\n/g,
         '',
       );
     return logsStripped;
