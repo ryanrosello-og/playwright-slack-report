@@ -131,6 +131,11 @@ export default class ResultsParser {
       '([\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~])))',
       'g',
     );
-    return rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
+
+    const ansiCleansed = rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
+    const logsStripped = ansiCleansed.replaceAll('============================================================\n', '')
+      .replaceAll('============================================================\r\n', '')
+      .replaceAll('=========================== logs ===========================\n', '');
+    return logsStripped;
   }
 }
