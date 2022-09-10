@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable import/extensions */
 /* eslint-disable no-control-regex */
 /* eslint-disable class-methods-use-this */
@@ -10,9 +12,11 @@ export type testResult = {
   suiteName: string;
   name: string;
   browser?: string;
+  projectName: string;
   endedAt: string;
   reason: string;
   retry: number;
+  retries: number;
   startedAt: string;
   status: 'passed' | 'failed' | 'timedOut' | 'skipped';
   attachments?: {
@@ -65,12 +69,10 @@ export default class ResultsParser {
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
         if (test.status === 'failed' || test.status === 'timedOut') {
-          // dont add duplicate results (retries)
-          const failureExists = failures.find((f) => f.test === test.name
-          && f.failureReason === test.reason);
-          if (!failureExists) {
+          // only flag as failed if the last attempt has failed
+          if (test.retries === test.retry) {
             failures.push({
-              test: test.name,
+              test: this.getTestName(test),
               failureReason: test.reason,
             });
           }
@@ -80,20 +82,41 @@ export default class ResultsParser {
     return failures;
   }
 
+  getTestName(failedTest: any) {
+    const testName = failedTest.name;
+    if (failedTest.browser && failedTest.projectName) {
+      if (failedTest.browser === failedTest.projectName) {
+        return `${testName} [${failedTest.browser}]`;
+      }
+      return `${testName} [Project Name: ${failedTest.projectName}] using ${failedTest.browser}`;
+    }
+
+    return testName;
+  }
+
   updateResults(data: { testSuite: any }) {
     if (data.testSuite.tests.length > 0) {
       this.result.push(data);
     }
   }
 
-  addTestResult(suiteName: any, test: any) {
+  addTestResult(suiteName: any, testCase: any) {
     const testResults: testResult[] = [];
-    for (const result of test.results) {
+    for (const result of testCase.results) {
       testResults.push({
         suiteName,
-        name: test.title,
+        name: testCase.title,
         status: result.status,
+        // eslint-disable-next-line no-underscore-dangle
+        browser: testCase.parent?.parent?._projectConfig?.use?.defaultBrowserType
+          ? testCase.parent.parent._projectConfig.use.defaultBrowserType
+          : '',
+        // eslint-disable-next-line no-underscore-dangle
+        projectName: testCase.parent?.parent?._projectConfig?.name
+          ? testCase.parent.parent._projectConfig.name
+          : '',
         retry: result.retry,
+        retries: testCase.retries,
         startedAt: new Date(result.startTime).toISOString(),
         endedAt: new Date(
           new Date(result.startTime).getTime() + result.duration,
@@ -110,11 +133,14 @@ export default class ResultsParser {
     });
   }
 
-  safelyDetermineFailure(result:
-    { errors: any[]; error: { message: string; stack: string; };
-  }) : string {
+  safelyDetermineFailure(result: {
+    errors: any[];
+    error: { message: string; stack: string };
+  }): string {
     if (result.errors.length > 0) {
-      const fullError = result.errors.map((e) => `${e.message}\r\n${e.stack ? e.stack : ''}\r\n`).join();
+      const fullError = result.errors
+        .map((e) => `${e.message}\r\n${e.stack ? e.stack : ''}\r\n`)
+        .join();
       return this.cleanseReason(fullError);
     }
     return `${this.cleanseReason(
@@ -128,6 +154,21 @@ export default class ResultsParser {
       '([\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~])))',
       'g',
     );
-    return rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
+
+    const ansiCleansed = rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
+    const logsStripped = ansiCleansed
+      .replace(
+        /============================================================\n/g,
+        '',
+      )
+      .replace(
+        /============================================================\r\n/g,
+        '',
+      )
+      .replace(
+        /=========================== logs ===========================\n/g,
+        '',
+      );
+    return logsStripped;
   }
 }

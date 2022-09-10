@@ -8,6 +8,7 @@ export type SummaryResults = {
     suiteName: string;
     name: string;
     browser?: string;
+    projectName?: string;
     endedAt: string;
     reason: string;
     retry: number;
