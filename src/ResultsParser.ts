@@ -108,9 +108,13 @@ export default class ResultsParser {
         name: testCase.title,
         status: result.status,
         // eslint-disable-next-line no-underscore-dangle
-        browser: testCase.parent.parent._projectConfig.use.defaultBrowserType,
+        browser: testCase.parent?.parent?._projectConfig.use.defaultBrowserType
+          ? testCase.parent.parent._projectConfig.use.defaultBrowserType
+          : '',
         // eslint-disable-next-line no-underscore-dangle
-        projectName: testCase.parent.parent._projectConfig.name,
+        projectName: testCase.parent?.parent?._projectConfig.name
+          ? testCase.parent.parent._projectConfig.name
+          : '',
         retry: result.retry,
         retries: testCase.retries,
         startedAt: new Date(result.startTime).toISOString(),
