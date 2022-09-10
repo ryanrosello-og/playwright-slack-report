@@ -13,6 +13,7 @@ export type testResult = {
   endedAt: string;
   reason: string;
   retry: number;
+  retries: number;
   startedAt: string;
   status: 'passed' | 'failed' | 'timedOut' | 'skipped';
   attachments?: {
@@ -65,10 +66,8 @@ export default class ResultsParser {
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
         if (test.status === 'failed' || test.status === 'timedOut') {
-          // dont add duplicate results (retries)
-          const failureExists = failures.find((f) => f.test === test.name
-          && f.failureReason === test.reason);
-          if (!failureExists) {
+          // only flag as failed if the last attempt has failed
+          if (test.retries === test.retry) {
             failures.push({
               test: test.name,
               failureReason: test.reason,
@@ -94,6 +93,7 @@ export default class ResultsParser {
         name: test.title,
         status: result.status,
         retry: result.retry,
+        retries: test.retries,
         startedAt: new Date(result.startTime).toISOString(),
         endedAt: new Date(
           new Date(result.startTime).getTime() + result.duration,
@@ -110,11 +110,14 @@ export default class ResultsParser {
     });
   }
 
-  safelyDetermineFailure(result:
-    { errors: any[]; error: { message: string; stack: string; };
-  }) : string {
+  safelyDetermineFailure(result: {
+    errors: any[];
+    error: { message: string; stack: string };
+  }): string {
     if (result.errors.length > 0) {
-      const fullError = result.errors.map((e) => `${e.message}\r\n${e.stack ? e.stack : ''}\r\n`).join();
+      const fullError = result.errors
+        .map((e) => `${e.message}\r\n${e.stack ? e.stack : ''}\r\n`)
+        .join();
       return this.cleanseReason(fullError);
     }
     return `${this.cleanseReason(
