@@ -18,6 +18,8 @@ class SlackReporter implements Reporter {
 
   private customLayout: Function | undefined;
 
+  private maxNumberOfFailuresToShow: number;
+
   private resultsParser: ResultsParser;
 
   logs: string[] = [];
@@ -32,6 +34,7 @@ class SlackReporter implements Reporter {
       this.sendResults = slackReporterConfig.sendResults || 'always';
       this.customLayout = slackReporterConfig.layout;
       this.slackChannels = slackReporterConfig.channels;
+      this.maxNumberOfFailuresToShow = slackReporterConfig.maxNumberOfFailuresToShow || 10;
     }
     this.resultsParser = new ResultsParser();
   }
@@ -69,6 +72,7 @@ class SlackReporter implements Reporter {
         channelIds: this.slackChannels,
         summaryResults: resultSummary,
         customLayout: this.customLayout,
+        maxNumberOfFailures: this.maxNumberOfFailuresToShow,
       },
     });
     // eslint-disable-next-line no-console

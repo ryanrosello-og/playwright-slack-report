@@ -28,13 +28,14 @@ export default class SlackClient {
       summaryResults: SummaryResults;
       customLayout: Function | undefined;
       fakeRequest?: Function;
+      maxNumberOfFailures: number
     };
   }): Promise<Array<{ channel: string; outcome: string }>> {
     let blocks: (Block | KnownBlock)[];
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
     } else {
-      blocks = await generateBlocks(options.summaryResults);
+      blocks = await generateBlocks(options.summaryResults, options.maxNumberOfFailures);
     }
     if (!options.channelIds) {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);

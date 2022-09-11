@@ -3,8 +3,8 @@ import { SummaryResults } from '.';
 
 const generateBlocks = async (
   summaryResults: SummaryResults,
+  maxNumberOfFailures: number,
 ): Promise<Array<KnownBlock | Block>> => {
-  const maxNumberOfFailures = 10;
   const maxNumberOfFailureLength = 650;
   const fails = [];
   const meta = [];
@@ -43,7 +43,7 @@ const generateBlocks = async (
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*There are too many failures to display*',
+          text: `*There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
         },
       });
       break;

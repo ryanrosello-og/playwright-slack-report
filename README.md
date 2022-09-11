@@ -104,6 +104,7 @@ An example advanced configuration is shown below:
         sendResults: "always", // "always" , "on-failure", "off"
       },
       layout: generateCustomLayout,
+      maxNumberOfFailuresToShow: 4,
       meta: [
         {
           key: 'BUILD_NUMBER',
@@ -132,6 +133,8 @@ Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is requi
 ### **layout**
 A function that returns a layout object, this configuration is optional.  See section below for more details.
 * meta - an array of meta data to be sent to Slack, this configuration is optional.
+### **maxNumberOfFailuresToShow**
+Limits the number of failures shown in the Slack message, defaults to 10.
 
 **Examples:**
 ```typescript
