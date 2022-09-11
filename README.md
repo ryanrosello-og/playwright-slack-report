@@ -113,6 +113,10 @@ An example advanced configuration is shown below:
           key: 'WHATEVER_ENV_VARIABLE',
           value: process.env.SOME_ENV_VARIABLE, // depending on your CI environment, this can be the branch name, build id, etc
         },
+        {
+          key: 'HTML Results',
+          value: '<https://your-build-artifacts.my.company.dev/pw/23887/playwright-report/index.html|📊>',
+        },
       ],      
     ],
   ],
