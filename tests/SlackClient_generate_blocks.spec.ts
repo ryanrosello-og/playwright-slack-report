@@ -9,7 +9,7 @@ test.describe('SlackClient.generateBlocks()', () => {
       skipped: 1,
       failures: [{ test: 'test', failureReason: 'message' }],
       tests: [],
-    });
+    }, 2);
     expect(generatedBlock).toEqual([
       {
         type: 'section',
@@ -51,7 +51,7 @@ test.describe('SlackClient.generateBlocks()', () => {
           value: '9sdcv-312432-3134',
         },
       ],
-    });
+    }, 2);
     expect(generatedBlock).toEqual([
       {
         type: 'section',
@@ -106,7 +106,7 @@ test.describe('SlackClient.generateBlocks()', () => {
           ],
         },
       ],
-    });
+    }, 0);
     expect(generatedBlock).toEqual([
       {
         type: 'section',
@@ -123,7 +123,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         },
       },
       {
-        type: 'divider',
+        type: 'zzdivider',
       },
     ]);
   });
