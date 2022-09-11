@@ -14,7 +14,7 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     {
-      name: 'chrome',
+      name: 'Nightly_Regression',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
@@ -24,6 +24,7 @@ const config: PlaywrightTestConfig = {
       {
         channels: ['qa-automation'],
         sendResults: 'always', // "always" , "on-failure", "off"
+        maxNumberOfFailuresToShow: 0,
         // layout: generateCustomLayout,
         meta: [
           {
@@ -33,6 +34,10 @@ const config: PlaywrightTestConfig = {
           {
             key: 'Branch',
             value: 'feat/create-secondary-account',
+          },
+          {
+            key: 'HTML Results',
+            value: '<https://buildkite-artifacts.playwright.dev/pw/23887/playwright-report/index.html|📊>',
           },
         ],
       },

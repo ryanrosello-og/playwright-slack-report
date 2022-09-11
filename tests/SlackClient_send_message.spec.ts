@@ -18,6 +18,7 @@ test.describe('SlackClient.sendMessage()', () => {
         summaryResults: testSummaryAllTestsPassed,
         customLayout: undefined,
         fakeRequest,
+        maxNumberOfFailures: 10,
       },
     });
     expect(clientResponse).toEqual([
@@ -43,6 +44,7 @@ test.describe('SlackClient.sendMessage()', () => {
         summaryResults: testSummaryAllTestsFailed,
         customLayout: generateCustomLayout,
         fakeRequest,
+        maxNumberOfFailures: 10,
       },
     });
     expect(clientResponse).toEqual([
@@ -67,6 +69,7 @@ test.describe('SlackClient.sendMessage()', () => {
         summaryResults: testSummaryAllTestsPassed,
         customLayout: undefined,
         fakeRequest: fakeFailedRequest,
+        maxNumberOfFailures: 10,
       },
     });
     expect(clientResponse).toEqual([
