@@ -72,7 +72,7 @@ export default class ResultsParser {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
             failures.push({
-              test: this.getTestName(test),
+              test: ResultsParser.getTestName(test),
               failureReason: test.reason,
             });
           }
@@ -82,7 +82,7 @@ export default class ResultsParser {
     return failures;
   }
 
-  getTestName(failedTest: any) {
+  static getTestName(failedTest: any) {
     const testName = failedTest.name;
     if (failedTest.browser && failedTest.projectName) {
       if (failedTest.browser === failedTest.projectName) {

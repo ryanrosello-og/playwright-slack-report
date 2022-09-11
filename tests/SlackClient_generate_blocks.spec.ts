@@ -123,7 +123,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         },
       },
       {
-        type: 'zzdivider',
+        type: 'divider',
       },
     ]);
   });
