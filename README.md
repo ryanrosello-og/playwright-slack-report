@@ -1,4 +1,4 @@
-# playwright-slack-report ![Biulds](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryanrosello-og/playwright-slack-report/blob/master/LICENSE) [![Coverage Status](https://coveralls.io/repos/github/ryanrosello-og/playwright-slack-report/badge.svg?branch=main)](https://coveralls.io/github/ryanrosello-og/playwright-slack-report?branch=main)
+# playwright-slack-report ![Builds](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryanrosello-og/playwright-slack-report/blob/master/LICENSE) [![Coverage Status](https://coveralls.io/repos/github/ryanrosello-og/playwright-slack-report/badge.svg?branch=main)](https://coveralls.io/github/ryanrosello-og/playwright-slack-report?branch=main)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
 
