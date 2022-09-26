@@ -47,7 +47,12 @@ Run your tests by providing your` SLACK_BOT_USER_OAUTH_TOKEN` as an environment 
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright test`
 
-# ℹ️ How do I find my Slack bot oauth token?
+> **NOTE:** The Slack channel that you specify will need to be *public*, this app will not be able to publish messages to private channels.
+
+---
+
+<details>
+<summary><b>🔎 How do I find my Slack bot oauth token?</b></summary>
 
 You will need to have Slack administrator rights to perform the steps below.
 
@@ -85,6 +90,10 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 >**Treat this token as a secret.**
 
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-09_5-53-17.png?raw=true)
+
+</details>
+
+---
 
 # ⚙️ Configuration
 
