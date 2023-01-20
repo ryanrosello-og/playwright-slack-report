@@ -3,7 +3,10 @@
 import {
   FullConfig, Reporter, Suite, TestCase, TestResult,
 } from '@playwright/test/reporter';
-import { LogLevel, WebClient } from '@slack/web-api';
+import {
+  Block, KnownBlock, LogLevel, WebClient,
+} from '@slack/web-api';
+import { SummaryResults } from '.';
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 
@@ -16,7 +19,9 @@ class SlackReporter implements Reporter {
 
   private meta: Array<{ key: string; value: string }> = [];
 
-  private customLayout: Function | undefined;
+  private customLayout: (summaryResults: SummaryResults) => Array<KnownBlock | Block> | undefined;
+
+  private customLayoutAsync: (summaryResults: SummaryResults) => Promise<Array<KnownBlock | Block>> | undefined;
 
   private maxNumberOfFailuresToShow: number;
 
@@ -33,6 +38,7 @@ class SlackReporter implements Reporter {
       this.meta = slackReporterConfig.meta || [];
       this.sendResults = slackReporterConfig.sendResults || 'always';
       this.customLayout = slackReporterConfig.layout;
+      this.customLayoutAsync = slackReporterConfig.layoutAsync;
       this.slackChannels = slackReporterConfig.channels;
       this.maxNumberOfFailuresToShow = slackReporterConfig.maxNumberOfFailuresToShow || 10;
     }
@@ -72,6 +78,7 @@ class SlackReporter implements Reporter {
         channelIds: this.slackChannels,
         summaryResults: resultSummary,
         customLayout: this.customLayout,
+        customLayoutAsync: this.customLayoutAsync,
         maxNumberOfFailures: this.maxNumberOfFailuresToShow,
       },
     });
@@ -113,6 +120,16 @@ class SlackReporter implements Reporter {
       return {
         okToProceed: false,
         message: '❌ Custom layout is not a function',
+      };
+    }
+
+    if (
+      this.customLayoutAsync
+      && typeof this.customLayoutAsync !== 'function'
+    ) {
+      return {
+        okToProceed: false,
+        message: '❌ customLayoutAsync is not a function',
       };
     }
 

@@ -109,3 +109,6 @@ dist
 test-results/
 build/
 dist/
+
+# VS Code files
+.vscode

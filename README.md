@@ -16,7 +16,7 @@ Publish your Playwright test results to your favorite Slack channel(s).
 - 🧑‍🎨 Define your own custom Slack message layout!
 
 
-# 📦 Installation 
+# 📦 Installation
 
 Run following commands:
 
@@ -73,9 +73,9 @@ You will need to have Slack administrator rights to perform the steps below.
 
 ![Click the Add an OAuth Scope](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-09_5-48-30.png?raw=true)
 
-* chat:write 
-* chat:write.public 
-* chat:write.customize  
+* chat:write
+* chat:write.public
+* chat:write.customize
 
 6. Scroll up to the OAuth Tokens for Your Workspace and click the **Install to Workspace** button
 
@@ -85,7 +85,7 @@ You will need to have Slack administrator rights to perform the steps below.
 
 ![click the Allow button](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-09_5-49-49.png?raw=true)
 
-The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT_USER_OAUTH_TOKEN`.  
+The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT_USER_OAUTH_TOKEN`.
 
 >**Treat this token as a secret.**
 
@@ -128,13 +128,13 @@ An example advanced configuration is shown below:
             },
         ],
       },
-         
+
     ],
   ],
 ```
 
 ### **channels**
-An array of Slack channels to post to, atleast one channel is required
+An array of Slack channels to post to, at least one channel is required
 ### **sendResults**
 Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is required:
   * **always** - will send the results to Slack at completion of the test run
@@ -143,6 +143,8 @@ Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is requi
 ### **layout**
 A function that returns a layout object, this configuration is optional.  See section below for more details.
 * meta - an array of meta data to be sent to Slack, this configuration is optional.
+### **layoutAsync**
+Same as **layout** above, but asynchronous in that it returns a promise.
 ### **maxNumberOfFailuresToShow**
 Limits the number of failures shown in the Slack message, defaults to 10.
 
@@ -162,7 +164,7 @@ meta: [
     key: 'GITHUB_REF',
     value: process.env.GITHUB_REF,
   },
-], 
+],
 ...
 ```
 
@@ -260,7 +262,6 @@ Add the meta block in your config:
           },
         ],
       },
-      
     ],
   ],
 ```
@@ -324,7 +325,7 @@ Run the tests using `npm run pw`
 Run `npm pack`
 
 Create a new playwright project using `yarn create playwright`
-Modify the `package.json` and a local dependancy to the generated `tgz` file 
+Modify the `package.json` and a local dependancy to the generated `tgz` file
 
 e.g.
 
