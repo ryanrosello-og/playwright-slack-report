@@ -310,9 +310,9 @@ Generates the following message in Slack:
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-17-46.png?raw=true)
 
 
-**Example 3: - with screenshots and/or recorded videos and layoutAsync**
+**Example 3: - with screenshots and/or recorded videos**
 
-In your, `playwright.config.ts` file, add your these params (Make sure you use **layoutAsync** rather than **layout**):
+In your, `playwright.config.ts` file, add these params (Make sure you use **layoutAsync** rather than **layout**):
 
 ```typescript
   import { generateCustomLayoutAsync } from "./my_custom_layout";
