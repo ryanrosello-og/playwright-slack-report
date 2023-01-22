@@ -190,7 +190,7 @@ const generateCustomLayout = (summaryResults: SummaryResults):Array<KnownBlock |
 export default generateCustomLayout;
 ```
 
-In your, `playwright.confing.ts` file, add your function into the config.
+In your, `playwright.config.ts` file, add your function into the config.
 
 ```typescript
   import { generateCustomLayout } from "./my_custom_layout";
@@ -308,6 +308,204 @@ export default function generateCustomLayoutSimpleMeta(
 Generates the following message in Slack:
 
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-17-46.png?raw=true)
+
+
+**Example 3: - with screenshots and/or recorded videos and layoutAsync**
+
+In your, `playwright.config.ts` file, add your these params (Make sure you use **layoutAsync** rather than **layout**):
+
+```typescript
+  import { generateCustomLayoutAsync } from "./my_custom_layout";
+  ...
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        ...
+        layoutAsync: generateCustomLayoutAsync,
+        ...
+      },
+    ],
+  ],
+  use: {
+    ...
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+    ...
+  },
+```
+
+Create the function to generate the layout asynchronously in `my_custom_layout.ts`:
+
+```typescript
+import fs from "fs";
+import path from "path";
+import { Block, KnownBlock } from "@slack/types";
+import { SummaryResults } from "playwright-slack-report/dist/src";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+
+const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY || "",
+    secretAccessKey: process.env.S3_SECRET || "",
+  },
+  region: process.env.S3_REGION,
+});
+
+async function uploadFile(filePath, fileName) {
+  try {
+    const ext = path.extname(filePath);
+    const name = `${fileName}${ext}`;
+
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: name,
+        Body: fs.createReadStream(filePath),
+      })
+    );
+
+    return `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${name}`;
+  } catch (err) {
+    console.log("🔥🔥 Error", err);
+  }
+}
+
+
+export async function generateCustomLayoutAsync (summaryResults: SummaryResults): Promise<Array<KnownBlock | Block>> {
+  const { tests } = summaryResults;
+  // create your custom slack blocks
+
+  const header = {
+    type: "header",
+    text: {
+      type: "plain_text",
+      text: "🎭 *Playwright E2E Test Results*",
+      emoji: true,
+    },
+  };
+
+  const summary = {
+    type: "section",
+    text: {
+      type: "mrkdwn",
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
+    },
+  };
+
+  const fails: Array<KnownBlock | Block> = [];
+
+  for (const t of tests) {
+    if (t.status === "failed" || t.status === "timedOut") {
+
+      fails.push({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `👎 *[${t.browser}] | ${t.suiteName.replace(/\W/gi, "-")}*`,
+        },
+      });
+
+      const assets: Array<string> = [];
+
+      if (t.attachments) {
+        for (const a of t.attachments) {
+          // Upload failed tests screenshots and videos to the service of your choice
+          // In my case I upload the to S3 bucket
+          const permalink = await uploadFile(
+            a.path,
+            `${t.suiteName}--${t.name}`.replace(/\W/gi, "-").toLowerCase()
+          );
+
+          if (permalink) {
+            let icon = "";
+            if (a.name === "screenshot") {
+              icon = "📸";
+            } else if (a.name === "video") {
+              icon = "🎥";
+            }
+
+            assets.push(`${icon}  See the <${permalink}|${a.name}>`);
+          }
+        }
+      }
+
+      if (assets.length > 0) {
+        fails.push({
+          type: "context",
+          elements: [{ type: "mrkdwn", text: assets.join("\n") }],
+        });
+      }
+    }
+  }
+
+  return [header, summary, { type: "divider" }, ...fails]
+}
+
+```
+
+**Also you can upload the attachments to slack.** But it might be more expensive for you and also you'll have to extend the scope.
+
+```typescript
+...
+const web_api_1 = require('@slack/web-api');
+const slackClient = new web_api_1.WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN);
+
+async function uploadFile(filePath) {
+  try {
+    const result = await slackClient.files.uploadV2({
+      channels: 'you_cannel_name',
+      file: fs.createReadStream(filePath),
+      filename: filePath.split('/').at(-1),
+    });
+
+    return result.file;
+  } catch (error) {
+    console.log('🔥🔥 error', error);
+  }
+}
+
+export async function generateCustomLayoutAsync (summaryResults: SummaryResults): Promise<Array<KnownBlock | Block>> {
+  const { tests } = summaryResults;
+  ....
+  // See the snippet above ^^^
+
+
+    if (t.attachments) {
+      for (const a of t.attachments) {
+        const file = await uploadFile(a.path);
+
+        if (file) {
+          if (a.name === 'screenshot' && file.permalink) {
+            fails.push({
+              alt_text: '',
+              image_url: file.permalink,
+              title: { type: 'plain_text', text: file.name || '' },
+              type: 'image',
+            });
+          }
+
+          if (a.name === 'video' && file.permalink) {
+            fails.push({
+              alt_text: '',
+              // NOTE:
+              // Slack requires thumbnail_url length to be more that 0
+              // Either set screenshot url as the thumbnail or add a placeholder image url
+              thumbnail_url: '',
+              title: { type: 'plain_text', text: file.name || '' },
+              type: 'video',
+              video_url: file.permalink,
+            });
+          }
+        }
+      }
+    }
+  ....
+
+  return [header, summary, { type: "divider" }, ...fails]
+}
+
+```
 
 # 🔑 License
 
