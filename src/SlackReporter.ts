@@ -3,10 +3,8 @@
 import {
   FullConfig, Reporter, Suite, TestCase, TestResult,
 } from '@playwright/test/reporter';
-import {
-  Block, KnownBlock, LogLevel, WebClient,
-} from '@slack/web-api';
-import { SummaryResults } from '.';
+import { LogLevel, WebClient } from '@slack/web-api';
+
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 
@@ -19,9 +17,9 @@ class SlackReporter implements Reporter {
 
   private meta: Array<{ key: string; value: string }> = [];
 
-  private customLayout: (summaryResults: SummaryResults) => Array<KnownBlock | Block> | undefined;
+  private customLayout: Function | undefined;
 
-  private customLayoutAsync: (summaryResults: SummaryResults) => Promise<Array<KnownBlock | Block>> | undefined;
+  private customLayoutAsync: Function | undefined;
 
   private maxNumberOfFailuresToShow: number;
 

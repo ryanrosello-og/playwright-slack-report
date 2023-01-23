@@ -26,8 +26,8 @@ export default class SlackClient {
     options: {
       channelIds: Array<string>;
       summaryResults: SummaryResults;
-      customLayout?: (summaryResults: SummaryResults) => Array<KnownBlock | Block>;
-      customLayoutAsync?: (summaryResults: SummaryResults) => Promise<Array<KnownBlock | Block>>;
+      customLayout: Function | undefined;
+      customLayoutAsync: Function | undefined;
       fakeRequest?: Function;
       maxNumberOfFailures: number;
     };
