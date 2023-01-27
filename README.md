@@ -16,7 +16,7 @@ Publish your Playwright test results to your favorite Slack channel(s).
 - 🧑‍🎨 Define your own custom Slack message layout!
 
 
-# 📦 Installation 
+# 📦 Installation
 
 Run following commands:
 
@@ -73,9 +73,9 @@ You will need to have Slack administrator rights to perform the steps below.
 
 ![Click the Add an OAuth Scope](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-09_5-48-30.png?raw=true)
 
-* chat:write 
-* chat:write.public 
-* chat:write.customize  
+* chat:write
+* chat:write.public
+* chat:write.customize
 
 6. Scroll up to the OAuth Tokens for Your Workspace and click the **Install to Workspace** button
 
@@ -85,7 +85,7 @@ You will need to have Slack administrator rights to perform the steps below.
 
 ![click the Allow button](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-09_5-49-49.png?raw=true)
 
-The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT_USER_OAUTH_TOKEN`.  
+The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT_USER_OAUTH_TOKEN`.
 
 >**Treat this token as a secret.**
 
@@ -128,13 +128,13 @@ An example advanced configuration is shown below:
             },
         ],
       },
-         
+
     ],
   ],
 ```
 
 ### **channels**
-An array of Slack channels to post to, atleast one channel is required
+An array of Slack channels to post to, at least one channel is required
 ### **sendResults**
 Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is required:
   * **always** - will send the results to Slack at completion of the test run
@@ -143,6 +143,8 @@ Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is requi
 ### **layout**
 A function that returns a layout object, this configuration is optional.  See section below for more details.
 * meta - an array of meta data to be sent to Slack, this configuration is optional.
+### **layoutAsync**
+Same as **layout** above, but asynchronous in that it returns a promise.
 ### **maxNumberOfFailuresToShow**
 Limits the number of failures shown in the Slack message, defaults to 10.
 
@@ -162,7 +164,7 @@ meta: [
     key: 'GITHUB_REF',
     value: process.env.GITHUB_REF,
   },
-], 
+],
 ...
 ```
 
@@ -188,7 +190,7 @@ const generateCustomLayout = (summaryResults: SummaryResults):Array<KnownBlock |
 export default generateCustomLayout;
 ```
 
-In your, `playwright.confing.ts` file, add your function into the config.
+In your, `playwright.config.ts` file, add your function into the config.
 
 ```typescript
   import { generateCustomLayout } from "./my_custom_layout";
@@ -260,7 +262,6 @@ Add the meta block in your config:
           },
         ],
       },
-      
     ],
   ],
 ```
@@ -308,6 +309,204 @@ Generates the following message in Slack:
 
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-17-46.png?raw=true)
 
+
+**Example 3: - with screenshots and/or recorded videos**
+
+In your, `playwright.config.ts` file, add these params (Make sure you use **layoutAsync** rather than **layout**):
+
+```typescript
+  import { generateCustomLayoutAsync } from "./my_custom_layout";
+  ...
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        ...
+        layoutAsync: generateCustomLayoutAsync,
+        ...
+      },
+    ],
+  ],
+  use: {
+    ...
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+    ...
+  },
+```
+
+Create the function to generate the layout asynchronously in `my_custom_layout.ts`:
+
+```typescript
+import fs from "fs";
+import path from "path";
+import { Block, KnownBlock } from "@slack/types";
+import { SummaryResults } from "playwright-slack-report/dist/src";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+
+const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY || "",
+    secretAccessKey: process.env.S3_SECRET || "",
+  },
+  region: process.env.S3_REGION,
+});
+
+async function uploadFile(filePath, fileName) {
+  try {
+    const ext = path.extname(filePath);
+    const name = `${fileName}${ext}`;
+
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: name,
+        Body: fs.createReadStream(filePath),
+      })
+    );
+
+    return `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${name}`;
+  } catch (err) {
+    console.log("🔥🔥 Error", err);
+  }
+}
+
+
+export async function generateCustomLayoutAsync (summaryResults: SummaryResults): Promise<Array<KnownBlock | Block>> {
+  const { tests } = summaryResults;
+  // create your custom slack blocks
+
+  const header = {
+    type: "header",
+    text: {
+      type: "plain_text",
+      text: "🎭 *Playwright E2E Test Results*",
+      emoji: true,
+    },
+  };
+
+  const summary = {
+    type: "section",
+    text: {
+      type: "mrkdwn",
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
+    },
+  };
+
+  const fails: Array<KnownBlock | Block> = [];
+
+  for (const t of tests) {
+    if (t.status === "failed" || t.status === "timedOut") {
+
+      fails.push({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `👎 *[${t.browser}] | ${t.suiteName.replace(/\W/gi, "-")}*`,
+        },
+      });
+
+      const assets: Array<string> = [];
+
+      if (t.attachments) {
+        for (const a of t.attachments) {
+          // Upload failed tests screenshots and videos to the service of your choice
+          // In my case I upload the to S3 bucket
+          const permalink = await uploadFile(
+            a.path,
+            `${t.suiteName}--${t.name}`.replace(/\W/gi, "-").toLowerCase()
+          );
+
+          if (permalink) {
+            let icon = "";
+            if (a.name === "screenshot") {
+              icon = "📸";
+            } else if (a.name === "video") {
+              icon = "🎥";
+            }
+
+            assets.push(`${icon}  See the <${permalink}|${a.name}>`);
+          }
+        }
+      }
+
+      if (assets.length > 0) {
+        fails.push({
+          type: "context",
+          elements: [{ type: "mrkdwn", text: assets.join("\n") }],
+        });
+      }
+    }
+  }
+
+  return [header, summary, { type: "divider" }, ...fails]
+}
+
+```
+
+**Also you can upload the attachments to slack.** But it might be more expensive for you and also you'll have to extend the scope.
+
+```typescript
+...
+const web_api_1 = require('@slack/web-api');
+const slackClient = new web_api_1.WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN);
+
+async function uploadFile(filePath) {
+  try {
+    const result = await slackClient.files.uploadV2({
+      channels: 'you_cannel_name',
+      file: fs.createReadStream(filePath),
+      filename: filePath.split('/').at(-1),
+    });
+
+    return result.file;
+  } catch (error) {
+    console.log('🔥🔥 error', error);
+  }
+}
+
+export async function generateCustomLayoutAsync (summaryResults: SummaryResults): Promise<Array<KnownBlock | Block>> {
+  const { tests } = summaryResults;
+  ....
+  // See the snippet above ^^^
+
+
+    if (t.attachments) {
+      for (const a of t.attachments) {
+        const file = await uploadFile(a.path);
+
+        if (file) {
+          if (a.name === 'screenshot' && file.permalink) {
+            fails.push({
+              alt_text: '',
+              image_url: file.permalink,
+              title: { type: 'plain_text', text: file.name || '' },
+              type: 'image',
+            });
+          }
+
+          if (a.name === 'video' && file.permalink) {
+            fails.push({
+              alt_text: '',
+              // NOTE:
+              // Slack requires thumbnail_url length to be more that 0
+              // Either set screenshot url as the thumbnail or add a placeholder image url
+              thumbnail_url: '',
+              title: { type: 'plain_text', text: file.name || '' },
+              type: 'video',
+              video_url: file.permalink,
+            });
+          }
+        }
+      }
+    }
+  ....
+
+  return [header, summary, { type: "divider" }, ...fails]
+}
+
+```
+
 # 🔑 License
 
 [MIT](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/LICENSE)
@@ -324,7 +523,7 @@ Run the tests using `npm run pw`
 Run `npm pack`
 
 Create a new playwright project using `yarn create playwright`
-Modify the `package.json` and a local dependancy to the generated `tgz` file 
+Modify the `package.json` and a local dependancy to the generated `tgz` file
 
 e.g.
 

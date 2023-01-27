@@ -27,13 +27,16 @@ export default class SlackClient {
       channelIds: Array<string>;
       summaryResults: SummaryResults;
       customLayout: Function | undefined;
+      customLayoutAsync: Function | undefined;
       fakeRequest?: Function;
-      maxNumberOfFailures: number
+      maxNumberOfFailures: number;
     };
   }): Promise<Array<{ channel: string; outcome: string }>> {
     let blocks: (Block | KnownBlock)[];
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
+    } else if (options.customLayoutAsync) {
+      blocks = await options.customLayoutAsync(options.summaryResults);
     } else {
       blocks = await generateBlocks(options.summaryResults, options.maxNumberOfFailures);
     }
