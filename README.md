@@ -43,7 +43,7 @@ Modify your `playwright.config.ts` file to include the following:
   ],
 ```
 
-Run your tests by providing your` SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable:
+Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright test`
 
@@ -102,7 +102,7 @@ An example advanced configuration is shown below:
 
 ```typescript
   import { generateCustomLayout } from "./my_custom_layout";
-
+  import { LogLevel } from '@slack/web-api';
   ...
 
   reporter: [
@@ -127,6 +127,8 @@ An example advanced configuration is shown below:
                 value: '<https://your-build-artifacts.my.company.dev/pw/23887/playwright-report/index.html|📊>',
             },
         ],
+        slackOAuthToken: 'YOUR_SLACK_OAUTH_TOKEN',
+        slackLogLevel: LogLevel.DEBUG
       },
 
     ],
@@ -147,6 +149,11 @@ A function that returns a layout object, this configuration is optional.  See se
 Same as **layout** above, but asynchronous in that it returns a promise.
 ### **maxNumberOfFailuresToShow**
 Limits the number of failures shown in the Slack message, defaults to 10.
+### **slackOAuthToken**
+Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.
+### **slackLogLevel** (default LogLevel.DEBUG)
+This option allows you to control slack client severity levels for log entries. It accepts a value from @slack/web-api `LogLevel` enum
+
 
 **Examples:**
 ```typescript
