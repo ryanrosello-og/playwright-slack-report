@@ -7,6 +7,7 @@ import {
   KnownBlock,
   Block,
   ChatPostMessageResponse,
+  LogLevel,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
 import generateBlocks from './LayoutGenerator';
@@ -25,11 +26,13 @@ export default class SlackClient {
   }: {
     options: {
       channelIds: Array<string>;
-      summaryResults: SummaryResults;
       customLayout: Function | undefined;
       customLayoutAsync: Function | undefined;
       fakeRequest?: Function;
       maxNumberOfFailures: number;
+      slackOAuthToken?: string;
+      slackLogLevel?: LogLevel;
+      summaryResults: SummaryResults;
     };
   }): Promise<Array<{ channel: string; outcome: string }>> {
     let blocks: (Block | KnownBlock)[];

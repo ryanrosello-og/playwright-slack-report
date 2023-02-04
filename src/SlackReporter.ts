@@ -9,21 +9,25 @@ import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 
 class SlackReporter implements Reporter {
-  private suite!: Suite;
-
-  private sendResults: 'always' | 'on-failure' | 'off' = 'on-failure';
-
-  private slackChannels: string[] = [];
-
-  private meta: Array<{ key: string; value: string }> = [];
-
   private customLayout: Function | undefined;
 
   private customLayoutAsync: Function | undefined;
 
   private maxNumberOfFailuresToShow: number;
 
+  private meta: Array<{ key: string; value: string }> = [];
+
   private resultsParser: ResultsParser;
+
+  private sendResults: 'always' | 'on-failure' | 'off' = 'on-failure';
+
+  private slackChannels: string[] = [];
+
+  private slackLogLevel: LogLevel | undefined;
+
+  private slackOAuthToken: string | undefined;
+
+  private suite!: Suite;
 
   logs: string[] = [];
 
@@ -67,17 +71,17 @@ class SlackReporter implements Reporter {
     }
 
     const slackClient = new SlackClient(
-      new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
-        logLevel: LogLevel.DEBUG,
+      new WebClient(this.slackOAuthToken || process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
+        logLevel: this.slackLogLevel || LogLevel.DEBUG,
       }),
     );
     const result = await slackClient.sendMessage({
       options: {
         channelIds: this.slackChannels,
-        summaryResults: resultSummary,
         customLayout: this.customLayout,
         customLayoutAsync: this.customLayoutAsync,
         maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+        summaryResults: resultSummary,
       },
     });
     // eslint-disable-next-line no-console
@@ -89,10 +93,10 @@ class SlackReporter implements Reporter {
       return { okToProceed: false, message: '❌ Slack reporter is disabled' };
     }
 
-    if (!process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
+    if (!this.slackOAuthToken && !process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
       return {
         okToProceed: false,
-        message: '❌ SLACK_BOT_USER_OAUTH_TOKEN was not found',
+        message: '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
       };
     }
 
