@@ -43,6 +43,7 @@ class SlackReporter implements Reporter {
       this.customLayoutAsync = slackReporterConfig.layoutAsync;
       this.slackChannels = slackReporterConfig.channels;
       this.maxNumberOfFailuresToShow = slackReporterConfig.maxNumberOfFailuresToShow || 10;
+      this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
     }
     this.resultsParser = new ResultsParser();
   }
