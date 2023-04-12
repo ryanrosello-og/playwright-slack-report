@@ -27,12 +27,12 @@
     "build": "tsc -p ./tsconfig.json",
     "lint":"npx eslint . --ext .ts"
   },
-  "name": "playwright-slack-report",
-  "version": "1.1.2",
+  "name": "mm-playwright-slack-reporter",
+  "version": "1.0.0",
   "main": "index.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
-  "author": "Ryan Rosello <ryanrosello@hotmail.com>",
+  "repository": "git@github.com:milkmoovement/playwright-slack-report.git",
+  "author": "MM Developer <mm-dev@milkmoovement.com>",
   "license": "MIT",
   "files": ["/dist/src"],
   "keywords": ["slack", "report", "playwright", "typescript"]

@@ -102,8 +102,8 @@ export default class ResultsParser {
 
   addTestResult(suiteName: any, testCase: any) {
     const testResults: testResult[] = [];
-    for (const result of testCase.results) {
-      testResults.push({
+    testCase.results.forEach((result) => {
+      const tempTestResult = {
         suiteName,
         name: testCase.title,
         status: result.status,
@@ -118,13 +118,22 @@ export default class ResultsParser {
         retry: result.retry,
         retries: testCase.retries,
         startedAt: new Date(result.startTime).toISOString(),
-        endedAt: new Date(
-          new Date(result.startTime).getTime() + result.duration,
-        ).toISOString(),
+        endedAt: new Date(new Date(result.startTime).getTime() + result.duration).toISOString(),
         reason: this.safelyDetermineFailure(result),
         attachments: result.attachments,
-      });
-    }
+      };
+      // eslint-disable-next-line max-len
+      const resultCheck = this.result.findIndex((storedResult) => storedResult.testSuite.tests.length > 0
+          && storedResult.testSuite.tests.some((test) => test.suiteName === tempTestResult.suiteName
+              && test.name === tempTestResult.name
+              && test.retry === tempTestResult.retry
+              && test.startedAt === tempTestResult.startedAt
+              && test.browser === tempTestResult.browser));
+      if (resultCheck !== -1) {
+        this.result.splice(resultCheck, 1);
+      }
+      testResults.push(tempTestResult);
+    });
     this.updateResults({
       testSuite: {
         title: suiteName,

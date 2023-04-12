@@ -16,11 +16,11 @@ jobs:
       - name: Install dependencies
         run: yarn
       - name: Run ESLint
-        run: yarn run lint     
+        run: yarn run lint
       - name: tsc
         uses: icrawl/action-tsc@v1
         with:
-          project: ./tsconfig.json        
+          project: ./tsconfig.json
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
@@ -31,7 +31,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
