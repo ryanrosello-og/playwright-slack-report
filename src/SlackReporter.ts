@@ -27,6 +27,8 @@ class SlackReporter implements Reporter {
 
   private slackOAuthToken: string | undefined;
 
+  private enableUnfurl: boolean | undefined;
+
   private suite!: Suite;
 
   logs: string[] = [];
@@ -44,6 +46,7 @@ class SlackReporter implements Reporter {
       this.slackChannels = slackReporterConfig.channels;
       this.maxNumberOfFailuresToShow = slackReporterConfig.maxNumberOfFailuresToShow || 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
+      this.enableUnfurl = slackReporterConfig.enableUnfurl || true;
     }
     this.resultsParser = new ResultsParser();
   }
@@ -82,6 +85,7 @@ class SlackReporter implements Reporter {
         customLayout: this.customLayout,
         customLayoutAsync: this.customLayoutAsync,
         maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+        unfurlEnable: this.enableUnfurl,
         summaryResults: resultSummary,
       },
     });

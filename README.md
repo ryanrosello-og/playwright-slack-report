@@ -530,7 +530,7 @@ Run the tests using `npm run pw`
 Run `npm pack`
 
 Create a new playwright project using `yarn create playwright`
-Modify the `package.json` and a local dependancy to the generated `tgz` file
+Modify the `package.json` and a local dependency to the generated `tgz` file
 
 e.g.
 
