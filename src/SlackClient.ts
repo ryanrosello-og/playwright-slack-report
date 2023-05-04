@@ -86,7 +86,6 @@ export default class SlackClient {
       channel,
       text: ' ',
       unfurl_link: unfurl,
-      unfurl_media: unfurl,
       blocks,
     });
     return chatResponse;
