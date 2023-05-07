@@ -34,14 +34,17 @@ export default class SlackClient {
       slackLogLevel?: LogLevel;
       summaryResults: SummaryResults;
     };
-  }): Promise<Array<{ channel: string; outcome: string }>> {
+  }): Promise<Array<{ channel: string; outcome: string; ts: string }>> {
     let blocks: (Block | KnownBlock)[];
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
     } else if (options.customLayoutAsync) {
       blocks = await options.customLayoutAsync(options.summaryResults);
     } else {
-      blocks = await generateBlocks(options.summaryResults, options.maxNumberOfFailures);
+      blocks = await generateBlocks(
+        options.summaryResults,
+        options.maxNumberOfFailures,
+      );
     }
     if (!options.channelIds) {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
@@ -59,11 +62,22 @@ export default class SlackClient {
           chatResponse = await this.doPostRequest(channel, blocks);
         }
         if (chatResponse.ok) {
-          result.push({ channel, outcome: `✅ Message sent to ${channel}` });
+          result.push({
+            channel,
+            outcome: `✅ Message sent to ${channel}`,
+            ts: chatResponse.ts,
+          });
           // eslint-disable-next-line no-console
           console.log(`✅ Message sent to ${channel}`);
         } else {
-          result.push({ channel, outcome: `❌ Message not sent to ${channel} \r\n ${JSON.stringify(chatResponse, null, 2)}` });
+          result.push({
+            channel,
+            outcome: `❌ Message not sent to ${channel} \r\n ${JSON.stringify(
+              chatResponse,
+              null,
+              2,
+            )}`,
+          });
         }
       } catch (error: any) {
         result.push({
@@ -75,14 +89,38 @@ export default class SlackClient {
     return result;
   }
 
+  async attachDetailsToThread({
+    channel,
+    ts,
+    summaryResults,
+    maxNumberOfFailures,
+  }: {
+    channel: string;
+    ts: string;
+    summaryResults: SummaryResults,
+    maxNumberOfFailures: number,
+  }) {
+    const blocks = await generateBlocks(
+      summaryResults,
+      maxNumberOfFailures,
+    );
+    const chatResponse = await this.doPostRequest(channel, blocks, ts);
+    if (chatResponse.ok) {
+      // eslint-disable-next-line no-console
+      console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+    }
+  }
+
   async doPostRequest(
     channel: string,
     blocks: Array<KnownBlock | Block>,
+    threadTimestamp?: string,
   ): Promise<ChatPostMessageResponse> {
     const chatResponse = await this.slackWebClient.chat.postMessage({
       channel,
       text: ' ',
       blocks,
+      thread_ts: threadTimestamp,
     });
     return chatResponse;
   }

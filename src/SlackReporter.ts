@@ -1,7 +1,11 @@
 /* eslint-disable import/extensions */
 /* eslint-disable import/no-unresolved */
 import {
-  FullConfig, Reporter, Suite, TestCase, TestResult,
+  FullConfig,
+  Reporter,
+  Suite,
+  TestCase,
+  TestResult,
 } from '@playwright/test/reporter';
 import { LogLevel, WebClient } from '@slack/web-api';
 
@@ -34,7 +38,9 @@ class SlackReporter implements Reporter {
   onBegin(fullConfig: FullConfig, suite: Suite): void {
     this.suite = suite;
     this.logs = [];
-    const slackReporterConfig = fullConfig.reporter.filter((f) => f[0].toLowerCase().includes('slackreporter'))[0][1];
+    const slackReporterConfig = fullConfig.reporter.filter((f) =>
+      f[0].toLowerCase().includes('slackreporter'),
+    )[0][1];
 
     if (slackReporterConfig) {
       this.meta = slackReporterConfig.meta || [];
@@ -42,7 +48,8 @@ class SlackReporter implements Reporter {
       this.customLayout = slackReporterConfig.layout;
       this.customLayoutAsync = slackReporterConfig.layoutAsync;
       this.slackChannels = slackReporterConfig.channels;
-      this.maxNumberOfFailuresToShow = slackReporterConfig.maxNumberOfFailuresToShow || 10;
+      this.maxNumberOfFailuresToShow =
+        slackReporterConfig.maxNumberOfFailuresToShow || 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
     }
     this.resultsParser = new ResultsParser();
@@ -64,17 +71,24 @@ class SlackReporter implements Reporter {
     resultSummary.meta = this.meta;
     const maxRetry = Math.max(...resultSummary.tests.map((o) => o.retry));
     if (
-      this.sendResults === 'on-failure'
-      && resultSummary.tests.filter((z) => (z.status === 'failed' || z.status === 'timedOut') && z.retry === maxRetry).length === 0
+      this.sendResults === 'on-failure' &&
+      resultSummary.tests.filter(
+        (z) =>
+          (z.status === 'failed' || z.status === 'timedOut') &&
+          z.retry === maxRetry,
+      ).length === 0
     ) {
       this.log('⏩ Slack reporter - no failures found');
       return;
     }
 
     const slackClient = new SlackClient(
-      new WebClient(this.slackOAuthToken || process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
-        logLevel: this.slackLogLevel || LogLevel.DEBUG,
-      }),
+      new WebClient(
+        this.slackOAuthToken || process.env.SLACK_BOT_USER_OAUTH_TOKEN,
+        {
+          logLevel: this.slackLogLevel || LogLevel.DEBUG,
+        },
+      ),
     );
     const result = await slackClient.sendMessage({
       options: {
@@ -87,6 +101,13 @@ class SlackReporter implements Reporter {
     });
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(result, null, 2));
+
+    await slackClient.attachDetailsToThread({
+      channel: this.slackChannels[0],
+      ts: result[0].ts,
+      summaryResults: resultSummary,
+      maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+    });
   }
 
   preChecks(): { okToProceed: boolean; message?: string } {
@@ -97,13 +118,14 @@ class SlackReporter implements Reporter {
     if (!this.slackOAuthToken && !process.env.SLACK_BOT_USER_OAUTH_TOKEN) {
       return {
         okToProceed: false,
-        message: '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
+        message:
+          '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
       };
     }
 
     if (
-      !this.sendResults
-      || !['always', 'on-failure', 'off'].includes(this.sendResults)
+      !this.sendResults ||
+      !['always', 'on-failure', 'off'].includes(this.sendResults)
     ) {
       return {
         okToProceed: false,
@@ -127,8 +149,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      this.customLayoutAsync
-      && typeof this.customLayoutAsync !== 'function'
+      this.customLayoutAsync &&
+      typeof this.customLayoutAsync !== 'function'
     ) {
       return {
         okToProceed: false,
