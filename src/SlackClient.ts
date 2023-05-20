@@ -34,6 +34,7 @@ export default class SlackClient {
       slackLogLevel?: LogLevel;
       unfurlEnable?: boolean;
       summaryResults: SummaryResults;
+      showInThread: boolean
     };
   }): Promise<Array<{ channel: string; outcome: string; ts: string }>> {
     let blocks: (Block | KnownBlock)[];
@@ -41,6 +42,8 @@ export default class SlackClient {
       blocks = options.customLayout(options.summaryResults);
     } else if (options.customLayoutAsync) {
       blocks = await options.customLayoutAsync(options.summaryResults);
+    } else if (options.showInThread) {
+      blocks = [];
     } else {
       blocks = await generateBlocks(
         options.summaryResults,
@@ -92,24 +95,28 @@ export default class SlackClient {
   }
 
   async attachDetailsToThread({
-    channel,
+    channelIds,
     ts,
     summaryResults,
     maxNumberOfFailures,
+    unfurlEnable,
   }: {
-    channel: string;
+    channelIds: Array<string>;
     ts: string;
     summaryResults: SummaryResults,
     maxNumberOfFailures: number,
+    unfurlEnable?: boolean;
   }) {
     const blocks = await generateBlocks(
       summaryResults,
       maxNumberOfFailures,
     );
-    const chatResponse = await this.doPostRequest(channel, blocks, ts);
-    if (chatResponse.ok) {
-      // eslint-disable-next-line no-console
-      console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+    for (const channel of channelIds) {
+      const chatResponse = await this.doPostRequest(channel, blocks, unfurlEnable, ts);
+      if (chatResponse.ok) {
+        // eslint-disable-next-line no-console
+        console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+      }
     }
   }
 

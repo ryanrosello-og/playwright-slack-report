@@ -19,6 +19,8 @@ class SlackReporter implements Reporter {
 
   private maxNumberOfFailuresToShow: number;
 
+  private showInThread: boolean;
+
   private meta: Array<{ key: string; value: string }> = [];
 
   private resultsParser: ResultsParser;
@@ -54,6 +56,7 @@ class SlackReporter implements Reporter {
         slackReporterConfig.maxNumberOfFailuresToShow || 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.enableUnfurl = slackReporterConfig.enableUnfurl || true;
+      this.showInThread = slackReporterConfig.showInThread || false;
     }
     this.resultsParser = new ResultsParser();
   }
@@ -101,17 +104,19 @@ class SlackReporter implements Reporter {
         maxNumberOfFailures: this.maxNumberOfFailuresToShow,
         unfurlEnable: this.enableUnfurl,
         summaryResults: resultSummary,
+        showInThread: this.showInThread,
       },
     });
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(result, null, 2));
-
-    await slackClient.attachDetailsToThread({
-      channel: this.slackChannels[0],
-      ts: result[0].ts,
-      summaryResults: resultSummary,
-      maxNumberOfFailures: this.maxNumberOfFailuresToShow,
-    });
+    if (this.showInThread) {
+      await slackClient.attachDetailsToThread({
+        channelIds: this.slackChannels,
+        ts: result[0].ts,
+        summaryResults: resultSummary,
+        maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+      });
+    }
   }
 
   preChecks(): { okToProceed: boolean; message?: string } {
