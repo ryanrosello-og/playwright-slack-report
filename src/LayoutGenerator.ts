@@ -74,4 +74,45 @@ const generateBlocks = async (
   ];
 };
 
-export default generateBlocks;
+const generateFailures = async (
+  summaryResults: SummaryResults,
+  maxNumberOfFailures: number,
+): Promise<Array<KnownBlock | Block>> => {
+  const maxNumberOfFailureLength = 650;
+  const fails = [];
+
+  for (let i = 0; i < summaryResults.failures.length; i += 1) {
+    const { failureReason, test } = summaryResults.failures[i];
+    const formattedFailure = failureReason
+      .substring(0, maxNumberOfFailureLength)
+      .split('\n')
+      .map((l) => `>${l}`)
+      .join('\n');
+    fails.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*${test}*
+        \n${formattedFailure}`,
+      },
+    });
+    if (i > maxNumberOfFailures) {
+      fails.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
+        },
+      });
+      break;
+    }
+  }
+  return [
+    {
+      type: 'divider',
+    },
+    ...fails,
+  ];
+};
+
+export { generateBlocks, generateFailures };

@@ -10,7 +10,7 @@ import {
   LogLevel,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
-import generateBlocks from './LayoutGenerator';
+import { generateBlocks, generateFailures } from './LayoutGenerator';
 
 export type additionalInfo = Array<{ key: string; value: string }>;
 
@@ -34,7 +34,7 @@ export default class SlackClient {
       slackLogLevel?: LogLevel;
       unfurlEnable?: boolean;
       summaryResults: SummaryResults;
-      showInThread: boolean
+      showInThread: boolean;
     };
   }): Promise<Array<{ channel: string; outcome: string; ts: string }>> {
     let blocks: (Block | KnownBlock)[];
@@ -43,7 +43,12 @@ export default class SlackClient {
     } else if (options.customLayoutAsync) {
       blocks = await options.customLayoutAsync(options.summaryResults);
     } else if (options.showInThread) {
-      blocks = [];
+      const modifiedOptions = { ...options };
+      modifiedOptions.summaryResults.failures = [];
+      blocks = await generateBlocks(
+        options.summaryResults,
+        options.maxNumberOfFailures,
+      );
     } else {
       blocks = await generateBlocks(
         options.summaryResults,
@@ -103,16 +108,18 @@ export default class SlackClient {
   }: {
     channelIds: Array<string>;
     ts: string;
-    summaryResults: SummaryResults,
-    maxNumberOfFailures: number,
+    summaryResults: SummaryResults;
+    maxNumberOfFailures: number;
     unfurlEnable?: boolean;
   }) {
-    const blocks = await generateBlocks(
-      summaryResults,
-      maxNumberOfFailures,
-    );
+    const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
     for (const channel of channelIds) {
-      const chatResponse = await this.doPostRequest(channel, blocks, unfurlEnable, ts);
+      const chatResponse = await this.doPostRequest(
+        channel,
+        blocks,
+        unfurlEnable,
+        ts,
+      );
       if (chatResponse.ok) {
         // eslint-disable-next-line no-console
         console.log(`✅ Message sent to ${channel} within thread ${ts}`);
