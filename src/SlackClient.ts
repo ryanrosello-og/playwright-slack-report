@@ -32,6 +32,7 @@ export default class SlackClient {
       maxNumberOfFailures: number;
       slackOAuthToken?: string;
       slackLogLevel?: LogLevel;
+      unfurlEnable?: boolean;
       summaryResults: SummaryResults;
     };
   }): Promise<Array<{ channel: string; outcome: string; ts: string }>> {
@@ -51,6 +52,7 @@ export default class SlackClient {
     }
 
     const result = [];
+    const unfurl: boolean = options.unfurlEnable;
     for (const channel of options.channelIds) {
       let chatResponse: ChatPostMessageResponse;
       try {
@@ -59,7 +61,7 @@ export default class SlackClient {
           chatResponse = await options.fakeRequest();
         } else {
           // send request for reals
-          chatResponse = await this.doPostRequest(channel, blocks);
+          chatResponse = await this.doPostRequest(channel, blocks, unfurl);
         }
         if (chatResponse.ok) {
           result.push({
@@ -114,11 +116,13 @@ export default class SlackClient {
   async doPostRequest(
     channel: string,
     blocks: Array<KnownBlock | Block>,
+    unfurl: boolean,
     threadTimestamp?: string,
   ): Promise<ChatPostMessageResponse> {
     const chatResponse = await this.slackWebClient.chat.postMessage({
       channel,
       text: ' ',
+      unfurl_link: unfurl,
       blocks,
       thread_ts: threadTimestamp,
     });
