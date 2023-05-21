@@ -1,7 +1,9 @@
 import { Block, KnownBlock } from '@slack/types';
 import { SummaryResults } from '..';
 
-const generateCustomLayout = (summaryResults: SummaryResults):Array<KnownBlock | Block> => {
+const generateCustomLayout = (
+  summaryResults: SummaryResults,
+): Array<KnownBlock | Block> => {
   const maxNumberOfFailures = 10;
   const maxNumberOfFailureLength = 650;
   const fails: any[] = [];

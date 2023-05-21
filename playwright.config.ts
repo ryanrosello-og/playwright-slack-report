@@ -25,6 +25,7 @@ const config: PlaywrightTestConfig = {
         channels: ['qa-automation'],
         sendResults: 'always', // "always" , "on-failure", "off"
         maxNumberOfFailuresToShow: 0,
+        showInThread: true,
         // layout: generateCustomLayout,
         meta: [
           {
@@ -37,7 +38,8 @@ const config: PlaywrightTestConfig = {
           },
           {
             key: 'HTML Results',
-            value: '<https://buildkite-artifacts.playwright.dev/pw/23887/playwright-report/index.html|📊>',
+            value:
+              '<https://buildkite-artifacts.playwright.dev/pw/23887/playwright-report/index.html|📊>',
           },
         ],
       },

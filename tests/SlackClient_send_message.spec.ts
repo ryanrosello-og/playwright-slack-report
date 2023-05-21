@@ -20,6 +20,7 @@ test.describe('SlackClient.sendMessage()', () => {
         customLayoutAsync: undefined,
         fakeRequest,
         maxNumberOfFailures: 10,
+        showInThread: false,
       },
     });
     expect(clientResponse).toEqual([
@@ -47,12 +48,65 @@ test.describe('SlackClient.sendMessage()', () => {
         customLayoutAsync: undefined,
         fakeRequest,
         maxNumberOfFailures: 10,
+        showInThread: false,
       },
     });
     expect(clientResponse).toEqual([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
+      },
+    ]);
+  });
+
+  test('sends message with shownInThreads enabled', async ({
+    testSlackClient,
+    testSummaryAllTestsFailed,
+  }) => {
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
+      ok: true,
+    });
+
+    const channelId = 'C12345';
+    const clientResponse = await testSlackClient.sendMessage({
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsFailed,
+        customLayout: generateCustomLayout,
+        customLayoutAsync: undefined,
+        fakeRequest,
+        maxNumberOfFailures: 10,
+        showInThread: true,
+      },
+    });
+    expect(clientResponse).toEqual([
+      {
+        channel: channelId,
+        outcome: '✅ Message sent to C12345',
+      },
+    ]);
+  });
+
+  test('attach error details when showInThreads option is enabled', async ({
+    testSlackClient,
+    testSummaryAllTestsFailed,
+  }) => {
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
+      ok: true,
+    });
+
+    const channelId = 'C12345';
+    const clientResponse = await testSlackClient.attachDetailsToThread({
+      channelIds: [channelId],
+      ts: '1684631671.947369',
+      summaryResults: testSummaryAllTestsFailed,
+      maxNumberOfFailures: 10,
+      fakeRequest,
+    });
+    expect(clientResponse).toEqual([
+      {
+        channel: channelId,
+        outcome: '✅ Message sent to C12345 within thread 1684631671.947369',
       },
     ]);
   });
@@ -73,6 +127,7 @@ test.describe('SlackClient.sendMessage()', () => {
         customLayoutAsync: undefined,
         fakeRequest: fakeFailedRequest,
         maxNumberOfFailures: 10,
+        showInThread: false,
       },
     });
     expect(clientResponse).toEqual([

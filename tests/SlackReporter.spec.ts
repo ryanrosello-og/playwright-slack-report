@@ -192,7 +192,8 @@ test.describe('SlackReporter - preChecks()', () => {
     const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
+      message:
+        '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
     });
   });
 

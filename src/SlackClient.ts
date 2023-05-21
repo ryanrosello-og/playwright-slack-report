@@ -10,7 +10,7 @@ import {
   LogLevel,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
-import generateBlocks from './LayoutGenerator';
+import { generateBlocks, generateFailures } from './LayoutGenerator';
 
 export type additionalInfo = Array<{ key: string; value: string }>;
 
@@ -34,15 +34,26 @@ export default class SlackClient {
       slackLogLevel?: LogLevel;
       unfurlEnable?: boolean;
       summaryResults: SummaryResults;
+      showInThread: boolean;
     };
-  }): Promise<Array<{ channel: string; outcome: string }>> {
+  }): Promise<Array<{ channel: string; outcome: string; ts: string }>> {
     let blocks: (Block | KnownBlock)[];
     if (options.customLayout) {
       blocks = options.customLayout(options.summaryResults);
     } else if (options.customLayoutAsync) {
       blocks = await options.customLayoutAsync(options.summaryResults);
+    } else if (options.showInThread) {
+      const modifiedOptions = JSON.parse(JSON.stringify(options));
+      modifiedOptions.summaryResults.failures = [];
+      blocks = await generateBlocks(
+        modifiedOptions.summaryResults,
+        options.maxNumberOfFailures,
+      );
     } else {
-      blocks = await generateBlocks(options.summaryResults, options.maxNumberOfFailures);
+      blocks = await generateBlocks(
+        options.summaryResults,
+        options.maxNumberOfFailures,
+      );
     }
     if (!options.channelIds) {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
@@ -58,14 +69,30 @@ export default class SlackClient {
           chatResponse = await options.fakeRequest();
         } else {
           // send request for reals
-          chatResponse = await this.doPostRequest(channel, blocks, unfurl);
+          chatResponse = await SlackClient.doPostRequest(
+            this.slackWebClient,
+            channel,
+            blocks,
+            unfurl,
+          );
         }
         if (chatResponse.ok) {
-          result.push({ channel, outcome: `✅ Message sent to ${channel}` });
+          result.push({
+            channel,
+            outcome: `✅ Message sent to ${channel}`,
+            ts: chatResponse.ts,
+          });
           // eslint-disable-next-line no-console
           console.log(`✅ Message sent to ${channel}`);
         } else {
-          result.push({ channel, outcome: `❌ Message not sent to ${channel} \r\n ${JSON.stringify(chatResponse, null, 2)}` });
+          result.push({
+            channel,
+            outcome: `❌ Message not sent to ${channel} \r\n ${JSON.stringify(
+              chatResponse,
+              null,
+              2,
+            )}`,
+          });
         }
       } catch (error: any) {
         result.push({
@@ -77,16 +104,63 @@ export default class SlackClient {
     return result;
   }
 
-  async doPostRequest(
+  async attachDetailsToThread({
+    channelIds,
+    ts,
+    summaryResults,
+    maxNumberOfFailures,
+    unfurlEnable,
+    fakeRequest,
+  }: {
+    channelIds: Array<string>;
+    ts: string;
+    summaryResults: SummaryResults;
+    maxNumberOfFailures: number;
+    unfurlEnable?: boolean;
+    fakeRequest?: Function;
+  }) {
+    const result = [];
+    const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
+    for (const channel of channelIds) {
+      // under test
+      let chatResponse: ChatPostMessageResponse;
+      if (fakeRequest) {
+        chatResponse = await fakeRequest();
+      } else {
+        chatResponse = await SlackClient.doPostRequest(
+          this.slackWebClient,
+          channel,
+          blocks,
+          unfurlEnable,
+          ts,
+        );
+      }
+      if (chatResponse.ok) {
+        // eslint-disable-next-line no-console
+        console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+        result.push({
+          channel,
+          outcome: `✅ Message sent to ${channel} within thread ${ts}`,
+          ts: chatResponse.ts,
+        });
+      }
+    }
+    return result;
+  }
+
+  static async doPostRequest(
+    slackWebClient: WebClient,
     channel: string,
     blocks: Array<KnownBlock | Block>,
     unfurl: boolean,
+    threadTimestamp?: string,
   ): Promise<ChatPostMessageResponse> {
-    const chatResponse = await this.slackWebClient.chat.postMessage({
+    const chatResponse = await slackWebClient.chat.postMessage({
       channel,
       text: ' ',
       unfurl_link: unfurl,
       blocks,
+      thread_ts: threadTimestamp,
     });
     return chatResponse;
   }
