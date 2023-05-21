@@ -130,6 +130,7 @@ An example advanced configuration is shown below:
         slackOAuthToken: 'YOUR_SLACK_OAUTH_TOKEN',
         slackLogLevel: LogLevel.DEBUG,
         enableUnfurl: false,
+        showInThread: true,
       },
 
     ],
@@ -156,8 +157,13 @@ Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you ca
 This option allows you to control slack client severity levels for log entries. It accepts a value from @slack/web-api `LogLevel` enum
 ### **enableUnfurl** (default: true)
 Enable or disable unfurling of links in Slack messages.
+### **showInThread** (default: false)
+Instructs the reporter to show the failure details in a thread instead of the main channel.
 
+![Show failures in threads](./assets/threads.png)
 
+### **meta** (default: empty array)
+The meta data to be sent to Slack.  This is useful for providing additional context to your test run.
 
 **Examples:**
 ```typescript
