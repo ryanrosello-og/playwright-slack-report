@@ -42,9 +42,7 @@ class SlackReporter implements Reporter {
   onBegin(fullConfig: FullConfig, suite: Suite): void {
     this.suite = suite;
     this.logs = [];
-    const slackReporterConfig = fullConfig.reporter.filter((f) =>
-      f[0].toLowerCase().includes('slackreporter'),
-    )[0][1];
+    const slackReporterConfig = fullConfig.reporter.filter((f) => f[0].toLowerCase().includes('slackreporter'))[0][1];
 
     if (slackReporterConfig) {
       this.meta = slackReporterConfig.meta || [];
@@ -52,8 +50,7 @@ class SlackReporter implements Reporter {
       this.customLayout = slackReporterConfig.layout;
       this.customLayoutAsync = slackReporterConfig.layoutAsync;
       this.slackChannels = slackReporterConfig.channels;
-      this.maxNumberOfFailuresToShow =
-        slackReporterConfig.maxNumberOfFailuresToShow || 10;
+      this.maxNumberOfFailuresToShow = slackReporterConfig.maxNumberOfFailuresToShow || 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.enableUnfurl = slackReporterConfig.enableUnfurl || true;
       this.showInThread = slackReporterConfig.showInThread || false;
@@ -77,11 +74,10 @@ class SlackReporter implements Reporter {
     resultSummary.meta = this.meta;
     const maxRetry = Math.max(...resultSummary.tests.map((o) => o.retry));
     if (
-      this.sendResults === 'on-failure' &&
-      resultSummary.tests.filter(
-        (z) =>
-          (z.status === 'failed' || z.status === 'timedOut') &&
-          z.retry === maxRetry,
+      this.sendResults === 'on-failure'
+      && resultSummary.tests.filter(
+        (z) => (z.status === 'failed' || z.status === 'timedOut')
+          && z.retry === maxRetry,
       ).length === 0
     ) {
       this.log('⏩ Slack reporter - no failures found');
@@ -133,8 +129,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      !this.sendResults ||
-      !['always', 'on-failure', 'off'].includes(this.sendResults)
+      !this.sendResults
+      || !['always', 'on-failure', 'off'].includes(this.sendResults)
     ) {
       return {
         okToProceed: false,
@@ -158,8 +154,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      this.customLayoutAsync &&
-      typeof this.customLayoutAsync !== 'function'
+      this.customLayoutAsync
+      && typeof this.customLayoutAsync !== 'function'
     ) {
       return {
         okToProceed: false,
