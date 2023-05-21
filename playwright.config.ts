@@ -25,6 +25,7 @@ const config: PlaywrightTestConfig = {
         channels: ['qa-automation'],
         sendResults: 'always', // "always" , "on-failure", "off"
         maxNumberOfFailuresToShow: 0,
+        showInThread: true,
         // layout: generateCustomLayout,
         meta: [
           {

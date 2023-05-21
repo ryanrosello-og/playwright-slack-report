@@ -105,26 +105,41 @@ export default class SlackClient {
     summaryResults,
     maxNumberOfFailures,
     unfurlEnable,
+    fakeRequest,
   }: {
     channelIds: Array<string>;
     ts: string;
     summaryResults: SummaryResults;
     maxNumberOfFailures: number;
     unfurlEnable?: boolean;
+    fakeRequest?: Function;
   }) {
+    const result = [];
     const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
     for (const channel of channelIds) {
-      const chatResponse = await this.doPostRequest(
-        channel,
-        blocks,
-        unfurlEnable,
-        ts,
-      );
+      // under test
+      let chatResponse: ChatPostMessageResponse;
+      if (fakeRequest) {
+        chatResponse = await fakeRequest();
+      } else {
+        chatResponse = await this.doPostRequest(
+          channel,
+          blocks,
+          unfurlEnable,
+          ts,
+        );
+      }
       if (chatResponse.ok) {
         // eslint-disable-next-line no-console
         console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+        result.push({
+          channel,
+          outcome: `✅ Message sent to ${channel} within thread ${ts}`,
+          ts: chatResponse.ts,
+        });
       }
     }
+    return result;
   }
 
   async doPostRequest(
