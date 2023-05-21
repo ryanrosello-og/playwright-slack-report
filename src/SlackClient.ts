@@ -43,10 +43,10 @@ export default class SlackClient {
     } else if (options.customLayoutAsync) {
       blocks = await options.customLayoutAsync(options.summaryResults);
     } else if (options.showInThread) {
-      const modifiedOptions = { ...options };
+      const modifiedOptions = JSON.parse(JSON.stringify(options));
       modifiedOptions.summaryResults.failures = [];
       blocks = await generateBlocks(
-        options.summaryResults,
+        modifiedOptions.summaryResults,
         options.maxNumberOfFailures,
       );
     } else {
