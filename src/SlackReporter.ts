@@ -109,8 +109,6 @@ class SlackReporter implements Reporter {
     });
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(result, null, 2));
-    // eslint-disable-next-line no-console
-    console.log(`🚀🚀${JSON.stringify(resultSummary, null, 2)}`);
     if (this.showInThread && resultSummary.failures.length > 0) {
       await slackClient.attachDetailsToThread({
         channelIds: this.slackChannels,
