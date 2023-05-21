@@ -59,7 +59,35 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('sends message when showInThreads option is enabled', async ({
+  test('sends message with shownInThreads enabled', async ({
+    testSlackClient,
+    testSummaryAllTestsFailed,
+  }) => {
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
+      ok: true,
+    });
+
+    const channelId = 'C12345';
+    const clientResponse = await testSlackClient.sendMessage({
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsFailed,
+        customLayout: generateCustomLayout,
+        customLayoutAsync: undefined,
+        fakeRequest,
+        maxNumberOfFailures: 10,
+        showInThread: true,
+      },
+    });
+    expect(clientResponse).toEqual([
+      {
+        channel: channelId,
+        outcome: '✅ Message sent to C12345',
+      },
+    ]);
+  });
+
+  test('attach error details when showInThreads option is enabled', async ({
     testSlackClient,
     testSummaryAllTestsFailed,
   }) => {

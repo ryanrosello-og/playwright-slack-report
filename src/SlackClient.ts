@@ -69,7 +69,12 @@ export default class SlackClient {
           chatResponse = await options.fakeRequest();
         } else {
           // send request for reals
-          chatResponse = await this.doPostRequest(channel, blocks, unfurl);
+          chatResponse = await SlackClient.doPostRequest(
+            this.slackWebClient,
+            channel,
+            blocks,
+            unfurl,
+          );
         }
         if (chatResponse.ok) {
           result.push({
@@ -122,7 +127,8 @@ export default class SlackClient {
       if (fakeRequest) {
         chatResponse = await fakeRequest();
       } else {
-        chatResponse = await this.doPostRequest(
+        chatResponse = await SlackClient.doPostRequest(
+          this.slackWebClient,
           channel,
           blocks,
           unfurlEnable,
@@ -142,13 +148,14 @@ export default class SlackClient {
     return result;
   }
 
-  async doPostRequest(
+  static async doPostRequest(
+    slackWebClient: WebClient,
     channel: string,
     blocks: Array<KnownBlock | Block>,
     unfurl: boolean,
     threadTimestamp?: string,
   ): Promise<ChatPostMessageResponse> {
-    const chatResponse = await this.slackWebClient.chat.postMessage({
+    const chatResponse = await slackWebClient.chat.postMessage({
       channel,
       text: ' ',
       unfurl_link: unfurl,
