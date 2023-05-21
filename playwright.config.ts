@@ -37,7 +37,8 @@ const config: PlaywrightTestConfig = {
           },
           {
             key: 'HTML Results',
-            value: '<https://buildkite-artifacts.playwright.dev/pw/23887/playwright-report/index.html|📊>',
+            value:
+              '<https://buildkite-artifacts.playwright.dev/pw/23887/playwright-report/index.html|📊>',
           },
         ],
       },

@@ -4,7 +4,7 @@ import { SummaryResults } from '..';
 export default function generateCustomLayoutSimpleMeta(
   summaryResults: SummaryResults,
 ): Array<Block | KnownBlock> {
-  const meta: { type: string; text: { type: string; text: string; }; }[] = [];
+  const meta: { type: string; text: { type: string; text: string } }[] = [];
   if (summaryResults.meta) {
     for (let i = 0; i < summaryResults.meta.length; i += 1) {
       const { key, value } = summaryResults.meta[i];

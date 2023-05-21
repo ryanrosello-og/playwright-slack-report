@@ -167,13 +167,17 @@ export default class ResultsParser {
     return logsStripped;
   }
 
-  getParentConfigInformation(testCase: any): {projectName: string, browser: string} {
+  getParentConfigInformation(testCase: any): {
+    projectName: string;
+    browser: string;
+  } {
     if (testCase._projectConfig !== undefined) {
       return {
         projectName: testCase._projectConfig.name || '',
         browser: testCase._projectConfig.use?.defaultBrowserType || '',
       };
-    } if (testCase.parent) {
+    }
+    if (testCase.parent) {
       return this.getParentConfigInformation(testCase.parent);
     }
     return { projectName: '', browser: '' };
