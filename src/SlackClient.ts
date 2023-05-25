@@ -60,7 +60,7 @@ export default class SlackClient {
     }
 
     const result = [];
-    const unfurl: boolean = options.disableUnfurl ? false : true;
+    const unfurl: boolean = !options.disableUnfurl;
     for (const channel of options.channelIds) {
       let chatResponse: ChatPostMessageResponse;
       try {
@@ -109,7 +109,7 @@ export default class SlackClient {
     ts,
     summaryResults,
     maxNumberOfFailures,
-    disableUnfurl: disableUnfurl,
+    disableUnfurl,
     fakeRequest,
   }: {
     channelIds: Array<string>;
