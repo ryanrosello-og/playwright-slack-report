@@ -129,7 +129,7 @@ An example advanced configuration is shown below:
         ],
         slackOAuthToken: 'YOUR_SLACK_OAUTH_TOKEN',
         slackLogLevel: LogLevel.DEBUG,
-        enableUnfurl: false,
+        disableUnfurl: true,
         showInThread: true,
       },
 
@@ -155,7 +155,7 @@ Limits the number of failures shown in the Slack message, defaults to 10.
 Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.
 ### **slackLogLevel** (default LogLevel.DEBUG)
 This option allows you to control slack client severity levels for log entries. It accepts a value from @slack/web-api `LogLevel` enum
-### **enableUnfurl** (default: true)
+### **disableUnfurl** (default: true)
 Enable or disable unfurling of links in Slack messages.
 ### **showInThread** (default: false)
 Instructs the reporter to show the failure details in a thread instead of the main channel.

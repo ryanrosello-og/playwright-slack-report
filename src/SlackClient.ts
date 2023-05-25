@@ -32,7 +32,7 @@ export default class SlackClient {
       maxNumberOfFailures: number;
       slackOAuthToken?: string;
       slackLogLevel?: LogLevel;
-      unfurlEnable?: boolean;
+      disableUnfurl?: boolean;
       summaryResults: SummaryResults;
       showInThread: boolean;
     };
@@ -60,7 +60,7 @@ export default class SlackClient {
     }
 
     const result = [];
-    const unfurl: boolean = options.unfurlEnable;
+    const unfurl: boolean = !options.disableUnfurl;
     for (const channel of options.channelIds) {
       let chatResponse: ChatPostMessageResponse;
       try {
@@ -109,14 +109,14 @@ export default class SlackClient {
     ts,
     summaryResults,
     maxNumberOfFailures,
-    unfurlEnable,
+    disableUnfurl,
     fakeRequest,
   }: {
     channelIds: Array<string>;
     ts: string;
     summaryResults: SummaryResults;
     maxNumberOfFailures: number;
-    unfurlEnable?: boolean;
+    disableUnfurl?: boolean;
     fakeRequest?: Function;
   }) {
     const result = [];
@@ -131,7 +131,7 @@ export default class SlackClient {
           this.slackWebClient,
           channel,
           blocks,
-          unfurlEnable,
+          disableUnfurl,
           ts,
         );
       }
