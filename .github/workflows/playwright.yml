@@ -23,6 +23,8 @@ jobs:
           project: ./tsconfig.json
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+      - name: Install @playwright/test package
+        run: yarn add --dev @playwright/test
       - name: Run Playwright tests
         run: yarn run pw
       - uses: actions/upload-artifact@v2
