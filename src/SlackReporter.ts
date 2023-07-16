@@ -54,6 +54,7 @@ class SlackReporter implements Reporter {
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
       this.showInThread = slackReporterConfig.showInThread || false;
+      this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
     }
     this.resultsParser = new ResultsParser();
   }
@@ -175,6 +176,11 @@ class SlackReporter implements Reporter {
     if (message) {
       this.logs.push(message);
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  printsToStdio(): boolean {
+    return false;
   }
 }
 export default SlackReporter;
