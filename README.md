@@ -154,7 +154,13 @@ Limits the number of failures shown in the Slack message, defaults to 10.
 ### **slackOAuthToken**
 Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.
 ### **slackLogLevel** (default LogLevel.DEBUG)
-This option allows you to control slack client severity levels for log entries. It accepts a value from @slack/web-api `LogLevel` enum
+This option allows you to control slack client severity levels for log entries. It accepts a value from @slack/web-api `LogLevel` enum:
+- ERROR
+- WARN
+- INFO
+- DEBUG
+
+Example: `slackLogLevel: "ERROR",` will only log errors to the console.
 ### **disableUnfurl** (default: true)
 Enable or disable unfurling of links in Slack messages.
 ### **showInThread** (default: false)
@@ -327,7 +333,7 @@ Generates the following message in Slack:
 ![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-17-46.png?raw=true)
 
 
-**Example 3: - with screenshots and/or recorded videos**
+**Example 3: - With screenshots and/or recorded videos (using AWS S3)**
 
 In your, `playwright.config.ts` file, add these params (Make sure you use **layoutAsync** rather than **layout**):
 
@@ -461,7 +467,19 @@ export async function generateCustomLayoutAsync (summaryResults: SummaryResults)
 
 ```
 
-**Also you can upload the attachments to slack.** But it might be more expensive for you and also you'll have to extend the scope.
+**Example 4: - Upload the attachments to directly to Slack**
+
+To enable this functionality, make sure the slackbot user has the following additional scopes:
+- `files:write`
+- `files:read`
+
+You will need to re-install the app and re-invite the bot into the channel.
+
+The value of the channel_id should be the channel id of the channel you want to upload the file to. This channel id can be found in the url when you are in the channel. e.g.
+
+**https://app.slack.com/client/T02RVEEFPDH/C05H7TKVDUK**
+
+^ the bit starting with 'C...' is your channel id. In this case, the channel id is `C05H7TKVDUK`
 
 ```typescript
 ...
@@ -471,7 +489,7 @@ const slackClient = new web_api_1.WebClient(process.env.SLACK_BOT_USER_OAUTH_TOK
 async function uploadFile(filePath) {
   try {
     const result = await slackClient.files.uploadV2({
-      channels: 'you_cannel_name',
+      channel_id: 'C05H7TKVDUK',  << this is the channel id not channel name! ☠️
       file: fs.createReadStream(filePath),
       filename: filePath.split('/').at(-1),
     });
