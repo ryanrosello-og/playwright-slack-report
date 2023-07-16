@@ -21,10 +21,10 @@ jobs:
         uses: icrawl/action-tsc@v1
         with:
           project: ./tsconfig.json
-      - name: Remove PW core
-        run: yarn remove playwright
-      - name: Install @playwright/test package
-        run: yarn add --D @playwright/test
+      # - name: Remove PW core
+      #   run: yarn remove playwright
+      # - name: Install @playwright/test package
+      #   run: yarn add --D @playwright/test
       - name: Run Playwright tests
         run: yarn run pw
       - uses: actions/upload-artifact@v2
