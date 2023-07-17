@@ -168,6 +168,12 @@ Instructs the reporter to show the failure details in a thread instead of the ma
 
 ![Show failures in threads](./assets/threads.png)
 
+### **proxy** (optional)
+String representation of your proxy server.
+*Example*:
+
+`proxy: "http://proxy.mycompany.com:8080",`
+
 ### **meta** (default: empty array)
 The meta data to be sent to Slack.  This is useful for providing additional context to your test run.
 
