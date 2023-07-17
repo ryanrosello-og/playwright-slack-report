@@ -8,7 +8,7 @@ import {
   TestResult,
 } from '@playwright/test/reporter';
 import { LogLevel, WebClient } from '@slack/web-api';
-
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 
@@ -35,6 +35,8 @@ class SlackReporter implements Reporter {
 
   private disableUnfurl: boolean | undefined;
 
+  private proxy: string | undefined;
+
   private suite!: Suite;
 
   logs: string[] = [];
@@ -55,6 +57,7 @@ class SlackReporter implements Reporter {
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
       this.showInThread = slackReporterConfig.showInThread || false;
       this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
+      this.proxy = slackReporterConfig.proxy || undefined;
     }
     this.resultsParser = new ResultsParser();
   }
@@ -85,14 +88,18 @@ class SlackReporter implements Reporter {
       return;
     }
 
+    const agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
+
     const slackClient = new SlackClient(
       new WebClient(
         this.slackOAuthToken || process.env.SLACK_BOT_USER_OAUTH_TOKEN,
         {
           logLevel: this.slackLogLevel || LogLevel.DEBUG,
+          agent,
         },
       ),
     );
+
     const result = await slackClient.sendMessage({
       options: {
         channelIds: this.slackChannels,
