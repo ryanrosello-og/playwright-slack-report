@@ -100,9 +100,9 @@ export default class ResultsParser {
     }
   }
 
-  addTestResult(suiteName: any, testCase: any) {
+  addTestResult(suiteName: any, testCase: any, projectBrowserMapping: any) {
     const testResults: testResult[] = [];
-    const projectSettings = this.getParentConfigInformation(testCase);
+    const projectSettings = this.determineBrowser(testCase._projectId, projectBrowserMapping);
     for (const result of testCase.results) {
       testResults.push({
         suiteName,
@@ -167,19 +167,25 @@ export default class ResultsParser {
     return logsStripped;
   }
 
-  getParentConfigInformation(testCase: any): {
+  determineBrowser(
+    projectName: string,
+    browserMappings: { projectName: string; browser: string }[],
+  ): {
     projectName: string;
     browser: string;
   } {
-    if (testCase._projectConfig !== undefined) {
+    const browserMapping = browserMappings.find(
+      (mapping) => mapping.projectName === projectName,
+    );
+    if (browserMapping) {
       return {
-        projectName: testCase._projectConfig.name || '',
-        browser: testCase._projectConfig.use?.defaultBrowserType || '',
+        projectName: browserMapping.projectName,
+        browser: browserMapping.browser,
       };
     }
-    if (testCase.parent) {
-      return this.getParentConfigInformation(testCase.parent);
-    }
-    return { projectName: '', browser: '' };
+    return {
+      projectName: '',
+      browser: '',
+    };
   }
 }

@@ -37,6 +37,8 @@ class SlackReporter implements Reporter {
 
   private proxy: string | undefined;
 
+  private browsers: {projectName: string ; browser: string}[] = [];
+
   private suite!: Suite;
 
   logs: string[] = [];
@@ -45,6 +47,12 @@ class SlackReporter implements Reporter {
     this.suite = suite;
     this.logs = [];
     const slackReporterConfig = fullConfig.reporter.filter((f) => f[0].toLowerCase().includes('slackreporter'))[0][1];
+    if (fullConfig.projects.length === 0) {
+      this.browsers = [];
+    } else {
+      // eslint-disable-next-line max-len
+      this.browsers = fullConfig.projects.map((obj) => ({ projectName: obj.name, browser: obj.use.browserName ? obj.use.browserName : obj.use.defaultBrowserType }));
+    }
 
     if (slackReporterConfig) {
       this.meta = slackReporterConfig.meta || [];
@@ -64,7 +72,7 @@ class SlackReporter implements Reporter {
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
   onTestEnd(test: TestCase, result: TestResult): void {
-    this.resultsParser.addTestResult(test.parent.title, test);
+    this.resultsParser.addTestResult(test.parent.title, test, this.browsers);
   }
 
   async onEnd(): Promise<void> {
