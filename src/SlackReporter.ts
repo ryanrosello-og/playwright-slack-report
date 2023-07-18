@@ -51,7 +51,7 @@ class SlackReporter implements Reporter {
       this.browsers = [];
     } else {
       // eslint-disable-next-line max-len
-      this.browsers = fullConfig.projects.map((obj) => ({ projectName: obj.name, browser: obj.use.defaultBrowserType }));
+      this.browsers = fullConfig.projects.map((obj) => ({ projectName: obj.name, browser: obj.use.browserName ? obj.use.browserName : obj.use.defaultBrowserType }));
     }
 
     if (slackReporterConfig) {
