@@ -74,6 +74,7 @@ const test = base.extend<{ testData: any }>({
                   column: 1,
                 },
                 expectedStatus: 'passed',
+                _projectId: 'playwright-slack-report',
               },
             ],
             location: {
@@ -170,11 +171,35 @@ const test = base.extend<{ testData: any }>({
 });
 
 test.describe('ResultsParser', () => {
+  test('determines correct browser based on project config', async ({
+    testData,
+  }) => {
+    const resultsParser = new ResultsParser();
+    resultsParser.addTestResult(
+      testData.suites[0].suites[0].title,
+      testData.suites[0].suites[0].tests[0],
+      [
+        {
+          projectName: 'ui',
+          browser: 'webkit',
+        },
+        {
+          projectName: 'playwright-slack-report',
+          browser: 'chrome',
+        },
+      ],
+    );
+    const results = await resultsParser.getParsedResults();
+    expect(results.tests[0].projectName).toEqual('playwright-slack-report');
+    expect(results.tests[0].browser).toEqual('chrome');
+  });
+
   test('parses results successfully', async ({ testData }) => {
     const resultsParser = new ResultsParser();
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
       testData.suites[0].suites[0].tests[0],
+      [],
     );
     const results = await resultsParser.getParsedResults();
     expect(results).toEqual({
@@ -230,15 +255,17 @@ test.describe('ResultsParser', () => {
     });
   });
 
-  test('parses multiple faliures successfully', async ({ testData }) => {
+  test('parses multiple failures successfully', async ({ testData }) => {
     const resultsParser = new ResultsParser();
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
       testData.suites[0].suites[0].tests[0],
+      [],
     );
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
       testData.suites[1].suites[0].tests[0],
+      [],
     );
     const results = await resultsParser.getParsedResults();
     expect(results.failures).toEqual([
