@@ -102,7 +102,10 @@ export default class ResultsParser {
 
   addTestResult(suiteName: any, testCase: any, projectBrowserMapping: any) {
     const testResults: testResult[] = [];
-    const projectSettings = this.determineBrowser(testCase._projectId, projectBrowserMapping);
+    const projectSettings = this.determineBrowser(
+      testCase._projectId,
+      projectBrowserMapping,
+    );
     for (const result of testCase.results) {
       testResults.push({
         suiteName,
