@@ -42,7 +42,35 @@ Modify your `playwright.config.ts` file to include the following:
     ["dot"], // other reporters
   ],
 ```
+# Option A - send your results via a Slack webhook
 
+Enable incoming webhooks in your Slack workspace by following the steps as per Slack's documentation:
+
+https://api.slack.com/messaging/webhooks
+
+
+
+Once you have enabled incoming webhooks, you will need to copy the webhook URL and specify it in the config:
+
+```typescript
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        slackWebHookUrl: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+        sendResults: "always", // "always" , "on-failure", "off"
+      },
+    ],
+    ["dot"], // other reporters
+  ],
+```
+### Note I:
+You will most likely need to have Slack administrator rights to perform the steps above.
+
+### Note II:
+Sending failure details in a thread is not supported when using webhooks.  You will need to use Option B below.
+
+# Option B
 Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright test`

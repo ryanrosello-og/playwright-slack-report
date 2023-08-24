@@ -152,7 +152,7 @@ test.describe('SlackReporter - onEnd()', () => {
     await fakeSlackReporter.onEnd();
     expect(
       fakeSlackReporter.logs.includes(
-        '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
+        '❌ Neither slack webhook url, slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
       ),
     ).toBeTruthy();
   });
@@ -193,7 +193,7 @@ test.describe('SlackReporter - preChecks()', () => {
     expect(result).toEqual({
       okToProceed: false,
       message:
-        '❌ Neither slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
+        '❌ Neither slack webhook url, slackOAuthToken nor process.env.SLACK_BOT_USER_OAUTH_TOKEN were found',
     });
   });
 
