@@ -1,7 +1,7 @@
 import { test as base, expect } from '@playwright/test';
-import SlackWebhookClient from '../src/SlackWebhookClient';
 import { IncomingWebhook } from '@slack/webhook';
 import { stubObject } from 'ts-sinon';
+import SlackWebhookClient from '../src/SlackWebhookClient';
 import { SummaryResults } from '../src';
 
 const test = base.extend<{ summaryResults: SummaryResults }>({

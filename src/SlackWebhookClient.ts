@@ -1,7 +1,7 @@
 import { Block, KnownBlock } from '@slack/types';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { SummaryResults } from '.';
-import { generateBlocks, generateFailures } from './LayoutGenerator';
+import { generateBlocks } from './LayoutGenerator';
 
 export default class SlackWebhookClient {
   private webhook: IncomingWebhook;
@@ -46,10 +46,9 @@ export default class SlackWebhookClient {
       return {
         outcome: result.text,
       };
-    } else {
-      return {
-        outcome: `😵 Failed to send webhook message, ensure your webhook url is valid`,
-      };
     }
+    return {
+      outcome: '😵 Failed to send webhook message, ensure your webhook url is valid',
+    };
   }
 }
