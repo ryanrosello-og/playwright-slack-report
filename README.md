@@ -44,9 +44,12 @@ Modify your `playwright.config.ts` file to include the following:
 ```
 # Option A - send your results via a Slack webhook
 
-Enable incoming webhooks in your Slack workspace by following the steps below:
+Enable incoming webhooks in your Slack workspace by following the steps as per Slacks documentation:
 
-Note: You will most likely need to have Slack administrator rights to perform the steps above.
+https://api.slack.com/messaging/webhooks
+
+Note I: You will most likely need to have Slack administrator rights to perform the steps above.
+Note II: Sending failure details in a thread is not supported when using webhooks.  You will need to use Option B below.
 
 Once you have enabled incoming webhooks, you will need to copy the webhook URL and specify it in the config:
 
