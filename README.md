@@ -44,7 +44,7 @@ Modify your `playwright.config.ts` file to include the following:
 ```
 # Option A - send your results via a Slack webhook
 
-Enable incoming webhooks in your Slack workspace by following the steps as per Slacks documentation:
+Enable incoming webhooks in your Slack workspace by following the steps as per Slack's documentation:
 
 https://api.slack.com/messaging/webhooks
 
