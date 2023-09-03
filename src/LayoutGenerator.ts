@@ -5,8 +5,6 @@ const generateBlocks = async (
   summaryResults: SummaryResults,
   maxNumberOfFailures: number,
 ): Promise<Array<KnownBlock | Block>> => {
-  const maxNumberOfFailureLength = 650;
-  const fails = [];
   const meta = [];
   const header = {
     type: 'section',
@@ -23,32 +21,7 @@ const generateBlocks = async (
     },
   };
 
-  for (let i = 0; i < summaryResults.failures.length; i += 1) {
-    const { failureReason, test } = summaryResults.failures[i];
-    const formattedFailure = failureReason
-      .substring(0, maxNumberOfFailureLength)
-      .split('\n')
-      .map((l) => `>${l}`)
-      .join('\n');
-    fails.push({
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*${test}*
-        \n${formattedFailure}`,
-      },
-    });
-    if (i > maxNumberOfFailures) {
-      fails.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
-        },
-      });
-      break;
-    }
-  }
+  const fails = await generateFailures(summaryResults, maxNumberOfFailures);
 
   if (summaryResults.meta) {
     for (let i = 0; i < summaryResults.meta.length; i += 1) {
@@ -67,9 +40,6 @@ const generateBlocks = async (
     header,
     summary,
     ...meta,
-    {
-      type: 'divider',
-    },
     ...fails,
   ];
 };
@@ -81,7 +51,9 @@ const generateFailures = async (
   const maxNumberOfFailureLength = 650;
   const fails = [];
 
-  for (let i = 0; i < summaryResults.failures.length; i += 1) {
+  const numberOfFailuresToShow = Math.min(summaryResults.failures.length, maxNumberOfFailures);
+
+  for (let i = 0; i < numberOfFailuresToShow; i += 1) {
     const { failureReason, test } = summaryResults.failures[i];
     const formattedFailure = failureReason
       .substring(0, maxNumberOfFailureLength)
@@ -96,16 +68,16 @@ const generateFailures = async (
         \n${formattedFailure}`,
       },
     });
-    if (i > maxNumberOfFailures) {
-      fails.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
-        },
-      });
-      break;
-    }
+  }
+
+  if (summaryResults.failures.length > maxNumberOfFailures) {
+    fails.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*⚠️ There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
+      },
+    });
   }
   return [
     {

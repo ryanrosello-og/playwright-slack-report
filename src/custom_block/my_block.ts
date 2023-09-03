@@ -29,7 +29,7 @@ const generateCustomLayout = (
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*There are too many failures to display, view the full results in BuildKite*',
+          text: '*⚠️ There are too many failures to display, view the full results in BuildKite*',
         },
       });
       break;

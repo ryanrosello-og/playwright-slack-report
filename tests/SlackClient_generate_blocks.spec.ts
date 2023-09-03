@@ -5,7 +5,7 @@ test.describe('SlackClient.generateBlocks()', () => {
   test('includes warning message if number of failures exceeds maximum allowed', async () => {
     const generatedBlock = await generateBlocks(
       {
-        failed: 2,
+        failed: 3,
         passed: 0,
         skipped: 0,
         failures: [
@@ -15,13 +15,13 @@ test.describe('SlackClient.generateBlocks()', () => {
         ],
         tests: [],
       },
-      1,
+      2,
     );
-    expect(generatedBlock[6]).toEqual({
+    expect(generatedBlock[5]).toEqual({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: '*There are too many failures to display - 3 out of 3 failures shown*',
+        text: '*⚠️ There are too many failures to display - 2 out of 3 failures shown*',
       },
     });
   });
@@ -41,11 +41,11 @@ test.describe('SlackClient.generateBlocks()', () => {
       },
       1,
     );
-    expect(generatedBlock[4]).toEqual({
+    expect(generatedBlock[2]).toEqual({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: '*There are too many failures to display - 3 out of 3 failures shown*',
+        text: '*⚠️ There are too many failures to display - 1 out of 3 failures shown*',
       },
     });
   });
