@@ -1,6 +1,7 @@
 export type SummaryResults = {
   passed: number;
   failed: number;
+  flaky: number | undefined;
   skipped: number;
   failures: Array<failure>;
   meta?: Array<{ key: string; value: string }>;
@@ -27,3 +28,12 @@ export type failure = {
   test: string;
   failureReason: string;
 };
+
+export type flaky = {
+  test: string;
+  retry: number;
+};
+
+export type pass = {
+  test: string;
+}

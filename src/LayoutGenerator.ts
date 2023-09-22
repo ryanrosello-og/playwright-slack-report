@@ -17,7 +17,7 @@ const generateBlocks = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* |${summaryResults.flaky !== undefined ? ` 🟡 *${summaryResults.flaky}* | ` : ' '}⏩ *${summaryResults.skipped}*`,
     },
   };
 

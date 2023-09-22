@@ -9,6 +9,7 @@ type SlackClientFixture = {
   testSlackClient: SlackClient;
   testSummaryAllTestsPassed: SummaryResults;
   testSummaryAllTestsFailed: SummaryResults;
+  testSummarySomeFlaky: SummaryResults;
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -21,6 +22,7 @@ export const test = base.extend<SlackClientFixture>({
   testSummaryAllTestsPassed: {
     failed: 0,
     passed: 1,
+    flaky: 0,
     skipped: 0,
     failures: [],
     tests: [
@@ -38,6 +40,7 @@ export const test = base.extend<SlackClientFixture>({
   testSummaryAllTestsFailed: {
     failed: 1,
     passed: 0,
+    flaky: 0,
     skipped: 0,
     failures: [
       {
@@ -64,6 +67,42 @@ export const test = base.extend<SlackClientFixture>({
             body: undefined,
           },
         ],
+      },
+    ],
+  },
+  testSummarySomeFlaky: {
+    failed: 0,
+    passed: 1,
+    flaky: 1,
+    skipped: 0,
+    failures: [],
+    tests: [
+      {
+        suiteName: 'accounts',
+        name: 'overdue will incur a penalty',
+        startedAt: new Date().toISOString(),
+        endedAt: new Date().toISOString(),
+        reason: '',
+        retry: 0,
+        status: 'passed',
+      },
+      {
+        suiteName: 'accounts',
+        name: 'withdrawal removes value from balance',
+        startedAt: new Date().toISOString(),
+        endedAt: new Date().toISOString(),
+        reason: '',
+        retry: 0,
+        status: 'failed',
+      },
+      {
+        suiteName: 'accounts',
+        name: 'withdrawal removes value from balance',
+        startedAt: new Date().toISOString(),
+        endedAt: new Date().toISOString(),
+        reason: '',
+        retry: 1,
+        status: 'passed',
       },
     ],
   },
