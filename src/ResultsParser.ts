@@ -5,9 +5,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
 
-import {
-  failure, flaky, pass, SummaryResults,
-} from '.';
+import { failure, flaky, pass, SummaryResults } from '.';
 
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
@@ -42,7 +40,9 @@ export default class ResultsParser {
 
   private separateFlakyTests: boolean;
 
-  constructor(options: { separateFlakyTests: boolean } = { separateFlakyTests: false }) {
+  constructor(
+    options: { separateFlakyTests: boolean } = { separateFlakyTests: false },
+  ) {
     this.result = [];
     this.separateFlakyTests = options.separateFlakyTests;
   }

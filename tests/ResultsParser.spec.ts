@@ -489,7 +489,9 @@ test.describe('ResultsParser', () => {
     ]);
   });
 
-  test('separates flaky tests from successful tests when flaky option is enabled', async ({ testData }) => {
+  test('separates flaky tests from successful tests when flaky option is enabled', async ({
+    testData,
+  }) => {
     const resultsParser = new ResultsParser({ separateFlakyTests: true });
 
     // add the flaky test run 1 - failed

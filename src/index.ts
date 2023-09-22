@@ -36,4 +36,4 @@ export type flaky = {
 
 export type pass = {
   test: string;
-}
+};
