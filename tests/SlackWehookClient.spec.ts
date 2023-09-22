@@ -8,6 +8,7 @@ const test = base.extend<{ summaryResults: SummaryResults }>({
   summaryResults: {
     failed: 1,
     passed: 1,
+    flaky: undefined,
     skipped: 1,
     failures: [
       {
