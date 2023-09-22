@@ -92,7 +92,7 @@ test.describe('SlackClient.generateBlocks()', () => {
     ]);
   });
 
-  test.only('creates blocks with correct stats summary - flaky enabled', async () => {
+  test('creates blocks with correct stats summary - flaky enabled', async () => {
     const generatedBlock = await generateBlocks(
       {
         failed: 1,
