@@ -7,6 +7,7 @@ test.describe('SlackClient.generateBlocks()', () => {
       {
         failed: 3,
         passed: 0,
+        flaky: undefined,
         skipped: 0,
         failures: [
           { test: 'test', failureReason: 'message' },
@@ -31,6 +32,7 @@ test.describe('SlackClient.generateBlocks()', () => {
       {
         failed: 2,
         passed: 0,
+        flaky: undefined,
         skipped: 0,
         failures: [
           { test: 'test', failureReason: 'message' },
@@ -50,11 +52,12 @@ test.describe('SlackClient.generateBlocks()', () => {
     });
   });
 
-  test('creates blocks with correct stats summary', async () => {
+  test('creates blocks with correct stats summary - flaky disabled', async () => {
     const generatedBlock = await generateBlocks(
       {
         failed: 1,
         passed: 1,
+        flaky: undefined,
         skipped: 1,
         failures: [{ test: 'test', failureReason: 'message' }],
         tests: [],
@@ -89,11 +92,52 @@ test.describe('SlackClient.generateBlocks()', () => {
     ]);
   });
 
+  test('creates blocks with correct stats summary - flaky enabled', async () => {
+    const generatedBlock = await generateBlocks(
+      {
+        failed: 1,
+        passed: 1,
+        flaky: 1,
+        skipped: 1,
+        failures: [{ test: 'test', failureReason: 'message' }],
+        tests: [],
+      },
+      2,
+    );
+    expect(generatedBlock).toEqual([
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '🎭 *Playwright Results*',
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '✅ *1* | ❌ *1* | 🟡 *1* | ⏩ *1*',
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '*test*\n        \n>message',
+        },
+      },
+    ]);
+  });
+
   test('creates blocks when meta provided', async () => {
     const generatedBlock = await generateBlocks(
       {
         failed: 0,
         passed: 1,
+        flaky: undefined,
         skipped: 1,
         failures: [],
         tests: [],
@@ -139,6 +183,7 @@ test.describe('SlackClient.generateBlocks()', () => {
       {
         failed: 1,
         passed: 0,
+        flaky: undefined,
         skipped: 1,
         failures: [],
         tests: [

@@ -17,7 +17,11 @@ const generateBlocks = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* |${
+        summaryResults.flaky !== undefined
+          ? ` 🟡 *${summaryResults.flaky}* | `
+          : ' '
+      }⏩ *${summaryResults.skipped}*`,
     },
   };
 
@@ -36,12 +40,7 @@ const generateBlocks = async (
     }
   }
 
-  return [
-    header,
-    summary,
-    ...meta,
-    ...fails,
-  ];
+  return [header, summary, ...meta, ...fails];
 };
 
 const generateFailures = async (
@@ -51,7 +50,10 @@ const generateFailures = async (
   const maxNumberOfFailureLength = 650;
   const fails = [];
 
-  const numberOfFailuresToShow = Math.min(summaryResults.failures.length, maxNumberOfFailures);
+  const numberOfFailuresToShow = Math.min(
+    summaryResults.failures.length,
+    maxNumberOfFailures,
+  );
 
   for (let i = 0; i < numberOfFailuresToShow; i += 1) {
     const { failureReason, test } = summaryResults.failures[i];

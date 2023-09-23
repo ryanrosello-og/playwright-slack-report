@@ -5,7 +5,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
 
-import { failure, SummaryResults } from '.';
+import { failure, flaky, pass, SummaryResults } from '.';
 
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
@@ -38,15 +38,28 @@ export type testSuite = {
 export default class ResultsParser {
   private result: testSuite[];
 
-  constructor() {
+  private separateFlakyTests: boolean;
+
+  constructor(
+    options: { separateFlakyTests: boolean } = { separateFlakyTests: false },
+  ) {
     this.result = [];
+    this.separateFlakyTests = options.separateFlakyTests;
   }
 
   async getParsedResults(): Promise<SummaryResults> {
     const failures = await this.getFailures();
+    const flakes = await this.getFlakes();
+    let passes = await this.getPasses();
+
+    if (this.separateFlakyTests) {
+      passes = this.doSeparateFlakyTests(passes, flakes);
+    }
+
     const summary: SummaryResults = {
-      passed: 0,
+      passed: passes.length,
       failed: failures.length,
+      flaky: this.separateFlakyTests ? flakes.length : undefined,
       skipped: 0,
       failures,
       tests: [],
@@ -54,9 +67,7 @@ export default class ResultsParser {
     for (const suite of this.result) {
       summary.tests = summary.tests.concat(suite.testSuite.tests);
       for (const test of suite.testSuite.tests) {
-        if (test.status === 'passed') {
-          summary.passed += 1;
-        } else if (test.status === 'skipped') {
+        if (test.status === 'skipped') {
           summary.skipped += 1;
         }
       }
@@ -80,6 +91,35 @@ export default class ResultsParser {
       }
     }
     return failures;
+  }
+
+  async getFlakes(): Promise<Array<flaky>> {
+    const flaky: Array<flaky> = [];
+    for (const suite of this.result) {
+      for (const test of suite.testSuite.tests) {
+        if (test.status === 'passed' && test.retry > 0) {
+          flaky.push({
+            test: ResultsParser.getTestName(test),
+            retry: test.retry,
+          });
+        }
+      }
+    }
+    return flaky;
+  }
+
+  async getPasses(): Promise<Array<pass>> {
+    const passes: Array<pass> = [];
+    for (const suite of this.result) {
+      for (const test of suite.testSuite.tests) {
+        if (test.status === 'passed') {
+          passes.push({
+            test: ResultsParser.getTestName(test),
+          });
+        }
+      }
+    }
+    return passes;
   }
 
   static getTestName(failedTest: any) {
@@ -190,5 +230,21 @@ export default class ResultsParser {
       projectName: '',
       browser: '',
     };
+  }
+
+  /** removes tests from the passed array that only passed on a retry (flaky).
+   * Does not modify param passed, returns a new passed array. */
+  doSeparateFlakyTests(passes: Array<pass>, flakes: Array<flaky>) {
+    const _passes: Map<string, pass> = new Map();
+
+    for (const pass of passes) {
+      _passes.set(pass.test, pass);
+    }
+
+    for (const flake of flakes) {
+      _passes.delete(flake.test);
+    }
+
+    return [..._passes.values()];
   }
 }

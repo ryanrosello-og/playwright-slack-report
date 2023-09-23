@@ -48,7 +48,8 @@ export default class SlackWebhookClient {
       };
     }
     return {
-      outcome: '😵 Failed to send webhook message, ensure your webhook url is valid',
+      outcome:
+        '😵 Failed to send webhook message, ensure your webhook url is valid',
     };
   }
 }
