@@ -180,7 +180,7 @@ Same as **layout** above, but asynchronous in that it returns a promise.
 ### **maxNumberOfFailuresToShow**
 Limits the number of failures shown in the Slack message, defaults to 10.
 ### **separateFlaky**
-Don't consider flaky tests as passed, instead output them separately. Flaky tests are tests that passed but not on the first try.
+Don't consider flaky tests as passed, instead output them separately. Flaky tests are tests that passed but not on the first try.  This defaults to `false` but it is highly recommended that you switch this on.
 ### **slackOAuthToken**
 Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.
 ### **slackLogLevel** (default LogLevel.DEBUG)

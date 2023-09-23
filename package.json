@@ -26,10 +26,11 @@
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
     "pw": "nyc playwright test && nyc report --reporter=lcov",
     "build": "tsc -p ./tsconfig.json",
-    "lint": "npx eslint . --ext .ts"
+    "lint": "npx eslint . --ext .ts",
+    "lint-fix": "npx eslint . --ext .ts --fix"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.23",
+  "version": "1.1.24",
   "main": "index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",

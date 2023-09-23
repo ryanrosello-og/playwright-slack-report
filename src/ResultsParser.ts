@@ -5,7 +5,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
 
-import { failure, flaky, pass, SummaryResults } from '.';
+import {
+  failure, flaky, pass, SummaryResults,
+} from '.';
 
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
