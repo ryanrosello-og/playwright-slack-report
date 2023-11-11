@@ -45,8 +45,6 @@ class SlackReporter implements Reporter {
 
   private suite!: Suite;
 
-  private separateFlaky: boolean = false;
-
   logs: string[] = [];
 
   onBegin(fullConfig: FullConfig, suite: Suite): void {
@@ -79,7 +77,6 @@ class SlackReporter implements Reporter {
       this.showInThread = slackReporterConfig.showInThread || false;
       this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
       this.proxy = slackReporterConfig.proxy || undefined;
-      this.separateFlaky = slackReporterConfig.separateFlaky || false;
     }
     this.resultsParser = new ResultsParser();
   }
