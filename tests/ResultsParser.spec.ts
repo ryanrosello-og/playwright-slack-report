@@ -414,12 +414,12 @@ test.describe('ResultsParser', () => {
       [],
     );
     const testA: TestCase = {
-      expectedStatus: 'skipped',
+      expectedStatus: 'failed',
       ok(): boolean {
         throw new Error('Function not implemented.');
       },
       outcome(): 'skipped' | 'expected' | 'unexpected' | 'flaky' {
-        return 'skipped';
+        return 'unexpected';
       },
       titlePath(): string[] {
         throw new Error('Function not implemented.');
@@ -437,9 +437,9 @@ test.describe('ResultsParser', () => {
     const results = await resultsParser.getParsedResults([testA]);
     expect(results).toEqual({
       passed: 0,
-      failed: 0,
+      failed: 1,
       flaky: 0,
-      skipped: 1,
+      skipped: 0,
       failures: [],
       tests: [
         {
