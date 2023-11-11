@@ -5,8 +5,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
 
+import { TestCase } from '@playwright/test/reporter';
 import {
-  failure, flaky, pass, SummaryResults,
+  failure, SummaryResults,
 } from '.';
 
 /* eslint-disable no-restricted-syntax */
@@ -40,39 +41,29 @@ export type testSuite = {
 export default class ResultsParser {
   private result: testSuite[];
 
-  private separateFlakyTests: boolean;
-
-  constructor(
-    options: { separateFlakyTests: boolean } = { separateFlakyTests: false },
-  ) {
+  constructor() {
     this.result = [];
-    this.separateFlakyTests = options.separateFlakyTests;
   }
 
-  async getParsedResults(): Promise<SummaryResults> {
+  async getParsedResults(allTests: Array<TestCase>): Promise<SummaryResults> {
     const failures = await this.getFailures();
-    const flakes = await this.getFlakes();
-    let passes = await this.getPasses();
-
-    if (this.separateFlakyTests) {
-      passes = this.doSeparateFlakyTests(passes, flakes);
-    }
-
+    // use Playwright recommended way of extracting test stats:
+    // https://github.com/microsoft/playwright/issues/27498#issuecomment-1766766335
+    const stats = {
+      expected: 0, skipped: 0, unexpected: 0, flaky: 0,
+    };
+    // eslint-disable-next-line no-plusplus
+    for (const test of allTests) ++stats[test.outcome()];
     const summary: SummaryResults = {
-      passed: passes.length,
-      failed: failures.length,
-      flaky: this.separateFlakyTests ? flakes.length : undefined,
-      skipped: 0,
+      passed: stats.expected,
+      failed: stats.unexpected,
+      flaky: stats.flaky,
+      skipped: stats.skipped,
       failures,
       tests: [],
     };
     for (const suite of this.result) {
       summary.tests = summary.tests.concat(suite.testSuite.tests);
-      for (const test of suite.testSuite.tests) {
-        if (test.status === 'skipped') {
-          summary.skipped += 1;
-        }
-      }
     }
     return summary;
   }
@@ -93,35 +84,6 @@ export default class ResultsParser {
       }
     }
     return failures;
-  }
-
-  async getFlakes(): Promise<Array<flaky>> {
-    const flaky: Array<flaky> = [];
-    for (const suite of this.result) {
-      for (const test of suite.testSuite.tests) {
-        if (test.status === 'passed' && test.retry > 0) {
-          flaky.push({
-            test: ResultsParser.getTestName(test),
-            retry: test.retry,
-          });
-        }
-      }
-    }
-    return flaky;
-  }
-
-  async getPasses(): Promise<Array<pass>> {
-    const passes: Array<pass> = [];
-    for (const suite of this.result) {
-      for (const test of suite.testSuite.tests) {
-        if (test.status === 'passed') {
-          passes.push({
-            test: ResultsParser.getTestName(test),
-          });
-        }
-      }
-    }
-    return passes;
   }
 
   static getTestName(failedTest: any) {
@@ -232,21 +194,5 @@ export default class ResultsParser {
       projectName: '',
       browser: '',
     };
-  }
-
-  /** removes tests from the passed array that only passed on a retry (flaky).
-   * Does not modify param passed, returns a new passed array. */
-  doSeparateFlakyTests(passes: Array<pass>, flakes: Array<flaky>) {
-    const _passes: Map<string, pass> = new Map();
-
-    for (const pass of passes) {
-      _passes.set(pass.test, pass);
-    }
-
-    for (const flake of flakes) {
-      _passes.delete(flake.test);
-    }
-
-    return [..._passes.values()];
   }
 }

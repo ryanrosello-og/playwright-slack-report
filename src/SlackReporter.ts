@@ -81,9 +81,7 @@ class SlackReporter implements Reporter {
       this.proxy = slackReporterConfig.proxy || undefined;
       this.separateFlaky = slackReporterConfig.separateFlaky || false;
     }
-    this.resultsParser = new ResultsParser({
-      separateFlakyTests: this.separateFlaky,
-    });
+    this.resultsParser = new ResultsParser();
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
@@ -98,7 +96,7 @@ class SlackReporter implements Reporter {
       return;
     }
 
-    const resultSummary = await this.resultsParser.getParsedResults();
+    const resultSummary = await this.resultsParser.getParsedResults(this.suite.allTests());
     resultSummary.meta = this.meta;
     const maxRetry = Math.max(...resultSummary.tests.map((o) => o.retry));
     if (

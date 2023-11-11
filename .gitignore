@@ -113,3 +113,4 @@ dist/
 # VS Code files
 .vscode
 bot
+playwright-report/

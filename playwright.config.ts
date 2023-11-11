@@ -7,6 +7,8 @@ require('dotenv').config();
 
 const config: PlaywrightTestConfig = {
   forbidOnly: !!process.env.CI,
+  workers: 4,
+  retries: 1,
   use: {
     trace: 'on',
     screenshot: 'on',
@@ -45,6 +47,7 @@ const config: PlaywrightTestConfig = {
       },
     ],
     ['dot'],
+    ['html'],
   ],
 };
 export default config;

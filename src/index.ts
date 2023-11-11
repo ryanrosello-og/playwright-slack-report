@@ -28,12 +28,3 @@ export type failure = {
   test: string;
   failureReason: string;
 };
-
-export type flaky = {
-  test: string;
-  retry: number;
-};
-
-export type pass = {
-  test: string;
-};
