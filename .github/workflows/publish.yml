@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
-      - name: install node v16.13.1
+      - name: install node v18.18.2
         uses: actions/setup-node@v1
         with:
-          node-version: 16.13.1
+          node-version: 18.18.2
       - name: yarn install
         run: yarn install
       - name: build
