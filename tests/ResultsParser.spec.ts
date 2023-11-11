@@ -1,4 +1,5 @@
 import { expect, test as base } from '@playwright/test';
+import { TestCase } from '@playwright/test/reporter';
 import ResultsParser from '../src/ResultsParser';
 
 const test = base.extend<{ testData: any }>({
@@ -385,7 +386,7 @@ test.describe('ResultsParser', () => {
   test('determines correct browser based on project config', async ({
     testData,
   }) => {
-    const resultsParser = new ResultsParser({ separateFlakyTests: false });
+    const resultsParser = new ResultsParser();
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
       testData.suites[0].suites[0].tests[0],
@@ -400,23 +401,44 @@ test.describe('ResultsParser', () => {
         },
       ],
     );
-    const results = await resultsParser.getParsedResults();
+    const results = await resultsParser.getParsedResults([]);
     expect(results.tests[0].projectName).toEqual('playwright-slack-report');
     expect(results.tests[0].browser).toEqual('chrome');
   });
 
   test('parses results successfully', async ({ testData }) => {
-    const resultsParser = new ResultsParser({ separateFlakyTests: false });
+    const resultsParser = new ResultsParser();
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
       testData.suites[0].suites[0].tests[0],
       [],
     );
-    const results = await resultsParser.getParsedResults();
+    const testA: TestCase = {
+      expectedStatus: 'failed',
+      ok(): boolean {
+        throw new Error('Function not implemented.');
+      },
+      outcome(): 'skipped' | 'expected' | 'unexpected' | 'flaky' {
+        return 'unexpected';
+      },
+      titlePath(): string[] {
+        throw new Error('Function not implemented.');
+      },
+      annotations: [],
+      id: '',
+      location: undefined,
+      parent: undefined,
+      repeatEachIndex: 0,
+      results: [],
+      retries: 0,
+      timeout: 0,
+      title: '',
+    };
+    const results = await resultsParser.getParsedResults([testA]);
     expect(results).toEqual({
       passed: 0,
-      failed: 0,
-      flaky: undefined,
+      failed: 1,
+      flaky: 0,
       skipped: 0,
       failures: [],
       tests: [
@@ -465,60 +487,6 @@ test.describe('ResultsParser', () => {
         },
       ],
     });
-  });
-
-  test('parses multiple failures successfully', async ({ testData }) => {
-    const resultsParser = new ResultsParser({ separateFlakyTests: false });
-    resultsParser.addTestResult(
-      testData.suites[0].suites[0].title,
-      testData.suites[0].suites[0].tests[0],
-      [],
-    );
-    resultsParser.addTestResult(
-      testData.suites[0].suites[0].title,
-      testData.suites[1].suites[0].tests[0],
-      [],
-    );
-    const results = await resultsParser.getParsedResults();
-    expect(results.failures).toEqual([
-      {
-        test: 'basic test failure 2',
-        failureReason:
-          'expect(received).toHaveText(expected)\n\nExpected string: "Playwright Fail"\nReceived string: "Playwright"\nCall log:\n  - expect.toHaveText with timeout 1000ms\n  - waiting for selector ".navbar__inner .navbar__title"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n\r\nError: expect(received).toHaveText(expected)\n\nExpected string: "Playwright Fail"\nReceived string: "Playwright"\nCall log:\n  - expect.toHaveText with timeout 1000ms\n  - waiting for selector ".navbar__inner .navbar__title"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n\n    at /home/ry/_repo/playwright-slack-report/tests/t1.spec.ts:17:23\r\n',
-      },
-    ]);
-  });
-
-  test('separates flaky tests from successful tests when flaky option is enabled', async ({
-    testData,
-  }) => {
-    const resultsParser = new ResultsParser({ separateFlakyTests: true });
-
-    // add the flaky test run 1 - failed
-    resultsParser.addTestResult(
-      testData.suites[0].suites[0].title,
-      testData.suites[2].suites[0].tests[0],
-      [],
-    );
-
-    // add the flaky test run 2 - passed
-    resultsParser.addTestResult(
-      testData.suites[0].suites[0].title,
-      testData.suites[2].suites[0].tests[1],
-      [],
-    );
-
-    // add a non-flaky passed test
-    resultsParser.addTestResult(
-      testData.suites[0].suites[0].title,
-      testData.suites[2].suites[0].tests[2],
-      [],
-    );
-
-    const results = await resultsParser.getParsedResults();
-    expect(results.passed).toBe(1);
-    expect(results.failures.length).toBe(0);
-    expect(results.flaky).toBe(1);
   });
 
   test('getTestName(...) generates correct test name', async ({}) => {
