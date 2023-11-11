@@ -44,5 +44,14 @@
     "report",
     "playwright",
     "typescript"
-  ]
+  ],
+  "nyc": {
+    "all": true,
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "./src/custom_block/my_block.ts"
+    ]
+  }
 }
