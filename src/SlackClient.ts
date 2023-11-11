@@ -10,7 +10,7 @@ import {
   LogLevel,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
-import { generateBlocks, generateFailures } from './LayoutGenerator';
+import { generateBlocks, generateFailures, generateFallbackText } from './LayoutGenerator';
 
 export type additionalInfo = Array<{ key: string; value: string }>;
 
@@ -58,7 +58,7 @@ export default class SlackClient {
     if (!options.channelIds) {
       throw new Error(`Channel ids [${options.channelIds}] is not valid`);
     }
-
+    const fallbackText = generateFallbackText(options.summaryResults);
     const result = [];
     const unfurl: boolean = !options.disableUnfurl;
     for (const channel of options.channelIds) {
@@ -72,6 +72,7 @@ export default class SlackClient {
           chatResponse = await SlackClient.doPostRequest(
             this.slackWebClient,
             channel,
+            fallbackText,
             blocks,
             unfurl,
           );
@@ -121,6 +122,7 @@ export default class SlackClient {
   }) {
     const result = [];
     const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
+    const fallbackText = generateFallbackText(summaryResults);
     for (const channel of channelIds) {
       // under test
       let chatResponse: ChatPostMessageResponse;
@@ -130,6 +132,7 @@ export default class SlackClient {
         chatResponse = await SlackClient.doPostRequest(
           this.slackWebClient,
           channel,
+          fallbackText,
           blocks,
           disableUnfurl,
           ts,
@@ -151,13 +154,14 @@ export default class SlackClient {
   static async doPostRequest(
     slackWebClient: WebClient,
     channel: string,
+    fallbackText: string,
     blocks: Array<KnownBlock | Block>,
     unfurl: boolean,
     threadTimestamp?: string,
   ): Promise<ChatPostMessageResponse> {
     const chatResponse = await slackWebClient.chat.postMessage({
       channel,
-      text: ' ',
+      text: fallbackText,
       unfurl_link: unfurl,
       blocks,
       thread_ts: threadTimestamp,

@@ -89,4 +89,8 @@ const generateFailures = async (
   ];
 };
 
-export { generateBlocks, generateFailures };
+const generateFallbackText = (summaryResults: SummaryResults): string => `✅ ${summaryResults.passed} ❌ ${summaryResults.failed} ${
+  summaryResults.flaky !== undefined ? ` 🟡 ${summaryResults.flaky} ` : ' '
+}⏩ ${summaryResults.skipped}`;
+
+export { generateBlocks, generateFailures, generateFallbackText };
