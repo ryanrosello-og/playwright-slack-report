@@ -27,11 +27,14 @@
     "pw": "nyc playwright test && nyc report --reporter=lcov",
     "build": "tsc -p ./tsconfig.json",
     "lint": "npx eslint . --ext .ts",
-    "lint-fix": "npx eslint . --ext .ts --fix"
+    "lint-fix": "npx eslint . --ext .ts --fix",
+    "cli":"yarn build && node dist/cli.js"
   },
   "name": "playwright-slack-report",
   "version": "1.1.25",
-  "main": "index.js",
+  "bin": {
+    "playwright-slack-report": "./dist/cli.js"
+  },
   "types": "dist/index.d.ts",
   "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
   "author": "Ryan Rosello <ryanrosello@hotmail.com>",
