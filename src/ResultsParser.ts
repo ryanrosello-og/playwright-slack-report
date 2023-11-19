@@ -5,9 +5,10 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-param-reassign */
 
+import * as fs from 'fs';
 import { TestCase } from '@playwright/test/reporter';
 import {
-  failure, SummaryResults,
+  failure, JSONResult, Spec, SummaryResults,
 } from '.';
 
 /* eslint-disable no-restricted-syntax */
@@ -45,12 +46,54 @@ export default class ResultsParser {
     this.result = [];
   }
 
+  async parseFromJsonFile(filePath: string) {
+    const data = fs.readFileSync(filePath, 'utf-8');
+    const parsedData: JSONResult = JSON.parse(data);
+    const stats = {
+      expected: 0,
+      skipped: 0,
+      unexpected: 0,
+      flaky: 0,
+    };
+    parsedData.suites.forEach((suite) => {
+      suite.specs.forEach((spec) => {
+        spec.tests.forEach((test) => {
+          this.addTestResultFromJson(suite.title, spec, test, [
+            { projectName: test.projectName, browser: test.projectName },
+          ]);
+          // eslint-disable-next-line no-plusplus
+          ++stats[test.status];
+        });
+      });
+    });
+
+    const failures = await this.getFailures();
+    const summary: SummaryResults = {
+      passed: stats.expected,
+      failed: stats.unexpected,
+      flaky: stats.flaky,
+      skipped: stats.skipped,
+      failures,
+      tests: [],
+    };
+
+    for (const suite of this.result) {
+      summary.tests = summary.tests.concat(suite.testSuite.tests);
+    }
+    console.log('🚀~ summary:', JSON.stringify(summary, null, 2));
+
+    return summary;
+  }
+
   async getParsedResults(allTests: Array<TestCase>): Promise<SummaryResults> {
     const failures = await this.getFailures();
     // use Playwright recommended way of extracting test stats:
     // https://github.com/microsoft/playwright/issues/27498#issuecomment-1766766335
     const stats = {
-      expected: 0, skipped: 0, unexpected: 0, flaky: 0,
+      expected: 0,
+      skipped: 0,
+      unexpected: 0,
+      flaky: 0,
     };
     // eslint-disable-next-line no-plusplus
     for (const test of allTests) ++stats[test.outcome()];
@@ -102,6 +145,42 @@ export default class ResultsParser {
     if (data.testSuite.tests.length > 0) {
       this.result.push(data);
     }
+  }
+
+  addTestResultFromJson(
+    suiteName: any,
+    spec: Spec,
+    testCase: any,
+    projectBrowserMapping: any,
+  ) {
+    const testResults: testResult[] = [];
+    const projectSettings = this.determineBrowser(
+      testCase._projectId,
+      projectBrowserMapping,
+    );
+    for (const result of testCase.results) {
+      testResults.push({
+        suiteName,
+        name: spec.title,
+        status: result.status,
+        browser: projectSettings.browser,
+        projectName: projectSettings.projectName,
+        retry: result.retry,
+        retries: 99, // nopte
+        startedAt: new Date(result.startTime).toISOString(),
+        endedAt: new Date(
+          new Date(result.startTime).getTime() + result.duration,
+        ).toISOString(),
+        reason: this.safelyDetermineFailure(result),
+        attachments: result.attachments,
+      });
+    }
+    this.updateResults({
+      testSuite: {
+        title: suiteName,
+        tests: testResults,
+      },
+    });
   }
 
   addTestResult(suiteName: any, testCase: any, projectBrowserMapping: any) {
