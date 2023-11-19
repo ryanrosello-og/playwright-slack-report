@@ -2,7 +2,8 @@
   "dependencies": {
     "@slack/web-api": "^6.9.1",
     "@slack/webhook": "^7.0.1",
-    "https-proxy-agent": "^7.0.1"
+    "https-proxy-agent": "^7.0.1",
+    "ts-node": "^10.9.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
@@ -28,7 +29,8 @@
     "build": "tsc -p ./tsconfig.json",
     "lint": "npx eslint . --ext .ts",
     "lint-fix": "npx eslint . --ext .ts --fix",
-    "cli":"yarn build && node dist/cli.js"
+    "cli": "yarn build && node dist/cli.js",
+    "cli-debug": "ts-node cli.ts"
   },
   "name": "playwright-slack-report",
   "version": "1.1.25",
