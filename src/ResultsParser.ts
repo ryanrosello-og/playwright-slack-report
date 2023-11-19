@@ -49,30 +49,29 @@ export default class ResultsParser {
   async parseFromJsonFile(filePath: string) {
     const data = fs.readFileSync(filePath, 'utf-8');
     const parsedData: JSONResult = JSON.parse(data);
-    const stats = {
-      expected: 0,
-      skipped: 0,
-      unexpected: 0,
-      flaky: 0,
-    };
+
     parsedData.suites.forEach((suite) => {
       suite.specs.forEach((spec) => {
         spec.tests.forEach((test) => {
-          this.addTestResultFromJson(suite.title, spec, test, [
-            { projectName: test.projectName, browser: test.projectName },
-          ]);
-          // eslint-disable-next-line no-plusplus
-          ++stats[test.status];
+          this.addTestResultFromJson({
+            suiteName: suite.title,
+            spec,
+            testCase: test,
+            projectBrowserMapping: [
+              { projectName: test.projectName, browser: test.projectName },
+            ],
+            retries: parsedData.config.projects[0].retries,
+          });
         });
       });
     });
 
     const failures = await this.getFailures();
     const summary: SummaryResults = {
-      passed: stats.expected,
-      failed: stats.unexpected,
-      flaky: stats.flaky,
-      skipped: stats.skipped,
+      passed: parsedData.stats.expected,
+      failed: parsedData.stats.unexpected,
+      flaky: parsedData.stats.flaky,
+      skipped: parsedData.stats.skipped,
       failures,
       tests: [],
     };
@@ -147,15 +146,22 @@ export default class ResultsParser {
     }
   }
 
-  addTestResultFromJson(
-    suiteName: any,
-    spec: Spec,
-    testCase: any,
-    projectBrowserMapping: any,
-  ) {
+  addTestResultFromJson({
+    suiteName,
+    spec,
+    testCase,
+    projectBrowserMapping,
+    retries,
+  }: {
+    suiteName: any;
+    spec: Spec;
+    testCase: any;
+    projectBrowserMapping: any;
+    retries: number;
+  }) {
     const testResults: testResult[] = [];
     const projectSettings = this.determineBrowser(
-      testCase._projectId,
+      projectBrowserMapping[0].projectName,
       projectBrowserMapping,
     );
     for (const result of testCase.results) {
@@ -166,7 +172,7 @@ export default class ResultsParser {
         browser: projectSettings.browser,
         projectName: projectSettings.projectName,
         retry: result.retry,
-        retries: 99, // nopte
+        retries,
         startedAt: new Date(result.startTime).toISOString(),
         endedAt: new Date(
           new Date(result.startTime).getTime() + result.duration,
