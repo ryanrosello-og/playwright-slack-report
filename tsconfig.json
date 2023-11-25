@@ -6,5 +6,7 @@
       "sourceMap": false,
       "outDir": "./dist",
       "declaration": true,
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
   }
 }
