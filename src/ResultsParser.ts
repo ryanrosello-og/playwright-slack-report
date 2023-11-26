@@ -73,7 +73,7 @@ export default class ResultsParser {
 
   async parseTestSuite(suites: any, retries: number, suiteIndex = 0) {
     let testResults = [];
-    if (suites.suites?.length > 0) {
+    if (suites[0].suites?.length > 0) {
       testResults = await this.parseTests(
         suites[0].title,
         suites[0].specs,
@@ -116,7 +116,7 @@ export default class ResultsParser {
           testResults.push({
             suiteName,
             name: spec.title,
-            status: result.status,
+            status: result.status === 'unexpected' ? 'failed' : result.status,
             browser: test.projectName,
             projectName: test.projectName,
             retry: result.retry,
