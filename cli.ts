@@ -112,7 +112,7 @@ async function sendResults({
       maxNumberOfFailures: 5,
       disableUnfurl: false,
       summaryResults: resultSummary,
-      showInThread: true,
+      showInThread: false,
     },
   });
 

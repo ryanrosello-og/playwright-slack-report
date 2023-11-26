@@ -50,21 +50,8 @@ export default class ResultsParser {
     const data = fs.readFileSync(filePath, 'utf-8');
     const parsedData: JSONResult = JSON.parse(data);
 
-    parsedData.suites.forEach((suite) => {
-      suite.specs.forEach((spec) => {
-        spec.tests.forEach((test) => {
-          this.addTestResultFromJson({
-            suiteName: suite.title,
-            spec,
-            testCase: test,
-            projectBrowserMapping: [
-              { projectName: test.projectName, browser: test.projectName },
-            ],
-            retries: parsedData.config.projects[0].retries,
-          });
-        });
-      });
-    });
+    const { retries } = parsedData.config.projects[0];
+    await this.parseTestSuite(parsedData.suites, retries);
 
     const failures = await this.getFailures();
     const summary: SummaryResults = {
@@ -82,6 +69,76 @@ export default class ResultsParser {
     console.log('🚀~ summary:', JSON.stringify(summary, null, 2));
 
     return summary;
+  }
+
+  async parseTestSuite(suites: any, retries: number, suiteIndex = 0) {
+    let testResults = [];
+    if (suites.suites?.length > 0) {
+      testResults = await this.parseTests(
+        suites[0].title,
+        suites[0].specs,
+        retries,
+      );
+      this.updateResults({
+        testSuite: {
+          title: suites[0].title,
+          tests: testResults,
+        },
+      });
+      await this.parseTestSuite(
+        suites[suiteIndex].suites,
+        retries,
+        (suiteIndex += 1),
+      );
+    } else {
+      testResults = await this.parseTests(
+        suites[0].title,
+        suites[0].specs,
+        retries,
+      );
+      this.updateResults({
+        testSuite: {
+          title: suites[0].title,
+          tests: testResults,
+        },
+      });
+      // eslint-disable-next-line no-useless-return
+      return;
+    }
+  }
+
+  async parseTests(suiteName: any, specs: any, retries: number) {
+    const testResults: testResult[] = [];
+
+    for (const spec of specs) {
+      for (const test of spec.tests) {
+        for (const result of test.results) {
+          testResults.push({
+            suiteName,
+            name: spec.title,
+            status: result.status,
+            browser: test.projectName,
+            projectName: test.projectName,
+            retry: result.retry,
+            retries,
+            startedAt: result.startTime,
+            endedAt: new Date(
+              new Date(result.startTime).getTime() + result.duration,
+            ).toISOString(),
+            reason: result.error
+              ? this.getFailure(result.error.snippet, result.error.stack)
+              : '',
+            attachments: result.attachments,
+          });
+        }
+      }
+    }
+    return testResults;
+  }
+
+  getFailure(snippet: string, stack: string) {
+    const fullError = `${snippet}\r\n${stack || ''}`;
+    return this.cleanseReason(fullError);
   }
 
   async getParsedResults(allTests: Array<TestCase>): Promise<SummaryResults> {
