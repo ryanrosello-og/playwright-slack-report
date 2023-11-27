@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 import { Command } from 'commander';
-import { existsSync, PathLike } from 'fs';
+import { existsSync, PathLike, readFileSync } from 'fs';
 import path from 'path';
 import { LogLevel, WebClient } from '@slack/web-api';
 import packageInfo from './package.json';
@@ -71,6 +72,76 @@ async function doPreChecks(
     };
   }
 
+  const config = getConfig(configFile);
+  if (config.sendVia.method === 'webhook' && !config.sendVia.webhookUrl) {
+    return {
+      status: 'error',
+      message: 'Missing the webhookUrl in the config file',
+    };
+  }
+
+  if (
+    config.sendVia.method === 'slack-bot-oauth'
+    && !process.env.SLACK_BOT_USER_OAUTH_TOKEN
+  ) {
+    return {
+      status: 'error',
+      message: 'Missing the SLACK_BOT_USER_OAUTH_TOKEN env variable',
+    };
+  }
+
+  if (
+    config.sendVia.method === 'slack-bot-oauth'
+    && config.sendVia.channels?.length === 0
+  ) {
+    return {
+      status: 'error',
+      message: 'Missing the channels in the config file',
+    };
+  }
+
+  if (
+    !config.customLayout?.functionName
+    || !fileExists(config.customLayout.source)
+  ) {
+    return {
+      status: 'error',
+      message:
+        'customLayout is not configured correctly - both functionName and source are required',
+    };
+  }
+
+  if (
+    !config.customLayoutAsync?.functionName
+    || !fileExists(config.customLayoutAsync.source)
+  ) {
+    return {
+      status: 'error',
+      message:
+        'customLayoutAsync is not configured correctly - both functionName and source are required',
+    };
+  }
+
+  if (config.maxNumberOfFailures < 0) {
+    return {
+      status: 'error',
+      message: 'maxNumberOfFailures must be a positive number',
+    };
+  }
+
+  if (typeof config.disableUnfurl !== 'boolean') {
+    return {
+      status: 'error',
+      message: 'disableUnfurl must be a boolean',
+    };
+  }
+
+  if (typeof config.showInThread !== 'boolean') {
+    return {
+      status: 'error',
+      message: 'showInThread must be a boolean',
+    };
+  }
   return {
     status: 'ok',
     jsonPath: path.resolve(jsonResultsPath),
@@ -88,17 +159,23 @@ function fileExists(filePath: string): boolean {
   return existsSync(absolutePath);
 }
 
+function getConfig(configPath: string): ICliConfig {
+  const config = readFileSync(path.resolve(path.resolve(configPath)), 'utf-8');
+  return JSON.parse(config);
+}
+
 async function sendResults({
   resultsParser,
   slackClient,
   filePath,
-  config,
+  configPath,
 }: {
   resultsParser: ResultsParser;
   slackClient: SlackClient;
   filePath: string;
-  config: any;
+  configPath: string;
 }): Promise<true> {
+  const config = getConfig(configPath);
   if (config.slackLogLevel === LogLevel.DEBUG) {
     console.log({ config });
   }
@@ -109,10 +186,10 @@ async function sendResults({
       channelIds: ['qa-automation'],
       customLayout: undefined,
       customLayoutAsync: undefined,
-      maxNumberOfFailures: 5,
-      disableUnfurl: false,
+      maxNumberOfFailures: config.maxNumberOfFailures,
+      disableUnfurl: config.disableUnfurl,
       summaryResults: resultSummary,
-      showInThread: false,
+      showInThread: config.showInThread,
     },
   });
 
@@ -120,4 +197,27 @@ async function sendResults({
   console.log('🚀 ~ file: cli.ts:35 ~ main ~ result:', result);
   console.log('🚀 --------------------------------------------🚀');
   return true;
+}
+
+interface ICliConfig {
+  sendVia: {
+    method: 'slack-bot-oauth' | 'webhook';
+    channels?: {
+      id: string;
+      sendResults: 'always' | 'on-failure';
+    }[];
+    webhookUrl?: string;
+  };
+  slackLogLevel: LogLevel;
+  customLayout?: {
+    functionName: string;
+    source: string;
+  };
+  customLayoutAsync?: {
+    functionName: string;
+    source: string;
+  };
+  maxNumberOfFailures: number;
+  disableUnfurl: boolean;
+  showInThread: boolean;
 }
