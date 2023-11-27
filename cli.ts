@@ -43,7 +43,7 @@ program
       resultsParser,
       slackClient,
       filePath: preCheckResult.jsonPath!,
-      config: preCheckResult.configPath!,
+      configPath: preCheckResult.configPath!,
     });
   });
 
