@@ -4,7 +4,8 @@
     "@slack/webhook": "^7.0.1",
     "commander": "^11.1.0",
     "https-proxy-agent": "^7.0.1",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
