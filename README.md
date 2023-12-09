@@ -11,7 +11,7 @@ Publish your Playwright test results to your favorite Slack channel(s).
 ## 🚀 Features
 
 - 💌 Send results your Playwright test results to one or more Slack channels
-- 🎚️ Leverage JSON results created by and seamlessly post them on Slack
+- 🎚️ Leverage JSON results created by Playwright and seamlessly post them on Slack
 - 📊 Conditionally send results to Slack channels based on test results
 - 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
 - 🧑‍🎨 Define your own custom Slack message layout!
