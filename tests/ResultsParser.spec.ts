@@ -1,5 +1,6 @@
 import { expect, test as base } from '@playwright/test';
 import { TestCase } from '@playwright/test/reporter';
+import path from 'path';
 import ResultsParser from '../src/ResultsParser';
 
 const test = base.extend<{ testData: any }>({
@@ -505,5 +506,23 @@ test.describe('ResultsParser', () => {
         projectName: 'nightly_regression',
       }),
     ).toEqual('Login [Project Name: nightly_regression] using chrome');
+  });
+
+  test('parse test results from json file', async ({}) => {
+    const resultsParser = new ResultsParser();
+    const validTestResults = path.join(
+      __dirname,
+      'test_data',
+      'valid_test_results.json',
+    );
+    const resultSummary = await resultsParser.parseFromJsonFile(
+      validTestResults,
+    );
+    expect(resultSummary.failed).toEqual(3);
+    expect(resultSummary.flaky).toEqual(1);
+    expect(resultSummary.skipped).toEqual(1);
+    expect(resultSummary.passed).toEqual(2);
+    expect(resultSummary.failures.length).toEqual(3);
+    expect(resultSummary.tests.length).toEqual(10);
   });
 });
