@@ -70,20 +70,6 @@ export const doPreChecks = async (
     };
   }
 
-  if (config.sendUsingBot && config.sendUsingBot.channels?.length === 0) {
-    return {
-      status: 'error',
-      message: 'Missing the channels in the config file',
-    };
-  }
-
-  if (config.sendUsingWebhook && !config.sendUsingWebhook.webhookUrl) {
-    return {
-      status: 'error',
-      message: 'Missing the webhookUrl in the config file',
-    };
-  }
-
   return {
     status: 'ok',
     jsonPath: path.resolve(jsonResultsPath),

@@ -7,8 +7,8 @@ import { IncomingWebhook } from '@slack/webhook';
 import packageInfo from './package.json';
 import ResultsParser from './src/ResultsParser';
 import SlackClient from './src/SlackClient';
-import doPreChecks from './cli_pre_checks';
-import { ICliConfig } from './cli_schema';
+import doPreChecks from './src/cli/cli_pre_checks';
+import { ICliConfig } from './src/cli/cli_schema';
 import { SummaryResults } from './src';
 import SlackWebhookClient from './src/SlackWebhookClient';
 
