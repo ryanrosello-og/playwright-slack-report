@@ -10,7 +10,11 @@ import {
   LogLevel,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
-import { generateBlocks, generateFailures, generateFallbackText } from './LayoutGenerator';
+import {
+  generateBlocks,
+  generateFailures,
+  generateFallbackText,
+} from './LayoutGenerator';
 
 export type additionalInfo = Array<{ key: string; value: string }>;
 

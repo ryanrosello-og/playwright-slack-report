@@ -11,6 +11,7 @@ Publish your Playwright test results to your favorite Slack channel(s).
 ## 🚀 Features
 
 - 💌 Send results your Playwright test results to one or more Slack channels
+- 🎚️ Leverage JSON results created by Playwright and seamlessly post them on Slack
 - 📊 Conditionally send results to Slack channels based on test results
 - 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
 - 🧑‍🎨 Define your own custom Slack message layout!
@@ -70,7 +71,7 @@ You will most likely need to have Slack administrator rights to perform the step
 ### Note II:
 Sending failure details in a thread is not supported when using webhooks.  You will need to use Option B below.
 
-# Option B
+# Option B - send your results via a Slack bot user
 Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright test`
@@ -122,6 +123,53 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 </details>
 
 ---
+# Option C - send your JSON results via CLI
+
+Playwright now provides a nice way to [merge multiple reports from multiple shards](https://playwright.dev/docs/test-sharding#merging-reports-from-multiple-shards).  You can use this feature to generate a single JSON report and then send it to Slack, alleviating the need to have separate messages sent per shard:
+
+
+`npx playwright merge-reports --reporter json ./all-blob-reports`
+
+^ It is important that you set the `--reporter` to `json` otherwise the report will not be generated in the correct format.
+
+Next, you will need to configure the cli.  See example below:
+
+*cli_config.json:*
+
+```json
+{
+  "sendResults": "always",
+  "slackLogLevel": "error",
+  "sendUsingBot": {
+    "channels": ["demo"]
+  },
+  "showInThread": true,
+  "meta": [
+    { "key": "build", "value" : "1.0.0"},
+    { "key": "branch", "value" : "master"},
+    { "key": "commit", "value" : "1234567890"},
+    { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
+  ],
+  "maxNumberOfFailures": 4,
+  "disableUnfurl": true
+}
+
+The config file also supports the follow extra options for using a proxy and sending results via a webhook:
+
+
+```json
+  ...
+  "proxy": "http://proxy.mycompany.com:8080",
+  "sendUsingWebhook": {
+    "webhookUrl": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  ...
+```
+
+Once you have generated the JSON report and defined your config file, you can send it to Slack using the following command:
+
+`SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright-slack-report -c cli_config.json -j ./merged_tests_results.json`
+
 
 # ⚙️ Configuration
 

@@ -1,5 +1,5 @@
 import { Block, KnownBlock } from '@slack/types';
-import { SummaryResults } from '..';
+import { SummaryResults } from '../src';
 
 const generateCustomLayout = (
   summaryResults: SummaryResults,

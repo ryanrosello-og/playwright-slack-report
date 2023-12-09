@@ -114,3 +114,4 @@ dist/
 .vscode
 bot
 playwright-report/
+tests/this.spec.ts
