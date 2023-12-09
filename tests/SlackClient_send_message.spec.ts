@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { ChatPostMessageResponse } from '@slack/web-api';
-import generateCustomLayout from '../src/custom_block/my_block';
+import generateCustomLayout from '../custom_block/my_block';
 import { test } from './fixtures';
 
 test.describe('SlackClient.sendMessage()', () => {

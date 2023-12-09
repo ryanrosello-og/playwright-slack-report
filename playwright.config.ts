@@ -1,7 +1,7 @@
 // playwright.config.ts
 import { PlaywrightTestConfig, devices } from '@playwright/test';
 // eslint-disable-next-line import/no-unresolved, import/extensions
-// import { generateCustomLayout } from './src/custom_block/my_block';
+// import { generateCustomLayout } from './custom_block/my_block';
 
 require('dotenv').config();
 

@@ -59,7 +59,7 @@
       "src/**/*.ts"
     ],
     "exclude": [
-      "./src/custom_block/my_block.ts"
+      "./custom_block/my_block.ts"
     ]
   }
 }
