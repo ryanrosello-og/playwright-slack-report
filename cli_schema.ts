@@ -6,16 +6,12 @@ export const ZodCliSchema = z.object({
   sendResults: z.enum(['always', 'on-failure']),
   sendUsingBot: z
     .object({
-      channels: z.array(
-        z.object({
-          id: z.string(),
-        }),
-      ),
+      channels: z.array(z.string()).nonempty(),
     })
     .optional(),
   sendUsingWebhook: z
     .object({
-      webhookUrl: z.string(),
+      webhookUrl: z.string().url(),
     })
     .optional(),
   customLayout: z
@@ -34,16 +30,14 @@ export const ZodCliSchema = z.object({
   maxNumberOfFailures: z.number().default(5),
   disableUnfurl: z.boolean().default(false),
   showInThread: z.boolean().default(false),
-  proxy: z.string().optional(),
-  meta: z.array(z.any()).optional(),
+  proxy: z.string().url().optional(),
+  meta: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
 });
 
 export interface ICliConfig {
   sendResults: 'always' | 'on-failure';
   sendUsingBot?: {
-    channels: {
-      id: string;
-    }[];
+    channels: string[];
   };
   sendUsingWebhook?: {
     webhookUrl: string;
@@ -61,4 +55,5 @@ export interface ICliConfig {
   disableUnfurl: boolean;
   showInThread: boolean;
   proxy?: string;
+  meta?: Array<{ key: string; value: string }>;
 }

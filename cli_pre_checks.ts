@@ -15,7 +15,8 @@ const doPreChecks = async (
   if (!fileExists(jsonResultsPath)) {
     return {
       status: 'error',
-      message: `JSON results file does not exist: ${jsonResultsPath}`,
+      message: `JSON results file does not exist: ${jsonResultsPath}:
+      Use --json-results <path> e.g. --json-results="./results.json"`,
     };
   }
 
@@ -26,12 +27,39 @@ const doPreChecks = async (
     };
   }
 
-  const config = getConfig(configFile);
+  const parseResult = { success: false, error: undefined, data: undefined };
+  let config: ICliConfig;
+  try {
+    config = getConfig(configFile);
+    parseResult.data = ZodCliSchema.parse(config);
+    parseResult.success = true;
+  } catch (error) {
+    parseResult.success = false;
+    parseResult.error = error;
+  }
+
+  if (!parseResult.success) {
+    return {
+      status: 'error',
+      message: `Config file is not valid: ${
+        parseResult.error.message ?? JSON.stringify(parseResult.error, null, 2)
+      }`,
+    };
+  }
+
   if (config.sendUsingWebhook && config.sendUsingBot) {
     return {
       status: 'error',
       message:
         'It is not possible to use both sendUsingWebhook and sendUsingBot, choose a single method',
+    };
+  }
+
+  if (!config.sendUsingWebhook && !config.sendUsingBot) {
+    return {
+      status: 'error',
+      message:
+        'You must specify either sendUsingWebhook or sendUsingBot in the config file',
     };
   }
 
@@ -57,8 +85,8 @@ const doPreChecks = async (
   }
 
   if (
-    !config.customLayout?.functionName
-    || !fileExists(config.customLayout.source)
+    config.customLayout?.functionName
+    && !fileExists(config.customLayout.source)
   ) {
     return {
       status: 'error',
@@ -68,8 +96,8 @@ const doPreChecks = async (
   }
 
   if (
-    !config.customLayoutAsync?.functionName
-    || !fileExists(config.customLayoutAsync.source)
+    config.customLayoutAsync?.functionName
+    && !fileExists(config.customLayoutAsync.source)
   ) {
     return {
       status: 'error',
@@ -77,17 +105,7 @@ const doPreChecks = async (
         'customLayoutAsync is not configured correctly - both functionName and source are required',
     };
   }
-  const parseResult = ZodCliSchema.safeParse(config);
-  if (!parseResult.success) {
-    return {
-      status: 'error',
-      message: `Config file is not valid: ${JSON.stringify(
-        parseResult.error,
-        null,
-        2,
-      )}`,
-    };
-  }
+
   return {
     status: 'ok',
     jsonPath: path.resolve(jsonResultsPath),

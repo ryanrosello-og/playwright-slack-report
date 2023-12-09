@@ -8,6 +8,5 @@
       "declaration": true,
       "resolveJsonModule": true,
       "esModuleInterop": true,
-      "strict": true,
   }
 }

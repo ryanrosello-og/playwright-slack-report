@@ -93,7 +93,9 @@ class SlackReporter implements Reporter {
       return;
     }
 
-    const resultSummary = await this.resultsParser.getParsedResults(this.suite.allTests());
+    const resultSummary = await this.resultsParser.getParsedResults(
+      this.suite.allTests(),
+    );
     resultSummary.meta = this.meta;
     const maxRetry = Math.max(...resultSummary.tests.map((o) => o.retry));
     if (

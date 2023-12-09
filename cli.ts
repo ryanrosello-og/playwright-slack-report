@@ -27,14 +27,13 @@ program
     'Generated Playwright json results file e.g. ./results.json',
   )
   .action(async (options) => {
-    console.log({ options });
     const preCheckResult = await doPreChecks(
       options.jsonResults,
       options.config,
     );
     const config: ICliConfig = preCheckResult.config!;
     if (preCheckResult.status === 'error') {
-      console.error(preCheckResult.message);
+      console.error(`❌ ${preCheckResult.message}`);
       process.exit(1);
     }
     const agent = config.proxy ? new HttpsProxyAgent(config.proxy) : undefined;
@@ -46,19 +45,28 @@ program
     if (config.sendUsingBot) {
       const slackClient = new SlackClient(
         new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
-          logLevel: LogLevel.DEBUG,
+          logLevel: config.slackLogLevel,
           agent,
         }),
       );
-      await sendResultsUsingBot({
+      const success = await sendResultsUsingBot({
         resultSummary,
         slackClient,
         config,
       });
+      if (!success) {
+        console.error('❌ Failed to send results to Slack');
+        process.exit(1);
+      } else {
+        console.log('✅ Results sent to Slack');
+        process.exit(0);
+      }
     }
 
     if (config.sendUsingWebhook) {
-      const webhook = new IncomingWebhook(config.sendUsingWebhook.webhookUrl, { agent });
+      const webhook = new IncomingWebhook(config.sendUsingWebhook.webhookUrl, {
+        agent,
+      });
       const slackWebhookClient = new SlackWebhookClient(webhook);
       const webhookResult = await slackWebhookClient.sendMessage({
         customLayout: undefined,
@@ -82,7 +90,7 @@ async function sendResultsUsingBot({
   resultSummary: SummaryResults;
   slackClient: SlackClient;
   config: ICliConfig;
-}): Promise<true> {
+}): Promise<boolean> {
   if (config.slackLogLevel === LogLevel.DEBUG) {
     console.log({ config });
   }
@@ -93,16 +101,17 @@ async function sendResultsUsingBot({
     console.log('⏩ Slack CLI reporter - no failures found');
     return true;
   }
-
+  let summaryResults = resultSummary;
+  summaryResults = { ...resultSummary, meta: config.meta };
   if (config.sendUsingBot) {
     const result = await slackClient.sendMessage({
       options: {
-        channelIds: config.sendUsingBot.channels.map((c) => c.id),
+        channelIds: config.sendUsingBot.channels,
         customLayout: undefined,
         customLayoutAsync: undefined,
         maxNumberOfFailures: config.maxNumberOfFailures,
         disableUnfurl: config.disableUnfurl,
-        summaryResults: resultSummary,
+        summaryResults,
         showInThread: config.showInThread,
       },
     });
@@ -117,6 +126,13 @@ async function sendResultsUsingBot({
           maxNumberOfFailures: config.maxNumberOfFailures,
         });
       }
+    }
+
+    if (
+      result.filter((r) => !r.outcome.includes('✅ Message sent to')).length
+      !== 0
+    ) {
+      return false;
     }
     return true;
   }

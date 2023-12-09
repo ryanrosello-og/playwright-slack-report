@@ -66,7 +66,7 @@ export default class ResultsParser {
     for (const suite of this.result) {
       summary.tests = summary.tests.concat(suite.testSuite.tests);
     }
-    console.log('🚀~ summary:', JSON.stringify(summary, null, 2));
+    // console.log('🚀~ summary:', JSON.stringify(summary, null, 2));
 
     return summary;
   }
