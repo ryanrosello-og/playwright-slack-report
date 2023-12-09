@@ -153,6 +153,17 @@ Next, you will need to configure the cli.  See example below:
   "maxNumberOfFailures": 4,
   "disableUnfurl": true
 }
+
+The config file also supports the follow extra options for using a proxy and sending results via a webhook:
+
+
+```json
+  ...
+  "proxy": "http://proxy.mycompany.com:8080",
+  "sendUsingWebhook": {
+    "webhookUrl": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  ...
 ```
 
 Once you have generated the JSON report and defined your config file, you can send it to Slack using the following command:
