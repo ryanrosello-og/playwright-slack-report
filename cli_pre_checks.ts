@@ -2,7 +2,7 @@ import { existsSync, PathLike, readFileSync } from 'fs';
 import path from 'path';
 import { ICliConfig, ZodCliSchema } from './cli_schema';
 
-const doPreChecks = async (
+export const doPreChecks = async (
   jsonResultsPath: string,
   configFile: string,
 ): Promise<{
@@ -81,28 +81,6 @@ const doPreChecks = async (
     return {
       status: 'error',
       message: 'Missing the webhookUrl in the config file',
-    };
-  }
-
-  if (
-    config.customLayout?.functionName
-    && !fileExists(config.customLayout.source)
-  ) {
-    return {
-      status: 'error',
-      message:
-        'customLayout is not configured correctly - both functionName and source are required',
-    };
-  }
-
-  if (
-    config.customLayoutAsync?.functionName
-    && !fileExists(config.customLayoutAsync.source)
-  ) {
-    return {
-      status: 'error',
-      message:
-        'customLayoutAsync is not configured correctly - both functionName and source are required',
     };
   }
 
