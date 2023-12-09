@@ -4,7 +4,6 @@ import { Command } from 'commander';
 import { LogLevel, WebClient } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { IncomingWebhook } from '@slack/webhook';
-import packageInfo from './package.json';
 import ResultsParser from './src/ResultsParser';
 import SlackClient from './src/SlackClient';
 import doPreChecks from './src/cli/cli_pre_checks';
@@ -15,8 +14,8 @@ import SlackWebhookClient from './src/SlackWebhookClient';
 const program = new Command();
 
 program
-  .name(packageInfo.name)
-  .version(packageInfo.version)
+  .name('playwright-slack-report - cli')
+  .version('1.0.0')
   .description('📦 Send Playwright json results to directly Slack ')
   .option(
     '-c, --config <path>',
