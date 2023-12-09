@@ -125,12 +125,12 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 ---
 # Option C - send your JSON results via CLI
 
-Playwright now provides a nice way to [merge multiple reports from multiple shards](https://playwright.dev/docs/test-sharding#merging-reports-from-multiple-shards).  You can use this feature to generate a single JSON report and then send it to Slack, alleviating the need to have separate messages sent per shard.
+Playwright now provides a nice way to [merge multiple reports from multiple shards](https://playwright.dev/docs/test-sharding#merging-reports-from-multiple-shards).  You can use this feature to generate a single JSON report and then send it to Slack, alleviating the need to have separate messages sent per shard:
 
 
 `npx playwright merge-reports --reporter json ./all-blob-reports`
 
-^ It is important the you set the `--reporter` to `json` otherwise the report will not be generated in the correct format.
+^ It is important that you set the `--reporter` to `json` otherwise the report will not be generated in the correct format.
 
 Next, you will need to configure the cli.  See example below:
 
@@ -141,7 +141,7 @@ Next, you will need to configure the cli.  See example below:
   "sendResults": "always",
   "slackLogLevel": "error",
   "sendUsingBot": {
-    "channels": ["demo" ]
+    "channels": ["demo"]
   },
   "showInThread": true,
   "meta": [

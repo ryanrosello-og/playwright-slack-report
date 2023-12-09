@@ -76,6 +76,8 @@ program
       });
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(webhookResult, null, 2));
+      console.log('✅ Results sent to Slack');
+      process.exit(0);
     }
   });
 
