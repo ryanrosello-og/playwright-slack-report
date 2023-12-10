@@ -4,7 +4,7 @@ export type SummaryResults = {
   flaky: number | undefined;
   skipped: number;
   failures: Array<failure>;
-  meta?: Array<{ key: string; value: string }>;
+  meta?: Meta;
   tests: Array<{
     suiteName: string;
     name: string;
@@ -23,6 +23,8 @@ export type SummaryResults = {
     }[];
   }>;
 };
+
+export type Meta = Array<{ key: string; value: string }>;
 
 export type failure = {
   test: string;

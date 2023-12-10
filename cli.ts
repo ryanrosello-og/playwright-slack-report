@@ -8,7 +8,7 @@ import ResultsParser from './src/ResultsParser';
 import SlackClient from './src/SlackClient';
 import doPreChecks from './src/cli/cli_pre_checks';
 import { ICliConfig } from './src/cli/cli_schema';
-import { SummaryResults } from './src';
+import { Meta, SummaryResults } from './src';
 import SlackWebhookClient from './src/SlackWebhookClient';
 
 const program = new Command();
@@ -67,12 +67,15 @@ program
         agent,
       });
       const slackWebhookClient = new SlackWebhookClient(webhook);
+      let summaryResults = resultSummary;
+      const meta = replaceEnvVars(config.meta);
+      summaryResults = { ...resultSummary, meta };
       const webhookResult = await slackWebhookClient.sendMessage({
         customLayout: undefined,
         customLayoutAsync: undefined,
         maxNumberOfFailures: config.maxNumberOfFailures,
         disableUnfurl: config.disableUnfurl,
-        summaryResults: resultSummary,
+        summaryResults,
       });
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(webhookResult, null, 2));
@@ -103,7 +106,8 @@ async function sendResultsUsingBot({
     return true;
   }
   let summaryResults = resultSummary;
-  summaryResults = { ...resultSummary, meta: config.meta };
+  const meta = replaceEnvVars(config.meta);
+  summaryResults = { ...resultSummary, meta };
   if (config.sendUsingBot) {
     const result = await slackClient.sendMessage({
       options: {
@@ -138,4 +142,25 @@ async function sendResultsUsingBot({
     return true;
   }
   throw new Error('sendUsingBot config is not set');
+}
+
+function replaceEnvVars(originalMeta: Meta) {
+  const newMeta: Meta = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const m of originalMeta) {
+    let metaValue = m.value;
+    if (m.value.startsWith('__ENV')) {
+      const environmentVarName = m.value.replace('__ENV_', '');
+      if (process.env[environmentVarName]) {
+        metaValue = process.env[environmentVarName];
+      } else {
+        const warningMessage = `❌ Environment variable [${environmentVarName}] was not set.
+        This variable was found in the [meta] section of the config file, ensure the variable is set in your environment.`;
+        console.log(warningMessage);
+        metaValue = warningMessage;
+      }
+    }
+    newMeta.push({ key: m.key, value: metaValue });
+  }
+  return newMeta;
 }
