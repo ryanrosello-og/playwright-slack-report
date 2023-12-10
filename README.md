@@ -154,10 +154,12 @@ Next, you will need to configure the cli.  See example below:
   "maxNumberOfFailures": 4,
   "disableUnfurl": true
 }
+```
 
 The config file also supports the follow extra options:
 * `proxy` - String representation of your proxy server.
 * `sendUsingWebhook` - Object containing the webhook url to send the results to
+
 
 
 ```json
@@ -184,12 +186,12 @@ Once you have generated the JSON report and defined your config file, you can se
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright-slack-report -c cli_config.json -j ./merged_tests_results.json`
 
-Both the -c and -j options are required.  The -c option is the path to your config file and the -j option is the path to your merged JSON report.
+Both the `-c` and `-j` options are required.  The `-c` option is the path to your config file and the `-j` option is the path to your merged JSON report.
 
 ### Additional notes
 * The CLI currently does not support custom layouts 👎🥺
 * The config file for the cli app is stand-alone, which means you no longer need to define the Playwright slack reporter in your `playwright.config.ts` file
-* In order to handle dynamic meta data e.g. environment variables storing your build id, branch name etc, you can use the `meta` option in the config file and use `{__ENV_VARIABLE_NAME}` as its value.  This will be replaced with the actual value of the environment variable at runtime.  See example below:
+* In order to handle dynamic meta data e.g. environment variables storing your build id, branch name etc, you can use the `meta` option in the config file and use the format: `{__ENV_VARIABLE_NAME}` as its value.  This will be replaced with the actual value of the environment variable at runtime.  See example below:
 
 In your `cli_config.json` file:
 
