@@ -1,4 +1,5 @@
 # playwright-slack-report ![Builds](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryanrosello-og/playwright-slack-report/blob/master/LICENSE) [![Coverage Status](https://coveralls.io/repos/github/ryanrosello-og/playwright-slack-report/badge.svg?branch=main)](https://coveralls.io/github/ryanrosello-og/playwright-slack-report?branch=main)
+[code quatlity badge][![CodeQL](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/github-code-scanning/codeql)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
 
@@ -153,23 +154,74 @@ Next, you will need to configure the cli.  See example below:
   "maxNumberOfFailures": 4,
   "disableUnfurl": true
 }
+```
 
-The config file also supports the follow extra options for using a proxy and sending results via a webhook:
+The config file also supports the follow extra options:
+* `proxy` - String representation of your proxy server.
+* `sendUsingWebhook` - Object containing the webhook url to send the results to
+
 
 
 ```json
-  ...
+{
+  "sendResults": "always",
+  "slackLogLevel": "error",
   "proxy": "http://proxy.mycompany.com:8080",
   "sendUsingWebhook": {
     "webhookUrl": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
   },
-  ...
+  "showInThread": true,
+  "meta": [
+    { "key": "build", "value" : "1.0.0"},
+    { "key": "branch", "value" : "master"},
+    { "key": "commit", "value" : "1234567890"},
+    { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
+  ],
+  "maxNumberOfFailures": 4,
+  "disableUnfurl": true
+}
 ```
 
 Once you have generated the JSON report and defined your config file, you can send it to Slack using the following command:
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright-slack-report -c cli_config.json -j ./merged_tests_results.json`
 
+Both the `-c` and `-j` options are required.  The `-c` option is the path to your config file and the `-j` option is the path to your merged JSON report.
+
+### Additional notes
+* The CLI currently does not support custom layouts 👎🥺
+* The config file for the cli app is stand-alone, which means you no longer need to define the Playwright slack reporter in your `playwright.config.ts` file
+* In order to handle dynamic meta data e.g. environment variables storing your build id, branch name etc, you can use the `meta` option in the config file and use the format: `{__ENV_VARIABLE_NAME}` as its value.  This will be replaced with the actual value of the environment variable at runtime.  See example below:
+
+In your `cli_config.json` file:
+
+`__ENV_BUILD_ID` is equivalent to `process.env.BUILD_ID`.  This will be automatically handled for you.
+
+You will encounter the following error if the environment variable is not defined:
+
+```bash
+❌ Environment variable [blah] was not set.
+        This variable was found in the [meta] section of the config file, ensure the variable is set in your environment.
+```
+
+```json
+{
+  "sendResults": "always",
+  "slackLogLevel": "error",
+  "sendUsingBot": {
+    "channels": ["demo"]
+  },
+  "showInThread": true,
+  "meta": [
+    { "key": "build", "value" : "{__ENV_BUILD_ID}"},
+    { "key": "branch", "value" : "{__ENV_BRANCH_NAME}"},
+    { "key": "commit", "value" : "{__ENV_COMMIT_ID}"},
+    { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
+  ],
+  "maxNumberOfFailures": 4,
+  "disableUnfurl": true
+}
+```
 
 # ⚙️ Configuration
 
