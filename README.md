@@ -184,9 +184,9 @@ The config file also supports the follow extra options:
 
 Once you have generated the JSON report and defined your config file, you can send it to Slack using the following command:
 
-`SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright-slack-report -c cli_config.json -j ./merged_tests_results.json`
+`SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright-slack-report -c cli_config.json -j > merged_tests_results.json`
 
-Both the `-c` and `-j` options are required.  The `-c` option is the path to your config file and the `-j` option is the path to your merged JSON report.
+Both the `-c` and `-j` options are required.  The `-c` option is the path to your config file and the `-j` option is the path to your merged JSON report.  You will also need to pipe the output to a json file, using the `>` operator.
 
 ### Additional notes
 * The CLI currently does not support custom layouts 👎🥺
@@ -202,6 +202,45 @@ You will encounter the following error if the environment variable is not define
 ```bash
 ❌ Environment variable [blah] was not set.
         This variable was found in the [meta] section of the config file, ensure the variable is set in your environment.
+```
+
+### Sample Github Actions workflow
+
+
+```yaml
+  ...
+
+  merge-reports:
+    # Merge reports after playwright-tests, even if some shards have failed
+    if: always()
+    needs: [playwright-tests]
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Download blob reports from GitHub Actions Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: all-blob-reports
+        path: all-blob-reports
+
+    - name: Merge into JSON Report
+      run: npx playwright merge-reports --reporter json ./all-blob-reports > merged_tests_results.json
+
+    - name: View merged results
+      run: cat ${GITHUB_WORKSPACE}/merged_tests_results.json
+
+    - name: Send report to Slack using CLI
+      env:
+        SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_TOKEN }}
+      run: npx playwright-slack-report --config="${GITHUB_WORKSPACE}/cli_config.json" --json-results="${GITHUB_WORKSPACE}/send_this.json"
+  ...
 ```
 
 ```json

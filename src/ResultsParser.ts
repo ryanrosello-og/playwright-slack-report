@@ -50,7 +50,7 @@ export default class ResultsParser {
     const data = fs.readFileSync(filePath, 'utf-8');
     const parsedData: JSONResult = JSON.parse(data);
 
-    const { retries } = parsedData.config.projects[0];
+    const retries = parsedData.config.projects[0]?.retries || 0;
     await this.parseTestSuite(parsedData.suites, retries);
 
     const failures = await this.getFailures();
