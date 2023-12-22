@@ -190,7 +190,26 @@ Both the `-c` and `-j` options are required.  The `-c` option is the path to you
 ### Additional notes
 * The CLI currently does not support custom layouts 👎🥺
 * The config file for the cli app is stand-alone, which means you no longer need to define the Playwright slack reporter in your `playwright.config.ts` file
-* In order to handle dynamic meta data e.g. environment variables storing your build id, branch name etc, you can use the `meta` option in the config file and use the format: `{__ENV_VARIABLE_NAME}` as its value.  This will be replaced with the actual value of the environment variable at runtime.  See example below:
+* In order to handle dynamic meta data e.g. environment variables storing your build id, branch name etc, you can use the `meta` option in the config file and use the format: `__ENV_VARIABLE_NAME` as its value.  This will be replaced with the actual value of the environment variable at runtime.  See example below:
+
+```json
+{
+  "sendResults": "always",
+  "slackLogLevel": "error",
+  "sendUsingBot": {
+    "channels": ["demo"]
+  },
+  "showInThread": true,
+  "meta": [
+    { "key": "build", "value" : "__ENV_BUILD_ID"},
+    { "key": "branch", "value" : "__ENV_BRANCH_NAME"},
+    { "key": "commit", "value" : "__ENV_COMMIT_ID"},
+    { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
+  ],
+  "maxNumberOfFailures": 4,
+  "disableUnfurl": true
+}
+```
 
 In your `cli_config.json` file:
 
@@ -242,26 +261,8 @@ You will encounter the following error if the environment variable is not define
   ...
 ```
 
-```json
-{
-  "sendResults": "always",
-  "slackLogLevel": "error",
-  "sendUsingBot": {
-    "channels": ["demo"]
-  },
-  "showInThread": true,
-  "meta": [
-    { "key": "build", "value" : "{__ENV_BUILD_ID}"},
-    { "key": "branch", "value" : "{__ENV_BRANCH_NAME}"},
-    { "key": "commit", "value" : "{__ENV_COMMIT_ID}"},
-    { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
-  ],
-  "maxNumberOfFailures": 4,
-  "disableUnfurl": true
-}
-```
 
-# ⚙️ Configuration
+# ⚙️ Configuration (applicable for Option A and Option B)
 
 An example advanced configuration is shown below:
 
