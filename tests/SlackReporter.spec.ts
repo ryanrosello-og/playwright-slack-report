@@ -261,6 +261,28 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
+  test('showInThread only supported for bots not webhooks', async ({
+    fakeSlackReporter,
+    suite,
+    fullConfig,
+  }) => {
+    delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
+      [
+        '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
+        { slackWebHookUrl: 'https://hooks.slack.com/services/1234', showInThread: true },
+      ],
+    ];
+    fakeSlackReporter.onBegin(cloneFullConfig, suite);
+
+    const result = fakeSlackReporter.preChecks();
+    expect(result).toEqual({
+      okToProceed: false,
+      message: '❌ The showInThread feature is only supported when using slackOAuthToken or process.env.SLACK_BOT_USER_OAUTH_TOKEN',
+    });
+  });
+
   test('okToProceed flag is set to false when the custom layout provided is not a Function', async ({
     fakeSlackReporter,
     suite,
