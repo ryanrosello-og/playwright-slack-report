@@ -12,6 +12,7 @@ const test = base.extend<{ summaryResults: SummaryResults }>({
     skipped: 1,
     failures: [
       {
+        suite: 'smoke',
         test: 'test',
         failureReason: 'Unexpected error',
       },
@@ -86,7 +87,7 @@ test.describe('SlackWebhookClient.sendMessage()', () => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*test*\n        \n>Unexpected error',
+            text: '*smoke > test*\n        \n>Unexpected error',
           },
         },
       ],

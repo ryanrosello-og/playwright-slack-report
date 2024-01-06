@@ -56,7 +56,7 @@ const generateFailures = async (
   );
 
   for (let i = 0; i < numberOfFailuresToShow; i += 1) {
-    const { failureReason, test } = summaryResults.failures[i];
+    const { failureReason, test, suite } = summaryResults.failures[i];
     const formattedFailure = failureReason
       .substring(0, maxNumberOfFailureLength)
       .split('\n')
@@ -66,7 +66,7 @@ const generateFailures = async (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${test}*
+        text: `*${suite} > ${test}*
         \n${formattedFailure}`,
       },
     });

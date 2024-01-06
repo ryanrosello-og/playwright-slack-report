@@ -167,6 +167,7 @@ export default class ResultsParser {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
             failures.push({
+              suite: test.suiteName,
               test: ResultsParser.getTestName(test),
               failureReason: test.reason,
             });
