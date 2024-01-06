@@ -51,7 +51,10 @@ export default class ResultsParser {
     const parsedData: JSONResult = JSON.parse(data);
 
     const retries = parsedData.config.projects[0]?.retries || 0;
-    await this.parseTestSuite(parsedData.suites, retries);
+    for (const suite of parsedData.suites) {
+      // eslint-disable-next-line no-await-in-loop
+      await this.parseTestSuite(suite, retries);
+    }
 
     const failures = await this.getFailures();
     const summary: SummaryResults = {
@@ -66,44 +69,33 @@ export default class ResultsParser {
     for (const suite of this.result) {
       summary.tests = summary.tests.concat(suite.testSuite.tests);
     }
-    // console.log('🚀~ summary:', JSON.stringify(summary, null, 2));
 
     return summary;
   }
 
-  async parseTestSuite(suites: any, retries: number, suiteIndex = 0) {
+  async parseTestSuite(suites: any, retries: number) {
     let testResults = [];
-    if (suites[0].suites?.length > 0) {
+
+    // if it has direct specs
+    if (suites.specs?.length > 0) {
       testResults = await this.parseTests(
-        suites[0].title,
-        suites[0].specs,
+        suites.title,
+        suites.specs,
         retries,
       );
       this.updateResults({
         testSuite: {
-          title: suites[0].title,
+          title: suites.title ?? suites.file,
           tests: testResults,
         },
       });
-      await this.parseTestSuite(
-        suites[suiteIndex].suites,
-        retries,
-        (suiteIndex += 1),
-      );
-    } else {
-      testResults = await this.parseTests(
-        suites[0].title,
-        suites[0].specs,
-        retries,
-      );
-      this.updateResults({
-        testSuite: {
-          title: suites[0].title,
-          tests: testResults,
-        },
-      });
-      // eslint-disable-next-line no-useless-return
-      return;
+    }
+
+    if (suites.suites?.length > 0) {
+      for (const suite of suites.suites) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.parseTestSuite(suite, retries);
+      }
     }
   }
 
