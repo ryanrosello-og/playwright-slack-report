@@ -10,9 +10,9 @@ test.describe('SlackClient.generateBlocks()', () => {
         flaky: undefined,
         skipped: 0,
         failures: [
-          { test: 'test', failureReason: 'message' },
-          { test: 'test2', failureReason: 'message' },
-          { test: 'test3', failureReason: 'message' },
+          { suite: 'smoke', test: 'test', failureReason: 'message' },
+          { suite: 'smoke', test: 'test2', failureReason: 'message' },
+          { suite: 'smoke', test: 'test3', failureReason: 'message' },
         ],
         tests: [],
       },
@@ -35,9 +35,9 @@ test.describe('SlackClient.generateBlocks()', () => {
         flaky: undefined,
         skipped: 0,
         failures: [
-          { test: 'test', failureReason: 'message' },
-          { test: 'test2', failureReason: 'message' },
-          { test: 'test3', failureReason: 'message' },
+          { suite: 'smoke', test: 'test', failureReason: 'message' },
+          { suite: 'smoke', test: 'test2', failureReason: 'message' },
+          { suite: 'smoke', test: 'test3', failureReason: 'message' },
         ],
         tests: [],
       },
@@ -59,7 +59,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         passed: 1,
         flaky: undefined,
         skipped: 1,
-        failures: [{ test: 'test', failureReason: 'message' }],
+        failures: [{ suite: 'smoke', test: 'test', failureReason: 'message' }],
         tests: [],
       },
       2,
@@ -86,7 +86,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*test*\n        \n>message',
+          text: '*smoke > test*\n        \n>message',
         },
       },
     ]);
@@ -99,7 +99,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         passed: 1,
         flaky: 1,
         skipped: 1,
-        failures: [{ test: 'test', failureReason: 'message' }],
+        failures: [{ suite: 'smoke', test: 'test', failureReason: 'message' }],
         tests: [],
       },
       2,
@@ -126,7 +126,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*test*\n        \n>message',
+          text: '*smoke > test*\n        \n>message',
         },
       },
     ]);

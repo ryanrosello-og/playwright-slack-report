@@ -27,6 +27,7 @@ export type SummaryResults = {
 export type Meta = Array<{ key: string; value: string }>;
 
 export type failure = {
+  suite: string;
   test: string;
   failureReason: string;
 };

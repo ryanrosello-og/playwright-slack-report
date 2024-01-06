@@ -55,6 +55,14 @@ export const doPreChecks = async (
     };
   }
 
+  if (config.sendUsingWebhook && config.showInThread) {
+    return {
+      status: 'error',
+      message:
+        'The showInThread feature is only supported when using sendUsingBot is configured',
+    };
+  }
+
   if (!config.sendUsingWebhook && !config.sendUsingBot) {
     return {
       status: 'error',

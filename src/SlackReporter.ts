@@ -189,6 +189,14 @@ class SlackReporter implements Reporter {
       };
     }
 
+    if (this.slackWebHookUrl && this.showInThread) {
+      return {
+        okToProceed: false,
+        message:
+          '❌ The showInThread feature is only supported when using slackOAuthToken or process.env.SLACK_BOT_USER_OAUTH_TOKEN',
+      };
+    }
+
     if (
       !this.sendResults
       || !['always', 'on-failure', 'off'].includes(this.sendResults)

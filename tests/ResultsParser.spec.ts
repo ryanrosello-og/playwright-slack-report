@@ -508,7 +508,7 @@ test.describe('ResultsParser', () => {
     ).toEqual('Login [Project Name: nightly_regression] using chrome');
   });
 
-  test('parse test results from json file', async ({}) => {
+  test('parse test results from json file that has retries, flakies and skipped tests', async ({}) => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(
       __dirname,
@@ -524,5 +524,23 @@ test.describe('ResultsParser', () => {
     expect(resultSummary.passed).toEqual(2);
     expect(resultSummary.failures.length).toEqual(3);
     expect(resultSummary.tests.length).toEqual(10);
+  });
+
+  test('parse test results from a complicated json file', async ({}) => {
+    const resultsParser = new ResultsParser();
+    const validTestResults = path.join(
+      __dirname,
+      'test_data',
+      'valid_test_results_complex.json',
+    );
+    const resultSummary = await resultsParser.parseFromJsonFile(
+      validTestResults,
+    );
+    expect(resultSummary.failed).toEqual(1);
+    expect(resultSummary.flaky).toEqual(0);
+    expect(resultSummary.skipped).toEqual(0);
+    expect(resultSummary.passed).toEqual(6);
+    expect(resultSummary.failures.length).toEqual(1);
+    expect(resultSummary.tests.length).toEqual(7);
   });
 });
