@@ -306,6 +306,10 @@ An example advanced configuration is shown below:
 
 ### **channels**
 An array of Slack channels to post to, at least one channel is required
+### **onSuccessChannels**
+(Optional) An array of Slack channels to post to when tests have passed. Value from `channels` is used if not defined here
+### **onFailureChannels**
+(Optional) An array of Slack channels to post to when tests have failed. Value from `channels` is used if not defined here
 ### **sendResults**
 Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is required:
   * **always** - will send the results to Slack at completion of the test run
