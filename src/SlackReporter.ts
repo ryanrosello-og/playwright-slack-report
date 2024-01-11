@@ -29,7 +29,9 @@ class SlackReporter implements Reporter {
 
   private sendResults: 'always' | 'on-failure' | 'off' = 'on-failure';
 
-  private slackChannels: string[] = [];
+  private onSuccessSlackChannels: string[] = [];
+
+  private onFailureSlackChannels: string[] = [];
 
   private slackLogLevel: LogLevel | undefined;
 
@@ -68,7 +70,10 @@ class SlackReporter implements Reporter {
       this.sendResults = slackReporterConfig.sendResults || 'always';
       this.customLayout = slackReporterConfig.layout;
       this.customLayoutAsync = slackReporterConfig.layoutAsync;
-      this.slackChannels = slackReporterConfig.channels;
+      this.onSuccessSlackChannels
+        = slackReporterConfig.onSuccessChannels || slackReporterConfig.channels;
+      this.onFailureSlackChannels
+        = slackReporterConfig.onFailureChannels || slackReporterConfig.channels;
       this.maxNumberOfFailuresToShow
         = slackReporterConfig.maxNumberOfFailuresToShow || 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
@@ -98,12 +103,14 @@ class SlackReporter implements Reporter {
     );
     resultSummary.meta = this.meta;
     const maxRetry = Math.max(...resultSummary.tests.map((o) => o.retry));
+    const testsFailed = resultSummary.tests.some(
+      (z) => (z.status === 'failed' || z.status === 'timedOut')
+        && z.retry === maxRetry,
+    );
+
     if (
       this.sendResults === 'on-failure'
-      && resultSummary.tests.filter(
-        (z) => (z.status === 'failed' || z.status === 'timedOut')
-          && z.retry === maxRetry,
-      ).length === 0
+      && !testsFailed
     ) {
       this.log('⏩ Slack reporter - no failures found');
       return;
@@ -134,9 +141,11 @@ class SlackReporter implements Reporter {
         ),
       );
 
+      const slackChannels = testsFailed ? this.onFailureSlackChannels : this.onSuccessSlackChannels;
+
       const result = await slackClient.sendMessage({
         options: {
-          channelIds: this.slackChannels,
+          channelIds: slackChannels,
           customLayout: this.customLayout,
           customLayoutAsync: this.customLayoutAsync,
           maxNumberOfFailures: this.maxNumberOfFailuresToShow,
@@ -208,10 +217,20 @@ class SlackReporter implements Reporter {
       };
     }
 
-    if (!this.sendResults || this.slackChannels?.length === 0) {
+    const noSuccessChannelsProvided = this.sendResults === 'always' && (!this.onSuccessSlackChannels || this.onSuccessSlackChannels.length === 0);
+    const noFailureChannelsProvided = ['always', 'on-failure'].includes(this.sendResults) && (!this.onFailureSlackChannels || this.onFailureSlackChannels.length === 0);
+
+    if (noSuccessChannelsProvided) {
       return {
         okToProceed: false,
-        message: '❌ Slack channel(s) was not provided in the config',
+        message: '❌ Slack channel(s) for successful tests notifications was not provided in the config',
+      };
+    }
+
+    if (noFailureChannelsProvided) {
+      return {
+        okToProceed: false,
+        message: '❌ Slack channel(s) for failed tests notifications was not provided in the config',
       };
     }
 

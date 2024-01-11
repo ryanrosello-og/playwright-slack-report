@@ -257,7 +257,7 @@ test.describe('SlackReporter - preChecks()', () => {
     const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: '❌ Slack channel(s) was not provided in the config',
+      message: '❌ Slack channel(s) for successful tests notifications was not provided in the config',
     });
   });
 
@@ -292,7 +292,10 @@ test.describe('SlackReporter - preChecks()', () => {
     cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
-        { layout: 'not a function' },
+        {
+          layout: 'not a function',
+          channels: ['zeb', 'pw'],
+        },
       ],
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
@@ -313,7 +316,10 @@ test.describe('SlackReporter - preChecks()', () => {
     cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
-        { meta: 'not a array' },
+        {
+          meta: 'not a array',
+          channels: ['zeb', 'pw'],
+        },
       ],
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
