@@ -1,9 +1,8 @@
-name: Publish package to NPM
+name: Node.js Package and Publish
 
 on:
-  push:
-    branches:
-    - main # Push events on main branch
+  release:
+    types: [created]
 
 jobs:
   publish:
@@ -20,4 +19,4 @@ jobs:
         run: npm run build
       - uses: JS-DevTools/npm-publish@v1
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          token: ${{ secrets.npm_token }}    
