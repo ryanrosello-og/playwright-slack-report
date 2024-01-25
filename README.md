@@ -277,7 +277,6 @@ Once you have generated the JSON report and defined your config file, you can se
 Both the `-c` and `-j` options are required.  The `-c` option is the path to your config file and the `-j` option is the path to your merged JSON report.  You will also need to pipe the output to a json file, using the `>` operator.
 
 ### Additional notes
-* The CLI currently does not support custom layouts 👎🥺
 * The config file for the cli app is stand-alone, which means you no longer need to define the Playwright slack reporter in your `playwright.config.ts` file
 * In order to handle dynamic meta data e.g. environment variables storing your build id, branch name etc, you can use the `meta` option in the config file and use the format: `__ENV_VARIABLE_NAME` as its value.  This will be replaced with the actual value of the environment variable at runtime.  See example below:
 
