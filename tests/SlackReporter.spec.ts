@@ -257,7 +257,8 @@ test.describe('SlackReporter - preChecks()', () => {
     const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: '❌ Slack channel(s) for successful tests notifications was not provided in the config',
+      message:
+        '❌ Slack channel(s) for successful tests notifications was not provided in the config',
     });
   });
 
@@ -271,7 +272,10 @@ test.describe('SlackReporter - preChecks()', () => {
     cloneFullConfig.reporter = [
       [
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
-        { slackWebHookUrl: 'https://hooks.slack.com/services/1234', showInThread: true },
+        {
+          slackWebHookUrl: 'https://hooks.slack.com/services/1234',
+          showInThread: true,
+        },
       ],
     ];
     fakeSlackReporter.onBegin(cloneFullConfig, suite);
@@ -279,7 +283,8 @@ test.describe('SlackReporter - preChecks()', () => {
     const result = fakeSlackReporter.preChecks();
     expect(result).toEqual({
       okToProceed: false,
-      message: '❌ The showInThread feature is only supported when using slackOAuthToken or process.env.SLACK_BOT_USER_OAUTH_TOKEN',
+      message:
+        '❌ The showInThread feature is only supported when using slackOAuthToken or process.env.SLACK_BOT_USER_OAUTH_TOKEN',
     });
   });
 

@@ -1,0 +1,20 @@
+{
+  "sendResults": "always",
+  "slackLogLevel": "error",
+  "sendUsingBot": {
+    "channels": ["demo"  ]
+  },
+  "showInThread": true,
+  "meta": [
+    { "key": "build", "value" : "1.0.0"},
+    { "key": "branch", "value" : "master"},
+    { "key": "commit", "value" : "1234567890"},
+    { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
+  ],
+  "maxNumberOfFailures": 1,
+  "disableUnfurl": true,
+  "customLayout": {
+    "source": "./custom_block/fail/cli_block_with_meta.ts",
+    "functionName": "generateCustomLayoutSimpleMeta"
+  }
+}

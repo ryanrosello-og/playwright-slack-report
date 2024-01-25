@@ -38,6 +38,19 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
+  test('throws an error when the custom layout js file cannot be found', async ({}) => {
+    const invalidConfig = path.join(
+      __dirname,
+      'test_data',
+      'invalid_cli_config_custom_layout_not_found.json',
+    );
+    const result = await doPreChecks(validTestResults, invalidConfig);
+    expect(result.status).toEqual('error');
+    expect(result.message).toContain(
+      'Custom layout was not found in path: ./custom_block/fail/cli_block_with_meta.ts',
+    );
+  });
+
   test('throws an error when both sendUsingWebhook and showInThread is true', async ({}) => {
     const invalidConfig = path.join(
       __dirname,
