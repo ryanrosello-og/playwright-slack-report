@@ -113,8 +113,14 @@ async function sendResultsUsingBot({
     const result = await slackClient.sendMessage({
       options: {
         channelIds: config.sendUsingBot.channels,
-        customLayout: await attemptToImportLayout(config),
-        customLayoutAsync: undefined,
+        customLayout: await attemptToImportLayout(
+          config.customLayout?.source,
+          config.customLayout?.functionName,
+        ),
+        customLayoutAsync: await attemptToImportLayout(
+          config.customLayoutAsync?.source,
+          config.customLayoutAsync?.functionName,
+        ),
         maxNumberOfFailures: config.maxNumberOfFailures,
         disableUnfurl: config.disableUnfurl,
         summaryResults,
@@ -145,17 +151,15 @@ async function sendResultsUsingBot({
   throw new Error('sendUsingBot config is not set');
 }
 
-async function attemptToImportLayout(config: ICliConfig) {
-  if (config.customLayout) {
+async function attemptToImportLayout(source: string, functionName: string) {
+  if (source && functionName) {
     try {
-      const importPath = path.resolve(config.customLayout.source);
+      const importPath = path.resolve(source);
       const layout = await import(importPath);
-      if (layout.default[config.customLayout.functionName]) {
-        return layout.default[config.customLayout.functionName];
+      if (layout.default[functionName]) {
+        return layout.default[functionName];
       }
-      console.error(
-        `Function [${config.customLayout.functionName}] was not found in [${config.customLayout.source}]`,
-      );
+      console.error(`Function [${functionName}] was not found in [${source}]`);
     } catch (error) {
       console.error(error);
     }
