@@ -115,3 +115,5 @@ dist/
 bot
 playwright-report/
 tests/this.spec.ts
+bag.json
+bag2.json

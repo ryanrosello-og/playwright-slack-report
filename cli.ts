@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { LogLevel, WebClient } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { IncomingWebhook } from '@slack/webhook';
+import path from 'path';
 import ResultsParser from './src/ResultsParser';
 import SlackClient from './src/SlackClient';
 import doPreChecks from './src/cli/cli_pre_checks';
@@ -112,8 +113,14 @@ async function sendResultsUsingBot({
     const result = await slackClient.sendMessage({
       options: {
         channelIds: config.sendUsingBot.channels,
-        customLayout: undefined,
-        customLayoutAsync: undefined,
+        customLayout: await attemptToImportLayout(
+          config.customLayout?.source,
+          config.customLayout?.functionName,
+        ),
+        customLayoutAsync: await attemptToImportLayout(
+          config.customLayoutAsync?.source,
+          config.customLayoutAsync?.functionName,
+        ),
         maxNumberOfFailures: config.maxNumberOfFailures,
         disableUnfurl: config.disableUnfurl,
         summaryResults,
@@ -142,6 +149,22 @@ async function sendResultsUsingBot({
     return true;
   }
   throw new Error('sendUsingBot config is not set');
+}
+
+async function attemptToImportLayout(source: string, functionName: string) {
+  if (source && functionName) {
+    try {
+      const importPath = path.resolve(source);
+      const layout = await import(importPath);
+      if (layout.default[functionName]) {
+        return layout.default[functionName];
+      }
+      console.error(`Function [${functionName}] was not found in [${source}]`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  return undefined;
 }
 
 function replaceEnvVars(originalMeta: Meta) {

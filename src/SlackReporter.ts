@@ -108,10 +108,7 @@ class SlackReporter implements Reporter {
         && z.retry === maxRetry,
     );
 
-    if (
-      this.sendResults === 'on-failure'
-      && !testsFailed
-    ) {
+    if (this.sendResults === 'on-failure' && !testsFailed) {
       this.log('⏩ Slack reporter - no failures found');
       return;
     }
@@ -141,7 +138,9 @@ class SlackReporter implements Reporter {
         ),
       );
 
-      const slackChannels = testsFailed ? this.onFailureSlackChannels : this.onSuccessSlackChannels;
+      const slackChannels = testsFailed
+        ? this.onFailureSlackChannels
+        : this.onSuccessSlackChannels;
 
       const result = await slackClient.sendMessage({
         options: {
@@ -217,20 +216,28 @@ class SlackReporter implements Reporter {
       };
     }
 
-    const noSuccessChannelsProvided = this.sendResults === 'always' && (!this.onSuccessSlackChannels || this.onSuccessSlackChannels.length === 0);
-    const noFailureChannelsProvided = ['always', 'on-failure'].includes(this.sendResults) && (!this.onFailureSlackChannels || this.onFailureSlackChannels.length === 0);
+    const noSuccessChannelsProvided
+      = this.sendResults === 'always'
+      && (!this.onSuccessSlackChannels
+        || this.onSuccessSlackChannels.length === 0);
+    const noFailureChannelsProvided
+      = ['always', 'on-failure'].includes(this.sendResults)
+      && (!this.onFailureSlackChannels
+        || this.onFailureSlackChannels.length === 0);
 
     if (noSuccessChannelsProvided) {
       return {
         okToProceed: false,
-        message: '❌ Slack channel(s) for successful tests notifications was not provided in the config',
+        message:
+          '❌ Slack channel(s) for successful tests notifications was not provided in the config',
       };
     }
 
     if (noFailureChannelsProvided) {
       return {
         okToProceed: false,
-        message: '❌ Slack channel(s) for failed tests notifications was not provided in the config',
+        message:
+          '❌ Slack channel(s) for failed tests notifications was not provided in the config',
       };
     }
 

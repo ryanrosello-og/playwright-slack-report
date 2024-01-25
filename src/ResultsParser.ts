@@ -78,11 +78,7 @@ export default class ResultsParser {
 
     // if it has direct specs
     if (suites.specs?.length > 0) {
-      testResults = await this.parseTests(
-        suites.title,
-        suites.specs,
-        retries,
-      );
+      testResults = await this.parseTests(suites.title, suites.specs, retries);
       this.updateResults({
         testSuite: {
           title: suites.title ?? suites.file,

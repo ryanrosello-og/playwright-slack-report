@@ -47,6 +47,13 @@ export const doPreChecks = async (
     };
   }
 
+  if (config.customLayout?.source && !fileExists(config.customLayout?.source)) {
+    return {
+      status: 'error',
+      message: `Custom layout was not found in path: ${config.customLayout.source}`,
+    };
+  }
+
   if (config.sendUsingWebhook && config.sendUsingBot) {
     return {
       status: 'error',
