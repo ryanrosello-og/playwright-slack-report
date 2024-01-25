@@ -157,9 +157,94 @@ Next, you will need to configure the cli.  See example below:
 
 The config file also supports the follow extra options:
 * `proxy` - String representation of your proxy server.
-* `sendUsingWebhook` - Object containing the webhook url to send the results to
+* `sendUsingWebhook` - Object containing the webhook url to send the results to (see example below)
+* `customLayout` - Object specifying the custom layout relative path and function name:
+```
+  "customLayout": {
+    "source": "./custom_block/cli_block_with_meta.ts",
+    "functionName": "generateCustomLayoutSimpleMeta"
+  }
+```
+* `customLayoutAsync` - Similar to `customLayout`, except this key requires an async function:
+```
+  "customLayoutAsync": {
+    "source": "./custom_block/cli_block_with_meta.ts",
+    "functionName": "generateCustomAsyncLayoutSimpleMeta"
+  }
+```
 
 
+The customLayout typescript file must export a function name using the `exports` syntax e.g. `exports.generateCustomLayoutSimpleMeta = generateCustomLayoutSimpleMeta;`
+This file should not contain any `import` statements otherwise it will complain.  See example below:
+<details>
+  <summary>Example custom layout for CLI</summary>
+
+  ```js
+  function generateCustomLayoutSimpleMeta(summaryResults) {
+    const meta = [];
+    if (summaryResults.meta) {
+      for (let i = 0; i < summaryResults.meta.length; i += 1) {
+        const { key, value } = summaryResults.meta[i];
+        meta.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `\n*${key}* :🙌\t${value}`,
+          },
+        });
+      }
+    }
+    return [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            summaryResults.failed === 0
+              ? ':tada: All tests passed!'
+              : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+        },
+      },
+      ...meta,
+    ];
+  }
+
+  async function generateCustomAsyncLayoutSimpleMeta(summaryResults) {
+    const meta = [];
+    // do some async stuff here
+    if (summaryResults.meta) {
+      for (let i = 0; i < summaryResults.meta.length; i += 1) {
+        const { key, value } = summaryResults.meta[i];
+        meta.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `\n*${key}* :😍\t${value}`,
+          },
+        });
+      }
+    }
+    return [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            summaryResults.failed === 0
+              ? ':tada: All tests passed!'
+              : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+        },
+      },
+      ...meta,
+    ];
+  }
+  exports.generateCustomLayoutSimpleMeta = generateCustomLayoutSimpleMeta;
+  exports.generateCustomAsyncLayoutSimpleMeta = generateCustomAsyncLayoutSimpleMeta;
+  ```
+</details>
+
+
+*Config with extra options*
 
 ```json
 {
@@ -177,7 +262,11 @@ The config file also supports the follow extra options:
     { "key": "results", "value" : "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"}
   ],
   "maxNumberOfFailures": 4,
-  "disableUnfurl": true
+  "disableUnfurl": true,
+  "customLayout": {
+    "source": "./custom_block/cli_block_with_meta.ts",
+    "functionName": "generateCustomLayoutSimpleMeta"
+  }
 }
 ```
 
