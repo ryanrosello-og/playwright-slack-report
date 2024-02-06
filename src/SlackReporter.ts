@@ -225,7 +225,10 @@ class SlackReporter implements Reporter {
       && (!this.onFailureSlackChannels
         || this.onFailureSlackChannels.length === 0);
 
-    if (noSuccessChannelsProvided) {
+    if (
+      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
+      && noSuccessChannelsProvided
+    ) {
       return {
         okToProceed: false,
         message:
@@ -233,7 +236,10 @@ class SlackReporter implements Reporter {
       };
     }
 
-    if (noFailureChannelsProvided) {
+    if (
+      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
+      && noFailureChannelsProvided
+    ) {
       return {
         okToProceed: false,
         message:
