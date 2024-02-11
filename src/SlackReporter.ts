@@ -102,11 +102,7 @@ class SlackReporter implements Reporter {
       this.suite.allTests(),
     );
     resultSummary.meta = this.meta;
-    const maxRetry = Math.max(...resultSummary.tests.map((o) => o.retry));
-    const testsFailed = resultSummary.tests.some(
-      (z) => (z.status === 'failed' || z.status === 'timedOut')
-        && z.retry === maxRetry,
-    );
+    const testsFailed = resultSummary.failed > 0;
 
     if (this.sendResults === 'on-failure' && !testsFailed) {
       this.log('⏩ Slack reporter - no failures found');
