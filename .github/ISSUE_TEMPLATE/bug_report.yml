@@ -1,0 +1,57 @@
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+name: Bug report
+description: Create a bug report to help us improve Playwright Slack Reporter
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us improve the Playwright Slack Reporter! 🙏 Please follow the sections in the template and provide as much information as possible about your problem.
+        Learn more about the best practices for writing a bug report here: https://pris.ly/d/bug-reports
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce (please include a snippet of your Playwright Slack Reporter configuration)
+      description: Steps to reproduce the behavior
+      value: |
+        <!--
+        1. Set the config to '...'
+        2. Change '....'
+        3. Run '....'
+        4. See error
+        -->
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment & setup
+      description: In which environment does the problem occur?
+      value: |
+        - OS: <!--[e.g. macOS, Windows, Debian, CentOS, ...]-->
+        - Node.js version: <!--[Run `node -v` to see your Node.js version]-->
+    validations:
+      required: true
+  - type: textarea
+    id: playwright-slack-report
+    attributes:
+      label: playwright-slack-report version
+      description: Which version of playwright-slack-report are you using?
+      value: |
+        ```
+
+        ```
+    validations:
+      required: true
