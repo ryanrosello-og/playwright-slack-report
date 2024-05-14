@@ -75,7 +75,9 @@ class SlackReporter implements Reporter {
       this.onFailureSlackChannels
         = slackReporterConfig.onFailureChannels || slackReporterConfig.channels;
       this.maxNumberOfFailuresToShow
-        = slackReporterConfig.maxNumberOfFailuresToShow || 10;
+        = slackReporterConfig.maxNumberOfFailuresToShow !== undefined
+          ? slackReporterConfig.maxNumberOfFailuresToShow
+          : 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.slackWebHookUrl = slackReporterConfig.slackWebHookUrl || undefined;
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
