@@ -434,6 +434,8 @@ test.describe('ResultsParser', () => {
       retries: 0,
       timeout: 0,
       title: '',
+      tags: [],
+      type: 'test',
     };
     const results = await resultsParser.getParsedResults([testA]);
     expect(results).toEqual({

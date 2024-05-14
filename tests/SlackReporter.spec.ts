@@ -93,7 +93,16 @@ const test = base.extend<{
     _testGroupsCount: 1,
   },
   suite: ({ fullConfig }, use) => {
-    const fakeSuite = {
+    const fakeSuite: {
+      project: any;
+      allTests(): TestCase[];
+      suites: any[];
+      tests: any[];
+      title: string;
+      titlePath(): string[];
+      entries(): Array<Suite | TestCase>;
+      type: 'root' | 'project' | 'file' | 'describe';
+    } = {
       project: fullConfig,
       allTests(): TestCase[] {
         return [];
@@ -104,6 +113,10 @@ const test = base.extend<{
       titlePath(): string[] {
         return [];
       },
+      entries(): Array<TestCase | Suite> {
+        return [];
+      },
+      type: 'file',
     };
     use(fakeSuite);
   },
