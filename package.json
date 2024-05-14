@@ -4,7 +4,7 @@
     "@slack/webhook": "^7.0.1",
     "commander": "^11.1.0",
     "https-proxy-agent": "^7.0.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -16,14 +16,14 @@
     "eslint": "^7.32.0 || ^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "nyc": "^15.1.0",
     "prettier": "^2.7.1",
     "ts-sinon": "^2.0.2",
-    "typescript": "^4.7.4"
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
@@ -35,7 +35,7 @@
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.72",
+  "version": "1.1.73",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },
