@@ -35,7 +35,7 @@
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.72",
+  "version": "1.1.73",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },
