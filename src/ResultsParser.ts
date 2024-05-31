@@ -47,8 +47,16 @@ export default class ResultsParser {
   }
 
   async parseFromJsonFile(filePath: string) {
-    const data = fs.readFileSync(filePath, 'utf-8');
-    const parsedData: JSONResult = JSON.parse(data);
+    let data: string;
+    let parsedData: JSONResult;
+    try {
+      data = fs.readFileSync(filePath, 'utf-8');
+      parsedData = JSON.parse(data);
+    } catch (error) {
+      throw new Error(
+        `Error reading or parsing JSON file [${filePath}]: \n\t${error}`,
+      );
+    }
 
     const retries = parsedData.config.projects[0]?.retries || 0;
     for (const suite of parsedData.suites) {
