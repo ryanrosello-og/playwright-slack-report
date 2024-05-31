@@ -528,6 +528,20 @@ test.describe('ResultsParser', () => {
     expect(resultSummary.tests.length).toEqual(10);
   });
 
+  test('throw an error when the results file is not a valid json', async ({}) => {
+    const resultsParser = new ResultsParser();
+    const validTestResults = path.join(
+      __dirname,
+      'test_data',
+      'invalid_json_results.json',
+    );
+    try {
+      await resultsParser.parseFromJsonFile(validTestResults);
+    } catch (error) {
+      expect(error.toString()).toContain('Error: Error reading or parsing JSON file');
+    }
+  });
+
   test('parse test results from a complicated json file', async ({}) => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(

@@ -111,6 +111,18 @@ class SlackReporter implements Reporter {
       return;
     }
 
+    if (
+      resultSummary.passed === 0
+      && resultSummary.failed === 0
+      && resultSummary.flaky === 0
+      && resultSummary.skipped === 0
+      && resultSummary.failures.length === 0
+      && resultSummary.tests.length === 0
+    ) {
+      this.log('⏩ Slack reporter - Playwright reported : "No tests found"');
+      return;
+    }
+
     const agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
 
     if (this.slackWebHookUrl) {
