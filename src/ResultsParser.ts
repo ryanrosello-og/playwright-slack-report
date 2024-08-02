@@ -168,7 +168,7 @@ export default class ResultsParser {
     const failures: Array<failure> = [];
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
-       if ((test.status === 'failed' && test.expectedStatus !== 'failed') || test.status === 'timedOut') {
+        if ((test.status === 'failed' && test.expectedStatus !== 'failed') || test.status === 'timedOut') {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
             failures.push({
