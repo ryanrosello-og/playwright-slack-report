@@ -560,4 +560,20 @@ test.describe('ResultsParser', () => {
     expect(resultSummary.failures.length).toEqual(1);
     expect(resultSummary.tests.length).toEqual(7);
   });
+
+  test('retrieve expected failure message from annotation', async ({}) => {
+    const resultsParser = new ResultsParser();
+    const result = resultsParser.getExpectedFailure({
+      annotations: [
+        { type: 'fail', description: 'This text will fail' },
+      ],
+    });
+    expect(result).toEqual('This text will fail');
+  });
+
+  test('empty failure message returned if annotation does not exist', async ({}) => {
+    const resultsParser = new ResultsParser();
+    const result = resultsParser.getExpectedFailure({});
+    expect(result).toEqual('');
+  });
 });
