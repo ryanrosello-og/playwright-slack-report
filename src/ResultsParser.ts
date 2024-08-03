@@ -23,6 +23,7 @@ export type testResult = {
   retries: number;
   startedAt: string;
   status: 'passed' | 'failed' | 'timedOut' | 'skipped';
+  expectedStatus?: 'passed' | 'failed' | 'skipped';
   attachments?: {
     body: string | undefined | Buffer;
     contentType: string;
@@ -108,6 +109,7 @@ export default class ResultsParser {
 
     for (const spec of specs) {
       for (const test of spec.tests) {
+        const { expectedStatus } = test;
         for (const result of test.results) {
           testResults.push({
             suiteName,
@@ -125,6 +127,7 @@ export default class ResultsParser {
               ? this.getFailure(result.error.snippet, result.error.stack)
               : '',
             attachments: result.attachments,
+            expectedStatus,
           });
         }
       }
@@ -135,6 +138,14 @@ export default class ResultsParser {
   getFailure(snippet: string, stack: string) {
     const fullError = `${snippet}\r\n${stack || ''}`;
     return this.cleanseReason(fullError);
+  }
+
+  getExpectedFailure(test: any) {
+    const failureReason = test.annotations?.find((f) => f.type === 'fail');
+    if (failureReason) {
+      return failureReason.description;
+    }
+    return '';
   }
 
   async getParsedResults(allTests: Array<TestCase>): Promise<SummaryResults> {
@@ -167,7 +178,11 @@ export default class ResultsParser {
     const failures: Array<failure> = [];
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
-        if (test.status === 'failed' || test.status === 'timedOut') {
+        if (
+          test.status === 'failed'
+          || test.status === 'timedOut'
+          || test.expectedStatus === 'failed'
+        ) {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
             failures.push({
@@ -262,8 +277,12 @@ export default class ResultsParser {
         endedAt: new Date(
           new Date(result.startTime).getTime() + result.duration,
         ).toISOString(),
-        reason: this.safelyDetermineFailure(result),
+        reason:
+          testCase.expectedStatus === 'failed'
+            ? this.getExpectedFailure(testCase)
+            : this.safelyDetermineFailure(result),
         attachments: result.attachments,
+        expectedStatus: testCase.expectedStatus,
       });
     }
     this.updateResults({

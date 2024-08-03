@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@slack/web-api": "^6.9.1",
+    "@slack/web-api": "^7.3.2",
     "@slack/webhook": "^7.0.1",
     "commander": "^11.1.0",
     "https-proxy-agent": "^7.0.5",
@@ -35,7 +35,7 @@
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.81",
+  "version": "1.1.82",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },

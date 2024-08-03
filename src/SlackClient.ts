@@ -166,7 +166,7 @@ export default class SlackClient {
     const chatResponse = await slackWebClient.chat.postMessage({
       channel,
       text: fallbackText,
-      unfurl_link: unfurl,
+      unfurl_links: unfurl,
       blocks,
       thread_ts: threadTimestamp,
     });

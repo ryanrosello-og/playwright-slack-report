@@ -415,7 +415,7 @@ test.describe('ResultsParser', () => {
       [],
     );
     const testA: TestCase = {
-      expectedStatus: 'failed',
+      expectedStatus: 'passed',
       ok(): boolean {
         throw new Error('Function not implemented.');
       },
@@ -455,6 +455,7 @@ test.describe('ResultsParser', () => {
           retries: undefined,
           startedAt: '2021-12-18T09:43:16.000Z',
           endedAt: '2021-12-18T09:43:39.591Z',
+          expectedStatus: 'passed',
           reason:
             'expect(received).toHaveText(expected)\n\nExpected string: "Playwright Fail"\nReceived string: "Playwright"\nCall log:\n  - expect.toHaveText with timeout 1000ms\n  - waiting for selector ".navbar__inner .navbar__title"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n\r\nError: expect(received).toHaveText(expected)\n\nExpected string: "Playwright Fail"\nReceived string: "Playwright"\nCall log:\n  - expect.toHaveText with timeout 1000ms\n  - waiting for selector ".navbar__inner .navbar__title"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n  -   selector resolved to <b class="navbar__title text--truncate">Playwright</b>\n  -   unexpected value "Playwright"\n\n    at /home/ry/_repo/playwright-slack-report/tests/t1.spec.ts:17:23\r\n',
           attachments: [
@@ -517,9 +518,8 @@ test.describe('ResultsParser', () => {
       'test_data',
       'valid_test_results.json',
     );
-    const resultSummary = await resultsParser.parseFromJsonFile(
-      validTestResults,
-    );
+    const resultSummary
+      = await resultsParser.parseFromJsonFile(validTestResults);
     expect(resultSummary.failed).toEqual(3);
     expect(resultSummary.flaky).toEqual(1);
     expect(resultSummary.skipped).toEqual(1);
@@ -538,7 +538,9 @@ test.describe('ResultsParser', () => {
     try {
       await resultsParser.parseFromJsonFile(validTestResults);
     } catch (error) {
-      expect(error.toString()).toContain('Error: Error reading or parsing JSON file');
+      expect(error.toString()).toContain(
+        'Error: Error reading or parsing JSON file',
+      );
     }
   });
 
@@ -549,9 +551,8 @@ test.describe('ResultsParser', () => {
       'test_data',
       'valid_test_results_complex.json',
     );
-    const resultSummary = await resultsParser.parseFromJsonFile(
-      validTestResults,
-    );
+    const resultSummary
+      = await resultsParser.parseFromJsonFile(validTestResults);
     expect(resultSummary.failed).toEqual(1);
     expect(resultSummary.flaky).toEqual(0);
     expect(resultSummary.skipped).toEqual(0);
