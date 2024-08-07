@@ -71,6 +71,9 @@ You will most likely need to have Slack administrator rights to perform the step
 ### Note II:
 Sending failure details in a thread is not supported when using webhooks.  You will need to use Option B below.
 
+### Note III:
+You can use `slackWebHookChannel: "pw-tests"`  as an option if you have a single Slack webhook URL that needs to send messages to multiple channels.
+
 # Option B - send your results via a Slack bot user
 Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
 
