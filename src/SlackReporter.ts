@@ -39,8 +39,6 @@ class SlackReporter implements Reporter {
 
   private slackWebHookUrl: string | undefined;
 
-  private slackWebHookChannel: string | undefined;
-
   private disableUnfurl: boolean | undefined;
 
   private proxy: string | undefined;
@@ -82,7 +80,6 @@ class SlackReporter implements Reporter {
           : 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.slackWebHookUrl = slackReporterConfig.slackWebHookUrl || undefined;
-      this.slackWebHookChannel = slackReporterConfig.slackWebHookChannel || undefined;
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
       this.showInThread = slackReporterConfig.showInThread || false;
       this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
@@ -129,10 +126,7 @@ class SlackReporter implements Reporter {
     const agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
 
     if (this.slackWebHookUrl) {
-      const webhook = new IncomingWebhook(this.slackWebHookUrl, {
-        channel: this.slackWebHookChannel,
-        agent,
-      });
+      const webhook = new IncomingWebhook(this.slackWebHookUrl, { agent });
       const slackWebhookClient = new SlackWebhookClient(webhook);
       const webhookResult = await slackWebhookClient.sendMessage({
         customLayout: this.customLayout,
