@@ -211,7 +211,23 @@ export default class ResultsParser {
 
   updateResults(data: { testSuite: any }) {
     if (data.testSuite.tests.length > 0) {
-      this.result.push(data);
+      const resIndex = this.result.findIndex(
+        (res) => res.testSuite.title === data.testSuite.title,
+      );
+      if (resIndex > -1) {
+        for (const test of data.testSuite.tests) {
+          const testIndex = this.result[resIndex].testSuite.tests.findIndex(
+            (tes) => tes.name === test.name,
+          );
+          if (testIndex > -1) {
+            this.result[resIndex].testSuite.tests[testIndex] = test;
+          } else {
+            this.result[resIndex].testSuite.tests.push(test);
+          }
+        }
+      } else {
+        this.result.push(data);
+      }
     }
   }
 
