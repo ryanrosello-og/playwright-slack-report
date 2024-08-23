@@ -13,6 +13,7 @@ import { SummaryResults } from '.';
 import {
   generateBlocks,
   generateFailures,
+  generateFailuresByTeams,
   generateFallbackText,
 } from './LayoutGenerator';
 
@@ -125,23 +126,29 @@ export default class SlackClient {
     fakeRequest?: Function;
   }) {
     const result = [];
-    const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
+    let failuresMap: Map<string, Array<KnownBlock | Block>>;
     const fallbackText = generateFallbackText(summaryResults);
-    for (const channel of channelIds) {
+    
+    if (channelIds.length === 1) {
+      const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
+      failuresMap = new Map([[channelIds[0], blocks]]);
+    }
+    else {
+      failuresMap = await generateFailuresByTeams(summaryResults, maxNumberOfFailures, channelIds);
+    }
+
+    failuresMap.forEach(async (blocks, channel) => {
       // under test
       let chatResponse: ChatPostMessageResponse;
-      if (fakeRequest) {
-        chatResponse = await fakeRequest();
-      } else {
-        chatResponse = await SlackClient.doPostRequest(
-          this.slackWebClient,
-          channel,
-          fallbackText,
-          blocks,
-          disableUnfurl,
-          ts,
-        );
-      }
+      chatResponse = await SlackClient.doPostRequest(
+        this.slackWebClient,
+        channel,
+        fallbackText,
+        blocks,
+        disableUnfurl,
+        ts,
+      );
+        
       if (chatResponse.ok) {
         // eslint-disable-next-line no-console
         console.log(`✅ Message sent to ${channel} within thread ${ts}`);
@@ -151,7 +158,8 @@ export default class SlackClient {
           ts: chatResponse.ts,
         });
       }
-    }
+    });
+
     return result;
   }
 
