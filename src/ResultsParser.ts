@@ -217,7 +217,7 @@ export default class ResultsParser {
       if (resIndex > -1) {
         for (const test of data.testSuite.tests) {
           const testIndex = this.result[resIndex].testSuite.tests.findIndex(
-            (tes) => tes.name === test.name,
+            (tes) => `${tes.projectName}${tes.name}` === `${test.projectName}${test.name}`,
           );
           if (testIndex > -1) {
             this.result[resIndex].testSuite.tests[testIndex] = test;
