@@ -8,7 +8,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@playwright/test": "^1.46.1",
+    "@playwright/test": "^1.47.0",
     "@slack/types": "^2.12.0",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
@@ -35,15 +35,17 @@
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.86",
+  "version": "1.2.0",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },
   "main": "dist/cli.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
-  "author": "Ryan Rosello <ryanrosello@hotmail.com>",
-  "license": "MIT",
+  "repository": "git@github.com:letsdeel/playwright-slack-report.git",
+  "author": "Deel",
+  "forkedFrom": "git@github.com:ryanrosello-og/playwright-slack-report.git",
+  "license": "UNLICENSED",
+  "private": true,
   "files": [
     "/dist/src"
   ],
@@ -61,5 +63,8 @@
     "exclude": [
       "./custom_block/my_block.ts"
     ]
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

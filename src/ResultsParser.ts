@@ -142,9 +142,11 @@ export default class ResultsParser {
 
   getExpectedFailure(test: any) {
     const failureReason = test.annotations?.find((f) => f.type === 'fail');
+
     if (failureReason) {
       return failureReason.description;
     }
+
     return '';
   }
 
@@ -197,6 +199,50 @@ export default class ResultsParser {
     return failures;
   }
 
+  async getParsedFailureResultsByTeam(
+    teams: Array<{ channelName: string; testNamePattern: string }>,
+  ): Promise<Map<string, SummaryResults>> {
+    const failures = await this.getFailures();
+
+    // Initialize the map object that will contain the filtered results
+    const teamsResults = new Map<string, SummaryResults>();
+
+    // Filter and group failures by teams
+    for (const { channelName, testNamePattern } of teams) {
+      const testTeamRegexp = new RegExp(`${testNamePattern}(?:\\s|\\[)`, 'i');
+
+      // Filter out failures that belong to the current team
+      const teamFailures = failures.filter((failure) => testTeamRegexp.test(failure.test));
+
+      if (teamFailures.length > 0) {
+        // Initialize summary result for the current team
+        const summary: SummaryResults = {
+          passed: 0,
+          failed: teamFailures.length,
+          flaky: 0,
+          skipped: 0,
+          failures: teamFailures,
+          tests: teamFailures.map((failure) => ({
+            suiteName: failure.suite,
+            name: failure.test,
+            browser: undefined,
+            projectName: undefined,
+            endedAt: undefined,
+            reason: failure.failureReason,
+            retry: undefined,
+            startedAt: undefined,
+            status: 'failed',
+            attachments: undefined,
+          })),
+        };
+
+        teamsResults.set(channelName, summary);
+      }
+    }
+
+    return teamsResults;
+  }
+
   static getTestName(failedTest: any) {
     const testName = failedTest.name;
     if (failedTest.browser && failedTest.projectName) {
@@ -217,7 +263,8 @@ export default class ResultsParser {
       if (resIndex > -1) {
         for (const test of data.testSuite.tests) {
           const testIndex = this.result[resIndex].testSuite.tests.findIndex(
-            (tes) => `${tes.projectName}${tes.name}` === `${test.projectName}${test.name}`,
+            (tes) => `${tes.projectName}${tes.name}`
+              === `${test.projectName}${test.name}`,
           );
           if (testIndex > -1) {
             this.result[resIndex].testSuite.tests[testIndex] = test;
@@ -324,14 +371,14 @@ export default class ResultsParser {
     )} \n ${this.cleanseReason(result.error?.stack)}`;
   }
 
-  cleanseReason(rawReaseon: string): string {
+  cleanseReason(rawReason: string): string {
     // eslint-disable-next-line prefer-regex-literals
     const ansiRegex = new RegExp(
       '([\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~])))',
       'g',
     );
 
-    const ansiCleansed = rawReaseon ? rawReaseon.replace(ansiRegex, '') : '';
+    const ansiCleansed = rawReason ? rawReason.replace(ansiRegex, '') : '';
     const logsStripped = ansiCleansed
       .replace(
         /============================================================\n/g,

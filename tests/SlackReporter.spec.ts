@@ -312,6 +312,7 @@ test.describe('SlackReporter - preChecks()', () => {
         '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
         {
           layout: 'not a function',
+          sendResults: 'always',
           channels: ['zeb', 'pw'],
         },
       ],
@@ -322,6 +323,32 @@ test.describe('SlackReporter - preChecks()', () => {
     expect(result).toEqual({
       okToProceed: false,
       message: '❌ Custom layout is not a function',
+    });
+  });
+
+  test('okToProceed flag is set to false when the custom on failure layout provided is not a Function', async ({
+    fakeSlackReporter,
+    suite,
+    fullConfig,
+  }) => {
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
+      [
+        '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
+        {
+          layout: () => 'fake function',
+          onFailureLayout: 'not a function',
+          sendResults: 'always',
+          channels: ['zeb', 'pw'],
+        },
+      ],
+    ];
+    fakeSlackReporter.onBegin(cloneFullConfig, suite);
+
+    const result = fakeSlackReporter.preChecks();
+    expect(result).toEqual({
+      okToProceed: false,
+      message: '❌ On Failure Layout is not a function',
     });
   });
 

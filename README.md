@@ -1,6 +1,4 @@
-# playwright-slack-report ![Builds](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryanrosello-og/playwright-slack-report/blob/master/LICENSE) [![Coverage Status](https://coveralls.io/repos/github/ryanrosello-og/playwright-slack-report/badge.svg?branch=main)](https://coveralls.io/github/ryanrosello-og/playwright-slack-report?branch=main) [![CodeQL](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/github-code-scanning/codeql) <a href="https://www.buymeacoffee.com/ryanrosello.og"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" height="20px"></a>
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
+# playwright-slack-report 
 
 ![Main Logo](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/_logo.png?raw=true)
 
@@ -10,11 +8,54 @@ Publish your Playwright test results to your favorite Slack channel(s).
 
 ## 🚀 Features
 
-- 💌 Send results your Playwright test results to one or more Slack channels
+- 💌 Send your Playwright test results to one or more Slack channels
 - 🎚️ Leverage JSON results created by Playwright and seamlessly post them on Slack
 - 📊 Conditionally send results to Slack channels based on test results
 - 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
 - 🧑‍🎨 Define your own custom Slack message layout!
+
+
+# ✨ Modifying this repository
+
+1. Clone the project and run `yarn install`
+2. Make your changes and add tests if necessary
+3. Run the tests using `yarn run pw`
+4. Run prettier using `yarn run prettier`
+5. Run eslint using `yarn run lint-fix`
+6. Build project: `yarn run build`
+7. Include dist files in changes: `git add -f ./dist`
+
+**To execute and test the entire package:**
+
+1. Run `yarn pack`
+2. Create a new playwright project using `yarn create playwright`.
+3. Modify the `package.json` to add a local dependency to the generated `tgz` file.
+
+e.g.
+
+```
+  "dependencies": {
+    "playwright-slack-report": "/home/ry/_repo/playwright-slack-report/playwright-slack-report-1.0.3.tgz"
+  }
+```
+
+4. Execute `yarn install`
+5. Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
+6. Modify the `playwright.config.ts` as above
+7. Run your Playwright tests using `npx playwright text`
+
+
+# 🕵🏼‍♀️ Creating a pull request
+
+1. Create PR.
+2. Request peer review.
+3. Request _infosec_ review >> use CR Mate (bookmarked) from #dev-infosec-review channel.
+4. If you change any parameter related to environment, you need _infra_ and _devops_ review.
+
+
+# Upgrading this repository
+
+If there are updates in the parent project (from which this fork was performed), the update of this repository must follow the same steps required for a common PR.
 
 
 # 📦 Installation
@@ -23,11 +64,11 @@ Run following commands:
 
 **yarn**
 
-`yarn add playwright-slack-report -D`
+`yarn add -D https://github.com/letsdeel/playwright-slack-report`
 
 **npm**
 
-`npm install playwright-slack-report -D`
+`npm install -D https://github.com/letsdeel/playwright-slack-report`
 
 Modify your `playwright.config.ts` file to include the following:
 
@@ -43,6 +84,7 @@ Modify your `playwright.config.ts` file to include the following:
     ["dot"], // other reporters
   ],
 ```
+
 # Option A - send your results via a Slack webhook
 
 Enable incoming webhooks in your Slack workspace by following the steps as per Slack's documentation:
@@ -65,6 +107,7 @@ Once you have enabled incoming webhooks, you will need to copy the webhook URL a
     ["dot"], // other reporters
   ],
 ```
+
 ### Note I:
 You will most likely need to have Slack administrator rights to perform the steps above.
 
@@ -74,7 +117,7 @@ Sending failure details in a thread is not supported when using webhooks.  You w
 ### Note III:
 You can use `slackWebHookChannel: "pw-tests"`  as an option if you have a single Slack webhook URL that needs to send messages to multiple channels.
 
-# Option B - send your results via a Slack bot user
+# Option B - send your results via a Slack bot user (recommended)
 Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
 
 `SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright test`
@@ -400,7 +443,18 @@ An array of Slack channels to post to, at least one channel is required
 ### **onSuccessChannels**
 (Optional) An array of Slack channels to post to when tests have passed. Value from `channels` is used if not defined here
 ### **onFailureChannels**
-(Optional) An array of Slack channels to post to when tests have failed. Value from `channels` is used if not defined here
+(Optional) An array of Slack channels + Test Name Pattern to post to when tests have failed.
+Each test matching the name pattern will be sent to its corresponding Slack channel.
+
+```
+onFailureChannels:[
+  { channelName: 'fake-failure-channel-1', testNamePattern: 'fake-test-name-pattern-1' },
+  { channelName: 'fake-failure-channel-2', testNamePattern: 'fake-test-name-pattern-2' }
+],
+```
+Note: those tests where its name _ends_ with the pattern will be filtered.
+EG: test name >> `User performs login with valid credentials @fake-test-name-pattern-1`
+
 ### **sendResults**
 Can either be *"always"*, *"on-failure"* or *"off"*, this configuration is required:
   * **always** - will send the results to Slack at completion of the test run
@@ -411,6 +465,12 @@ A function that returns a layout object, this configuration is optional.  See se
 * meta - an array of meta data to be sent to Slack, this configuration is optional.
 ### **layoutAsync**
 Same as **layout** above, but asynchronous in that it returns a promise.
+### **onFailureLayout**
+A different layout object that can be used with onFailureChannels option. This configuration is optional, if not provided, layout object will be used instead.
+You also have to configure it in `playwright.config.ts` file.
+
+Example: `const reporterSelected = selectReporters(RPconfig, currentDate, slackLayout, slackLayoutOnFailure);`
+
 ### **maxNumberOfFailuresToShow**
 Limits the number of failures shown in the Slack message, defaults to 10.
 ### **slackOAuthToken**
@@ -812,35 +872,6 @@ export async function generateCustomLayoutAsync (summaryResults: SummaryResults)
 
 # 🔑 License
 
+Project forked from [ryanrosello-og repo](https://github.com/ryanrosello-og/playwright-slack-report)
+
 [MIT](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/LICENSE)
-
-# ✨ Contributing
-
-Clone the project and run `npm install`
-
-Make your changes
-Run the tests using `npm run pw`
-
-**To execute and test the entire package:**
-
-Run `npm pack`
-
-Create a new playwright project using `yarn create playwright`
-Modify the `package.json` and a local dependency to the generated `tgz` file
-
-e.g.
-
-```
-  "dependencies": {
-    "playwright-slack-report": "/home/ry/_repo/playwright-slack-report/playwright-slack-report-1.0.3.tgz"
-  }
-```
-
-* Execute `npm install`
-* Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
-* Modify the `playwright.config.ts` as above
-* Run the tests using `npx playwright text`
-
-# 🐛 Something not working for you?
-
-Feel free to [raise a github issue](https://github.com/ryanrosello-og/playwright-slack-report/issues) for any bugs or feature requests.
