@@ -1,10 +1,10 @@
 # playwright-slack-report 
 
-![Main Logo](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/_logo.png?raw=true)
+![Main Logo](./assets/_logo.png)
 
 Publish your Playwright test results to your favorite Slack channel(s).
 
-![Gif](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-15_20-22-59.png?raw=true)
+Forked from [ryanrosello github repo](git@github.com:ryanrosello-og/playwright-slack-report.git)
 
 ## 🚀 Features
 
@@ -23,39 +23,6 @@ Publish your Playwright test results to your favorite Slack channel(s).
 4. Run prettier using `yarn run prettier`
 5. Run eslint using `yarn run lint-fix`
 6. Build project: `yarn run build`
-7. Include dist files in changes: `git add -f ./dist`
-
-**To execute and test the entire package:**
-
-1. Run `yarn pack`
-2. Create a new playwright project using `yarn create playwright`.
-3. Modify the `package.json` to add a local dependency to the generated `tgz` file.
-
-e.g.
-
-```
-  "dependencies": {
-    "playwright-slack-report": "/home/ry/_repo/playwright-slack-report/playwright-slack-report-1.0.3.tgz"
-  }
-```
-
-4. Execute `yarn install`
-5. Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
-6. Modify the `playwright.config.ts` as above
-7. Run your Playwright tests using `npx playwright text`
-
-
-# 🕵🏼‍♀️ Creating a pull request
-
-1. Create PR.
-2. Request peer review.
-3. Request _infosec_ review >> use CR Mate (bookmarked) from #dev-infosec-review channel.
-4. If you change any parameter related to environment, you need _infra_ and _devops_ review.
-
-
-# Upgrading this repository
-
-If there are updates in the parent project (from which this fork was performed), the update of this repository must follow the same steps required for a common PR.
 
 
 # 📦 Installation

@@ -44,7 +44,7 @@
   "repository": "git@github.com:letsdeel/playwright-slack-report.git",
   "author": "Deel",
   "forkedFrom": "git@github.com:ryanrosello-og/playwright-slack-report.git",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "files": [
     "/dist/src"

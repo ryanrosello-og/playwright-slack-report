@@ -199,30 +199,38 @@ export default class ResultsParser {
     return failures;
   }
 
-  async getParsedFailureResultsByTeam(
-    teams: Array<{ channelName: string; testNamePattern: string }>,
+  async getParsedFailureResultsByPattern(
+    channelAndTestPatternArray: Array<{
+      channelName: string;
+      testNamePattern: string;
+    }>,
   ): Promise<Map<string, SummaryResults>> {
     const failures = await this.getFailures();
 
     // Initialize the map object that will contain the filtered results
-    const teamsResults = new Map<string, SummaryResults>();
+    const results = new Map<string, SummaryResults>();
 
-    // Filter and group failures by teams
-    for (const { channelName, testNamePattern } of teams) {
-      const testTeamRegexp = new RegExp(`${testNamePattern}(?:\\s|\\[)`, 'i');
+    // Filter and group failures by pattern
+    for (const { channelName, testNamePattern } of channelAndTestPatternArray) {
+      const testNamePatternRegexp = new RegExp(
+        `${testNamePattern}(?:\\s|\\[)`,
+        'i',
+      );
 
-      // Filter out failures that belong to the current team
-      const teamFailures = failures.filter((failure) => testTeamRegexp.test(failure.test));
+      // Filter out failures that belong to the current pattern
+      const testNamePatternFailures = failures.filter(
+        (failure) => testNamePatternRegexp.test(failure.test),
+      );
 
-      if (teamFailures.length > 0) {
-        // Initialize summary result for the current team
+      if (testNamePatternFailures.length > 0) {
+        // Initialize summary result for the current pattern
         const summary: SummaryResults = {
           passed: 0,
-          failed: teamFailures.length,
+          failed: testNamePatternFailures.length,
           flaky: 0,
           skipped: 0,
-          failures: teamFailures,
-          tests: teamFailures.map((failure) => ({
+          failures: testNamePatternFailures,
+          tests: testNamePatternFailures.map((failure) => ({
             suiteName: failure.suite,
             name: failure.test,
             browser: undefined,
@@ -236,11 +244,11 @@ export default class ResultsParser {
           })),
         };
 
-        teamsResults.set(channelName, summary);
+        results.set(channelName, summary);
       }
     }
 
-    return teamsResults;
+    return results;
   }
 
   static getTestName(failedTest: any) {

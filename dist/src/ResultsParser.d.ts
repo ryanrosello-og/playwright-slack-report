@@ -36,7 +36,7 @@ export default class ResultsParser {
     getExpectedFailure(test: any): any;
     getParsedResults(allTests: Array<TestCase>): Promise<SummaryResults>;
     getFailures(): Promise<Array<failure>>;
-    getParsedFailureResultsByTeam(teams: Array<{
+    getParsedFailureResultsByPattern(channelAndTestPatternArray: Array<{
         channelName: string;
         testNamePattern: string;
     }>): Promise<Map<string, SummaryResults>>;

@@ -167,24 +167,24 @@ class ResultsParser {
         }
         return failures;
     }
-    async getParsedFailureResultsByTeam(teams) {
+    async getParsedFailureResultsByPattern(channelAndTestPatternArray) {
         const failures = await this.getFailures();
         // Initialize the map object that will contain the filtered results
-        const teamsResults = new Map();
-        // Filter and group failures by teams
-        for (const { channelName, testNamePattern } of teams) {
-            const testTeamRegexp = new RegExp(`${testNamePattern}(?:\\s|\\[)`, 'i');
-            // Filter out failures that belong to the current team
-            const teamFailures = failures.filter((failure) => testTeamRegexp.test(failure.test));
-            if (teamFailures.length > 0) {
-                // Initialize summary result for the current team
+        const results = new Map();
+        // Filter and group failures by pattern
+        for (const { channelName, testNamePattern } of channelAndTestPatternArray) {
+            const testNamePatternRegexp = new RegExp(`${testNamePattern}(?:\\s|\\[)`, 'i');
+            // Filter out failures that belong to the current pattern
+            const testNamePatternFailures = failures.filter((failure) => testNamePatternRegexp.test(failure.test));
+            if (testNamePatternFailures.length > 0) {
+                // Initialize summary result for the current pattern
                 const summary = {
                     passed: 0,
-                    failed: teamFailures.length,
+                    failed: testNamePatternFailures.length,
                     flaky: 0,
                     skipped: 0,
-                    failures: teamFailures,
-                    tests: teamFailures.map((failure) => ({
+                    failures: testNamePatternFailures,
+                    tests: testNamePatternFailures.map((failure) => ({
                         suiteName: failure.suite,
                         name: failure.test,
                         browser: undefined,
@@ -197,10 +197,10 @@ class ResultsParser {
                         attachments: undefined,
                     })),
                 };
-                teamsResults.set(channelName, summary);
+                results.set(channelName, summary);
             }
         }
-        return teamsResults;
+        return results;
     }
     static getTestName(failedTest) {
         const testName = failedTest.name;

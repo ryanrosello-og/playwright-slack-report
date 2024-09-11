@@ -133,12 +133,12 @@ class SlackReporter {
                 for (const channel of this.slackChannels) {
                     await this.postResults(slackClient, channel, resultSummary, false);
                 }
-                // Send failure results to each 'on failure' channel if any, filtering by team
+                // Send failure results to each 'on failure' channel if any, filtering by pattern
                 if (this.onFailureSlackChannels) {
-                    const failuresByTeam = await this.resultsParser.getParsedFailureResultsByTeam(this.onFailureSlackChannels);
-                    for (const [team, summary] of failuresByTeam.entries()) {
+                    const failuresGroupedByPattern = await this.resultsParser.getParsedFailureResultsByPattern(this.onFailureSlackChannels);
+                    for (const [channelName, summary,] of failuresGroupedByPattern.entries()) {
                         summary.meta = this.meta;
-                        await this.postResults(slackClient, team, summary, true);
+                        await this.postResults(slackClient, channelName, summary, true);
                     }
                 }
             }
