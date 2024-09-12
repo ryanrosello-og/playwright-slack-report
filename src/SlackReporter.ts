@@ -13,11 +13,16 @@ import { IncomingWebhook } from '@slack/webhook';
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 import SlackWebhookClient from './SlackWebhookClient';
+import { SummaryResults } from '.';
 
 class SlackReporter implements Reporter {
   private customLayout: Function | undefined;
 
   private customLayoutAsync: Function | undefined;
+
+  private customFailureLayout: Function | undefined;
+
+  private customFailureLayoutAsync: Function | undefined;
 
   private maxNumberOfFailuresToShow: number;
 
@@ -29,9 +34,14 @@ class SlackReporter implements Reporter {
 
   private sendResults: 'always' | 'on-failure' | 'off' = 'on-failure';
 
+  private slackChannels: string[] = [];
+
   private onSuccessSlackChannels: string[] = [];
 
-  private onFailureSlackChannels: string[] = [];
+  private onFailureSlackChannels: {
+    channelName: string;
+    testNamePattern: string;
+  }[] = [];
 
   private slackLogLevel: LogLevel | undefined;
 
@@ -72,17 +82,20 @@ class SlackReporter implements Reporter {
       this.sendResults = slackReporterConfig.sendResults || 'always';
       this.customLayout = slackReporterConfig.layout;
       this.customLayoutAsync = slackReporterConfig.layoutAsync;
+      this.customFailureLayout = slackReporterConfig.onFailureLayout;
+      this.customFailureLayoutAsync = slackReporterConfig.onFailureLayoutAsync;
+      this.slackChannels = slackReporterConfig.channels;
       this.onSuccessSlackChannels
-        = slackReporterConfig.onSuccessChannels || slackReporterConfig.channels;
-      this.onFailureSlackChannels
-        = slackReporterConfig.onFailureChannels || slackReporterConfig.channels;
+        = slackReporterConfig.onSuccessChannels || this.slackChannels;
+      this.onFailureSlackChannels = slackReporterConfig.onFailureChannels || [];
       this.maxNumberOfFailuresToShow
         = slackReporterConfig.maxNumberOfFailuresToShow !== undefined
           ? slackReporterConfig.maxNumberOfFailuresToShow
           : 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.slackWebHookUrl = slackReporterConfig.slackWebHookUrl || undefined;
-      this.slackWebHookChannel = slackReporterConfig.slackWebHookChannel || undefined;
+      this.slackWebHookChannel
+        = slackReporterConfig.slackWebHookChannel || undefined;
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
       this.showInThread = slackReporterConfig.showInThread || false;
       this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
@@ -154,38 +167,49 @@ class SlackReporter implements Reporter {
         ),
       );
 
-      const slackChannels = testsFailed
-        ? this.onFailureSlackChannels
-        : this.onSuccessSlackChannels;
+      if (!testsFailed && this.onSuccessSlackChannels) {
+        // Send complete results when no failures found
+        for (const channel of this.onSuccessSlackChannels) {
+          await this.postResults(slackClient, channel, resultSummary, false);
+        }
+      } else if (testsFailed) {
+        // There are failures
+        // Send complete results to slackChannels
+        for (const channel of this.slackChannels) {
+          await this.postResults(slackClient, channel, resultSummary, false);
+        }
 
-      const result = await slackClient.sendMessage({
-        options: {
-          channelIds: slackChannels,
-          customLayout: this.customLayout,
-          customLayoutAsync: this.customLayoutAsync,
-          maxNumberOfFailures: this.maxNumberOfFailuresToShow,
-          disableUnfurl: this.disableUnfurl,
-          summaryResults: resultSummary,
-          showInThread: this.showInThread,
-        },
-      });
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(result, null, 2));
-      if (this.showInThread && resultSummary.failures.length > 0) {
-        for (let i = 0; i < result.length; i += 1) {
-          // eslint-disable-next-line no-await-in-loop
-          await slackClient.attachDetailsToThread({
-            channelIds: [result[i].channel],
-            ts: result[i].ts,
-            summaryResults: resultSummary,
-            maxNumberOfFailures: this.maxNumberOfFailuresToShow,
-          });
+        // Send failure results to each 'on failure' channel if any, filtering by pattern
+        if (this.onFailureSlackChannels) {
+          const failuresGroupedByPattern
+            = await this.resultsParser.getParsedFailureResultsByPattern(
+              this.onFailureSlackChannels,
+            );
+
+          for (const [
+            channelName,
+            summary,
+          ] of failuresGroupedByPattern.entries()) {
+            summary.meta = this.meta;
+            await this.postResults(slackClient, channelName, summary, true);
+          }
         }
       }
     }
   }
 
   preChecks(): { okToProceed: boolean; message?: string } {
+    const noSuccessChannelsProvided
+      = this.sendResults === 'always'
+      && (!this.onSuccessSlackChannels
+        || this.onSuccessSlackChannels.length === 0);
+
+    const noFailureChannelsProvided
+      = ['always', 'on-failure'].includes(this.sendResults)
+      && (!this.onFailureSlackChannels
+        || this.onFailureSlackChannels.length === 0)
+      && (!this.slackChannels || this.slackChannels.length === 0);
+
     if (this.sendResults === 'off') {
       return { okToProceed: false, message: '❌ Slack reporter is disabled' };
     }
@@ -232,19 +256,7 @@ class SlackReporter implements Reporter {
       };
     }
 
-    const noSuccessChannelsProvided
-      = this.sendResults === 'always'
-      && (!this.onSuccessSlackChannels
-        || this.onSuccessSlackChannels.length === 0);
-    const noFailureChannelsProvided
-      = ['always', 'on-failure'].includes(this.sendResults)
-      && (!this.onFailureSlackChannels
-        || this.onFailureSlackChannels.length === 0);
-
-    if (
-      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
-      && noSuccessChannelsProvided
-    ) {
+    if (noSuccessChannelsProvided) {
       return {
         okToProceed: false,
         message:
@@ -252,10 +264,7 @@ class SlackReporter implements Reporter {
       };
     }
 
-    if (
-      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
-      && noFailureChannelsProvided
-    ) {
+    if (noFailureChannelsProvided) {
       return {
         okToProceed: false,
         message:
@@ -280,6 +289,26 @@ class SlackReporter implements Reporter {
       };
     }
 
+    if (
+      this.customFailureLayout
+      && typeof this.customFailureLayout !== 'function'
+    ) {
+      return {
+        okToProceed: false,
+        message: '❌ On Failure Layout is not a function',
+      };
+    }
+
+    if (
+      this.customFailureLayoutAsync
+      && typeof this.customFailureLayoutAsync !== 'function'
+    ) {
+      return {
+        okToProceed: false,
+        message: '❌ On Failure Layout Async is not a function',
+      };
+    }
+
     if (this.meta && !Array.isArray(this.meta)) {
       return { okToProceed: false, message: '❌ Meta is not an array' };
     }
@@ -298,5 +327,46 @@ class SlackReporter implements Reporter {
   printsToStdio(): boolean {
     return false;
   }
+
+  async postResults(
+    slackClient: SlackClient,
+    channelName: string,
+    summary: SummaryResults,
+    isFailureReport?: boolean,
+  ): Promise<void> {
+    const channel = [];
+    channel.push(channelName);
+
+    const result = await slackClient.sendMessage({
+      options: {
+        channelIds: channel,
+        customLayout: isFailureReport
+          ? this.customFailureLayout
+          : this.customLayout,
+        customLayoutAsync: isFailureReport
+          ? this.customFailureLayoutAsync
+          : this.customLayoutAsync,
+        maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+        disableUnfurl: this.disableUnfurl,
+        summaryResults: summary,
+        showInThread: this.showInThread,
+      },
+    });
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(result, null, 2));
+
+    if (this.showInThread && summary.failures.length > 0) {
+      for (let i = 0; i < result.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await slackClient.attachDetailsToThread({
+          channelIds: [result[i].channel],
+          ts: result[i].ts,
+          summaryResults: summary,
+          maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+        });
+      }
+    }
+  }
 }
+
 export default SlackReporter;

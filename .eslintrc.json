@@ -23,7 +23,9 @@
          "no-empty-pattern": 0,
          "no-undef": 0,
          "no-use-before-define": 0,
-         "operator-linebreak": ["error", "before"]
+         "operator-linebreak": ["error", "before"],
+         "no-restricted-syntax": 0,
+         "no-await-in-loop": 0
     },
     "ignorePatterns": [
         "*.d.ts"
