@@ -17,7 +17,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "nyc": "^17.0.0",
