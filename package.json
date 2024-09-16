@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.46.1",
-    "@slack/types": "^2.13.0",
+    "@slack/types": "^2.13.1",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
     "dotenv": "^16.0.1",
