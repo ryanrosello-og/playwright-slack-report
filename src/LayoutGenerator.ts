@@ -72,7 +72,7 @@ const generateFailures = async (
     });
   }
 
-  if (summaryResults.failures.length > maxNumberOfFailures) {
+  if (maxNumberOfFailures > 0 && summaryResults.failures.length > maxNumberOfFailures) {
     fails.push({
       type: 'section',
       text: {
@@ -81,6 +81,11 @@ const generateFailures = async (
       },
     });
   }
+
+  if (fails.length === 0) {
+    return [];
+  }
+
   return [
     {
       type: 'divider',
