@@ -126,6 +126,10 @@ export default class SlackClient {
   }) {
     const result = [];
     const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
+    if (blocks.length === 0) {
+      return result;
+    }
+
     const fallbackText = generateFallbackText(summaryResults);
     for (const channel of channelIds) {
       // under test

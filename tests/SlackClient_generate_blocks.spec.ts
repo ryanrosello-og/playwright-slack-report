@@ -172,9 +172,6 @@ test.describe('SlackClient.generateBlocks()', () => {
           text: '\n*BuildID* :\t9sdcv-312432-3134',
         },
       },
-      {
-        type: 'divider',
-      },
     ]);
   });
 
@@ -223,9 +220,6 @@ test.describe('SlackClient.generateBlocks()', () => {
           type: 'mrkdwn',
           text: '✅ *0* | ❌ *1* | ⏩ *1*',
         },
-      },
-      {
-        type: 'divider',
       },
     ]);
   });
