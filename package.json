@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@slack/web-api": "^7.4.0",
+    "@slack/web-api": "^7.5.0",
     "@slack/webhook": "^7.0.1",
     "commander": "^11.1.0",
     "https-proxy-agent": "^7.0.5",
@@ -10,6 +10,7 @@
   "devDependencies": {
     "@playwright/test": "^1.46.1",
     "@slack/types": "^2.14.0",
+    "@playwright/test": "^1.47.0",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
     "dotenv": "^16.0.1",
@@ -20,7 +21,7 @@
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "nyc": "^17.0.0",
+    "nyc": "^17.1.0",
     "prettier": "^3.3.3",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.5.4"
