@@ -72,8 +72,14 @@ program
       const meta = replaceEnvVars(config.meta);
       summaryResults = { ...resultSummary, meta };
       const webhookResult = await slackWebhookClient.sendMessage({
-        customLayout: undefined,
-        customLayoutAsync: undefined,
+        customLayout: await attemptToImportLayout(
+          config.customLayout?.source,
+          config.customLayout?.functionName,
+        ),
+        customLayoutAsync: await attemptToImportLayout(
+          config.customLayoutAsync?.source,
+          config.customLayoutAsync?.functionName,
+        ),
         maxNumberOfFailures: config.maxNumberOfFailures,
         disableUnfurl: config.disableUnfurl,
         summaryResults,
