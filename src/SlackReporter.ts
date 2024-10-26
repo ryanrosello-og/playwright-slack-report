@@ -82,7 +82,8 @@ class SlackReporter implements Reporter {
           : 10;
       this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
       this.slackWebHookUrl = slackReporterConfig.slackWebHookUrl || undefined;
-      this.slackWebHookChannel = slackReporterConfig.slackWebHookChannel || undefined;
+      this.slackWebHookChannel
+        = slackReporterConfig.slackWebHookChannel || undefined;
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
       this.showInThread = slackReporterConfig.showInThread || false;
       this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
