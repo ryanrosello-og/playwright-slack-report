@@ -72,7 +72,10 @@ const generateFailures = async (
     });
   }
 
-  if (maxNumberOfFailures > 0 && summaryResults.failures.length > maxNumberOfFailures) {
+  if (
+    maxNumberOfFailures > 0
+    && summaryResults.failures.length > maxNumberOfFailures
+  ) {
     fails.push({
       type: 'section',
       text: {
