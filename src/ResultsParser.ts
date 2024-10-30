@@ -24,6 +24,7 @@ export type testResult = {
   startedAt: string;
   status: 'passed' | 'failed' | 'timedOut' | 'skipped';
   expectedStatus?: 'passed' | 'failed' | 'skipped';
+  steps: string
   attachments?: {
     body: string | undefined | Buffer;
     contentType: string;
@@ -126,6 +127,7 @@ export default class ResultsParser {
             reason: result.error
               ? this.getFailure(result.error.snippet, result.error.stack)
               : '',
+            steps: this.getStepError(result),
             attachments: result.attachments,
             expectedStatus,
           });
@@ -231,6 +233,19 @@ export default class ResultsParser {
     }
   }
 
+  getStepError(result: any) {
+    if (result.status === 'failed') {
+      if (result.steps) {
+        for (const step of result.steps) {
+          if (step.error) {
+            return `\nStep: "${step.title}" failed with error: ${step.error.message}`;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   addTestResultFromJson({
     suiteName,
     spec,
@@ -264,6 +279,7 @@ export default class ResultsParser {
         ).toISOString(),
         reason: this.safelyDetermineFailure(result),
         attachments: result.attachments,
+        steps: this.getStepError(result),
       });
     }
     this.updateResults({
@@ -298,6 +314,7 @@ export default class ResultsParser {
             ? this.getExpectedFailure(testCase)
             : this.safelyDetermineFailure(result),
         attachments: result.attachments,
+        steps: this.getStepError(result),
         expectedStatus: testCase.expectedStatus,
       });
     }
