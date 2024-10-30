@@ -7,22 +7,32 @@ const validTestResults = path.join(
   'test_data',
   'valid_test_results.json',
 );
+
 test.describe('CLI app - pre-check', () => {
   test.beforeAll(async ({}) => {});
 
   test('throws an error when the JSON results file does not exist', async ({}) => {
-    const result = await doPreChecks(
-      'does-not-exist.json',
-      'does-not-exist.json',
-    );
-    expect(result.status).toEqual('error');
-    expect(result.message).toContain('JSON results file does not exist');
+    await test.step('Check JSON results file existence', async () => {
+      const result = await doPreChecks('does-not-exist.json', 'does-not-exist.json');
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toContain('JSON results file does not exist');
+      });
+    });
   });
 
   test('throws an error when the config file does not exist', async ({}) => {
-    const result = await doPreChecks(validTestResults, 'does-not-exist.json');
-    expect(result.status).toEqual('error');
-    expect(result.message).toContain('Config file does not exist');
+    await test.step('Check config file existence', async () => {
+      const result = await doPreChecks(validTestResults, 'does-not-exist.json');
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toContain('Config file does not exist');
+      });
+    });
   });
 
   test('throws an error when both sendUsingBot and sendUsingWebhook defined', async ({}) => {
@@ -31,11 +41,17 @@ test.describe('CLI app - pre-check', () => {
       'test_data',
       'invalid_cli_config_both_bot_and_webhook_defined.json',
     );
-    const result = await doPreChecks(validTestResults, invalidConfig);
-    expect(result.status).toEqual('error');
-    expect(result.message).toContain(
-      'It is not possible to use both sendUsingWebhook and sendUsingBot, choose a single method',
-    );
+    await test.step('Check both sendUsingBot and sendUsingWebhook defined', async () => {
+      const result = await doPreChecks(validTestResults, invalidConfig);
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toContain(
+          'It is not possible to use both sendUsingWebhook and sendUsingBot, choose a single method',
+        );
+      });
+    });
   });
 
   test('throws an error when the custom layout js file cannot be found', async ({}) => {
@@ -44,11 +60,17 @@ test.describe('CLI app - pre-check', () => {
       'test_data',
       'invalid_cli_config_custom_layout_not_found.json',
     );
-    const result = await doPreChecks(validTestResults, invalidConfig);
-    expect(result.status).toEqual('error');
-    expect(result.message).toContain(
-      'Custom layout was not found in path: ./custom_block/fail/cli_block_with_meta.ts',
-    );
+    await test.step('Check custom layout file existence', async () => {
+      const result = await doPreChecks(validTestResults, invalidConfig);
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toContain(
+          'Custom layout was not found in path: ./custom_block/fail/cli_block_with_meta.ts',
+        );
+      });
+    });
   });
 
   test('throws an error when both sendUsingWebhook and showInThread is true', async ({}) => {
@@ -57,11 +79,17 @@ test.describe('CLI app - pre-check', () => {
       'test_data',
       'invalid_cli_config_showInThread_enable_for_webhook.json',
     );
-    const result = await doPreChecks(validTestResults, invalidConfig);
-    expect(result.status).toEqual('error');
-    expect(result.message).toContain(
-      'The showInThread feature is only supported when using sendUsingBot is configured',
-    );
+    await test.step('Check sendUsingWebhook and showInThread configuration', async () => {
+      const result = await doPreChecks(validTestResults, invalidConfig);
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toContain(
+          'The showInThread feature is only supported when using sendUsingBot is configured',
+        );
+      });
+    });
   });
 
   test('throws an error when missing both sendUsingBot and sendUsingWebhook keys', async ({}) => {
@@ -70,11 +98,17 @@ test.describe('CLI app - pre-check', () => {
       'test_data',
       'invalid_cli_config_missing_both_bot_and_webhook.json',
     );
-    const result = await doPreChecks(validTestResults, invalidConfig);
-    expect(result.status).toEqual('error');
-    expect(result.message).toContain(
-      'You must specify either sendUsingWebhook or sendUsingBot in the config file',
-    );
+    await test.step('Check missing sendUsingBot and sendUsingWebhook keys', async () => {
+      const result = await doPreChecks(validTestResults, invalidConfig);
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toContain(
+          'You must specify either sendUsingWebhook or sendUsingBot in the config file',
+        );
+      });
+    });
   });
 
   test('zod parsing throws an error when cli config misconfigured', async ({}) => {
@@ -83,9 +117,13 @@ test.describe('CLI app - pre-check', () => {
       'test_data',
       'invalid_cli_config_fails_zod_parsing.json',
     );
-    const result = await doPreChecks(validTestResults, invalidConfig);
-    expect(result.status).toEqual('error');
-    expect(result.message).toEqual(`Config file is not valid: [
+    await test.step('Check zod parsing for misconfigured cli config', async () => {
+      const result = await doPreChecks(validTestResults, invalidConfig);
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toEqual(`Config file is not valid: [
   {
     "code": "invalid_type",
     "expected": "string",
@@ -97,6 +135,8 @@ test.describe('CLI app - pre-check', () => {
     "message": "Required"
   }
 ]`);
+      });
+    });
   });
 
   test('ensures the env variable [SLACK_BOT_USER_OAUTH_TOKEN] is set', async ({}) => {
@@ -106,11 +146,17 @@ test.describe('CLI app - pre-check', () => {
       'valid_cli_config.json',
     );
     delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
-    const result = await doPreChecks(validTestResults, validConfig);
-    expect(result.status).toEqual('error');
-    expect(result.message).toEqual(
-      'Missing the SLACK_BOT_USER_OAUTH_TOKEN env variable',
-    );
+    await test.step('Check SLACK_BOT_USER_OAUTH_TOKEN env variable', async () => {
+      const result = await doPreChecks(validTestResults, validConfig);
+      await test.step('Validate error status', async () => {
+        expect(result.status).toEqual('error');
+      });
+      await test.step('Validate error message', async () => {
+        expect(result.message).toEqual(
+          'Missing the SLACK_BOT_USER_OAUTH_TOKEN env variable',
+        );
+      });
+    });
   });
 
   test('provides config value when all pre-checks are valid', async ({}) => {
@@ -120,7 +166,11 @@ test.describe('CLI app - pre-check', () => {
       'valid_cli_config.json',
     );
     process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'test';
-    const result = await doPreChecks(validTestResults, validConfig);
-    expect(result.status).toEqual('ok');
+    await test.step('Run pre-checks with valid configuration', async () => {
+      const result = await doPreChecks(validTestResults, validConfig);
+      await test.step('Validate successful status', async () => {
+        expect(result.status).toEqual('ok');
+      });
+    });
   });
 });
