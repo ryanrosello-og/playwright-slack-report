@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@slack/web-api": "^7.5.0",
+    "@slack/web-api": "^7.6.0",
     "@slack/webhook": "^7.0.1",
     "commander": "^11.1.0",
     "https-proxy-agent": "^7.0.5",
@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@slack/types": "^2.14.0",
-    "@playwright/test": "^1.47.0",
+    "@playwright/test": "^1.48.1",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
     "dotenv": "^16.0.1",
@@ -17,7 +17,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "nyc": "^17.1.0",
@@ -35,7 +35,7 @@
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.88",
+  "version": "1.1.89",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },

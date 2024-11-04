@@ -565,9 +565,7 @@ test.describe('ResultsParser', () => {
   test('retrieve expected failure message from annotation', async ({}) => {
     const resultsParser = new ResultsParser();
     const result = resultsParser.getExpectedFailure({
-      annotations: [
-        { type: 'fail', description: 'This text will fail' },
-      ],
+      annotations: [{ type: 'fail', description: 'This text will fail' }],
     });
     expect(result).toEqual('This text will fail');
   });
