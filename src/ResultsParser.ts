@@ -236,12 +236,9 @@ export default class ResultsParser {
 
   getStepError(result: any) {
     if (result.status === 'failed' && result.steps) {
-       for (const step of result.steps) {
-      if (result.steps) {
-        for (const step of result.steps) {
-          if (step.error) {
-            return `\nStep: "${step.title}" failed with error: ${step.error.message}`;
-          }
+      for (const step of result.steps) {
+        if (step.error) {
+          return `\nStep: "${step.title}" failed with error: ${step.error.message}`;
         }
       }
     }
