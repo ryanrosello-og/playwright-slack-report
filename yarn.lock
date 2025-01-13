@@ -515,16 +515,16 @@
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-2.14.0.tgz#913946b4bcb635dad1d39ceca73699215c38cf6f"
   integrity sha512-n0EGm7ENQRxlXbgKSrQZL69grzg1gHLAVd+GlRVQJ1NSORo0FrApR7wql/gaKdu2n4TO83Sq/AmeUOqD60aXUA==
 
-"@slack/web-api@^7.6.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-7.6.0.tgz#7bfa2e0da4fce934715b54e47305fd02e722c0aa"
-  integrity sha512-1u9JnP12RPk8ChF8RXKKoVtlox9HlZXhf+6lvvRORKxRd4+8ZQ41KskhPO6WiD0Q+wE6k/M6U627BXzVzBcVNA==
+"@slack/web-api@^7.8.0":
+  version "7.8.0"
+  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-7.8.0.tgz#e042f39a01ec6f44dc8f244caa2ab1999674479c"
+  integrity sha512-d4SdG+6UmGdzWw38a4sN3lF/nTEzsDxhzU13wm10ejOpPehtmRoqBKnPztQUfFiWbNvSb4czkWYJD4kt+5+Fuw==
   dependencies:
     "@slack/logger" "^4.0.0"
     "@slack/types" "^2.9.0"
     "@types/node" ">=18.0.0"
     "@types/retry" "0.12.0"
-    axios "^1.7.4"
+    axios "^1.7.8"
     eventemitter3 "^5.0.1"
     form-data "^4.0.0"
     is-electron "2.2.2"
@@ -932,7 +932,7 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-axios@^1.7.4, axios@^1.7.8:
+axios@^1.7.8:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
   integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
