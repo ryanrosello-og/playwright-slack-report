@@ -2,7 +2,7 @@
   "dependencies": {
     "@slack/web-api": "^7.8.0",
     "@slack/webhook": "^7.0.4",
-    "commander": "^13.0.0",
+    "commander": "^13.1.0",
     "https-proxy-agent": "^7.0.6",
     "ts-node": "^10.9.2",
     "zod": "^3.24.1"
