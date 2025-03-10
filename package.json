@@ -23,7 +23,7 @@
     "nyc": "^17.1.0",
     "prettier": "^3.4.2",
     "ts-sinon": "^2.0.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
