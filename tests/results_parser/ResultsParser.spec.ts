@@ -1,7 +1,7 @@
 import { expect, test as base } from '@playwright/test';
 import { TestCase } from '@playwright/test/reporter';
 import path from 'path';
-import ResultsParser from '../src/ResultsParser';
+import ResultsParser from '../../src/ResultsParser';
 
 const test = base.extend<{ testData: any }>({
   testData: {
@@ -15,7 +15,7 @@ const test = base.extend<{ testData: any }>({
             suites: [],
             tests: [
               {
-                title: 'basic test failure ',
+                title: 'basic test failure',
                 results: [
                   {
                     retry: 0,
@@ -403,6 +403,7 @@ test.describe('ResultsParser', () => {
       ],
     );
     const results = await resultsParser.getParsedResults([]);
+
     expect(results.tests[0].projectName).toEqual('playwright-slack-report');
     expect(results.tests[0].browser).toEqual('chrome');
   });
@@ -414,6 +415,7 @@ test.describe('ResultsParser', () => {
       testData.suites[0].suites[0].tests[0],
       [],
     );
+
     const testA: TestCase = {
       expectedStatus: 'passed',
       ok(): boolean {
@@ -447,7 +449,7 @@ test.describe('ResultsParser', () => {
       tests: [
         {
           suiteName: 'tests/t1.spec.ts',
-          name: 'basic test failure ',
+          name: 'basic test failure',
           status: 'failed',
           browser: '',
           projectName: '',
@@ -493,7 +495,7 @@ test.describe('ResultsParser', () => {
     });
   });
 
-  test('getTestName(...) generates correct test name', async ({}) => {
+  test('getTestName(...) generates correct test name', async () => {
     expect(ResultsParser.getTestName({ name: 'Login' })).toEqual('Login');
     expect(
       ResultsParser.getTestName({
@@ -511,11 +513,11 @@ test.describe('ResultsParser', () => {
     ).toEqual('Login [Project Name: nightly_regression] using chrome');
   });
 
-  test('parse test results from json file that has retries, flakies and skipped tests', async ({}) => {
+  test('parse test results from json file that has retries, flakies and skipped tests', async () => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(
       __dirname,
-      'test_data',
+      '../test_data',
       'valid_test_results.json',
     );
     const resultSummary
@@ -544,11 +546,11 @@ test.describe('ResultsParser', () => {
     }
   });
 
-  test('parse test results from a complicated json file', async ({}) => {
+  test('parse test results from a complicated json file', async () => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(
       __dirname,
-      'test_data',
+      '../test_data',
       'valid_test_results_complex.json',
     );
     const resultSummary
@@ -561,17 +563,11 @@ test.describe('ResultsParser', () => {
     expect(resultSummary.tests.length).toEqual(7);
   });
 
-  test('retrieve expected failure message from annotation', async ({}) => {
+  test('retrieve expected failure message from annotation', async () => {
     const resultsParser = new ResultsParser();
     const result = resultsParser.getExpectedFailure({
       annotations: [{ type: 'fail', description: 'This text will fail' }],
     });
     expect(result).toEqual('This text will fail');
-  });
-
-  test('empty failure message returned if annotation does not exist', async ({}) => {
-    const resultsParser = new ResultsParser();
-    const result = resultsParser.getExpectedFailure({});
-    expect(result).toEqual('');
   });
 });

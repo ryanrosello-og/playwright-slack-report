@@ -1,0 +1,778 @@
+{
+  "config": {
+    "configFile": "C:\\_repo\\test-slick\\playwright.config.ts",
+    "rootDir": "C:/_repo/test-slick/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 10,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "C:\\_repo\\test-slick\\node_modules\\playwright-slack-report\\dist\\src\\SlackReporter.js",
+        {
+          "channels": ["fake-automation-channel"],
+          "teamChannels": [
+            { "channelName": "team0-channel", "testNamePattern": "@team0" },
+            { "channelName": "team1-channel", "testNamePattern": "@team1" },
+            { "channelName": "team2-channel", "testNamePattern": "@team2" },
+            { "channelName": "team3-channel", "testNamePattern": "@team3" },
+            { "channelName": "team4-channel", "testNamePattern": "@team4" },
+            { "channelName": "team5-channel", "testNamePattern": "@team5" }
+          ],
+          "sendResults": "always",
+          "maxNumberOfFailuresToShow": 5,
+          "meta": [
+            {
+              "key": "Environment",
+              "value": "test env"
+            },
+            {
+              "key": "Execution",
+              "value": "REPORT_PORTAL_PROJECT_TITLE"
+            },
+            {
+              "key": "Build",
+              "value": "<https://github.sarasa/SOME_GITHUB_REPOSITORY/actions/runs/1234 | View Fake Build>"
+            },
+            {
+              "key": "Results",
+              "value": "<https://reportportal.sarasa/ui/#playwright/launches/all | Fake Report Portal>"
+            }
+          ],
+          "slackLogLevel": "INFO",
+          "disableUnfurl": false,
+          "showInThread": false
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/_repo/test-slick/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "id": "chrome",
+        "name": "chrome",
+        "testDir": "C:/_repo/test-slick/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.40.0",
+    "workers": 16,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "2 passed tests",
+      "file": "team0example.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "success - fake test @team0",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "status": "passed",
+                  "duration": 3305,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.015Z",
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a30a6eba6312f6b87ea5-4a26ebd06a6b810edcc2",
+          "file": "team0example.spec.ts",
+          "line": 3,
+          "column": 5
+        },
+        {
+          "title": "success - another fake test @team0",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "status": "passed",
+                  "duration": 3148,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.011Z",
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a30a6eba6312f6b87ea5-d453c460efc40138b554",
+          "file": "team0example.spec.ts",
+          "line": 9,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "2 flaky tests",
+      "file": "team1example.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "flaky - fake test @team1",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "status": "failed",
+                  "duration": 3938,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:58:76",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team1example.spec.ts",
+                      "column": 76,
+                      "line": 58
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 56 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 57 |\u001b[39m   } \u001b[36melse\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 58 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 59 |\u001b[39m   }\u001b[0m\n\u001b[0m \u001b[90m 60 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 61 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team1example.spec.ts",
+                        "column": 76,
+                        "line": 58
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 56 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 57 |\u001b[39m   } \u001b[36melse\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 58 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 59 |\u001b[39m   }\u001b[0m\n\u001b[0m \u001b[90m 60 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 61 |\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:58:76\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.027Z",
+                  "attachments": [],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team1example.spec.ts",
+                    "column": 76,
+                    "line": 58
+                  }
+                },
+                {
+                  "workerIndex": 8,
+                  "status": "passed",
+                  "duration": 1899,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2023-11-19T09:04:13.251Z",
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\_repo\\test-slick\\test-results\\example-get-started-link3-chrome-retry1\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "flaky"
+            }
+          ],
+          "id": "a30a6eba6312f6b87ea5-53d7f4fe50c7ce42ea99",
+          "file": "team1example.spec.ts",
+          "line": 49,
+          "column": 5
+        },
+        {
+          "title": "flaky - another fake test @team1",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "status": "failed",
+                  "duration": 3938,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:58:76",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team1example.spec.ts",
+                      "column": 76,
+                      "line": 58
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 56 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 57 |\u001b[39m   } \u001b[36melse\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 58 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 59 |\u001b[39m   }\u001b[0m\n\u001b[0m \u001b[90m 60 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 61 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team1example.spec.ts",
+                        "column": 76,
+                        "line": 58
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 56 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 57 |\u001b[39m   } \u001b[36melse\u001b[39m {\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 58 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 59 |\u001b[39m   }\u001b[0m\n\u001b[0m \u001b[90m 60 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 61 |\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:58:76\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.027Z",
+                  "attachments": [],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team1example.spec.ts",
+                    "column": 176,
+                    "line": 58
+                  }
+                },
+                {
+                  "workerIndex": 8,
+                  "status": "passed",
+                  "duration": 1899,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2023-11-19T09:04:13.251Z",
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\_repo\\test-slick\\test-results\\example-get-started-link3-chrome-retry1\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "flaky"
+            }
+          ],
+          "id": "a30a6eba6312f6b87ea5-53d7f4fe50c7ce42ea99",
+          "file": "team1example.spec.ts",
+          "line": 149,
+          "column": 15
+        }
+      ]
+    },
+    {
+      "title": "2 failed tests",
+      "file": "team2example.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "failed - fake test @team2",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "status": "failed",
+                  "duration": 4033,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                      "column": 74,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                        "column": 74,
+                        "line": 38
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.016Z",
+                  "attachments": [],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                    "column": 74,
+                    "line": 38
+                  }
+                },
+                {
+                  "workerIndex": 9,
+                  "status": "failed",
+                  "duration": 2424,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                      "column": 74,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                        "column": 74,
+                        "line": 38
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2023-11-19T09:04:13.414Z",
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\_repo\\test-slick\\test-results\\example-get-started-link-chrome-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                    "column": 74,
+                    "line": 38
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a40a6eba6312f6b87ea5-1eb159041d56409ed83c",
+          "file": "team2example.spec.ts",
+          "line": 31,
+          "column": 5
+        },
+        {
+          "title": "failed - another fake test @team2",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "status": "failed",
+                  "duration": 4033,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                      "column": 74,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                        "column": 74,
+                        "line": 38
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.016Z",
+                  "attachments": [],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                    "column": 74,
+                    "line": 38
+                  }
+                },
+                {
+                  "workerIndex": 9,
+                  "status": "failed",
+                  "duration": 2424,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                      "column": 74,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                        "column": 74,
+                        "line": 38
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2023-11-19T09:04:13.414Z",
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\_repo\\test-slick\\test-results\\example-get-started-link-chrome-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team2example.spec.ts",
+                    "column": 74,
+                    "line": 38
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a30a6eba1312f6b87ea5-1eb159041d56409ed83a",
+          "file": "team2example.spec.ts",
+          "line": 131,
+          "column": 15
+        }
+      ]
+    },
+    {
+      "title": "1 passed test + 1 failed test",
+      "file": "team3example.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "success - fake test @team3",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "status": "passed",
+                  "duration": 3305,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.015Z",
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a30a6eba6312f6b87ea5-4a26ebd06a6b810ddcc2",
+          "file": "team3example.spec.ts",
+          "line": 3,
+          "column": 5
+        },
+        {
+          "title": "failed - fake test @team3",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "status": "failed",
+                  "duration": 4033,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team3example.spec.ts",
+                      "column": 74,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team3example.spec.ts",
+                        "column": 74,
+                        "line": 38
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.016Z",
+                  "attachments": [],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team3example.spec.ts",
+                    "column": 74,
+                    "line": 38
+                  }
+                },
+                {
+                  "workerIndex": 9,
+                  "status": "failed",
+                  "duration": 2424,
+                  "error": {
+                    "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n",
+                    "stack": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74",
+                    "location": {
+                      "file": "C:\\_repo\\test-slick\\tests\\team3example.spec.ts",
+                      "column": 74,
+                      "line": 38
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\_repo\\test-slick\\tests\\team3example.spec.ts",
+                        "column": 74,
+                        "line": 38
+                      },
+                      "message": "Error: \u001b[31mTimed out 500ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: getByRole('heading', { name: 'Installation_fail' })\nExpected: visible\nReceived: hidden\nCall log:\n  \u001b[2m- expect.toBeVisible with timeout 500ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: 'Installation_fail' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 36 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 37 |\u001b[39m   \u001b[90m// Expects page to have a heading with the name of Installation.\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 38 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'heading'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Installation_fail'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({timeout\u001b[33m:\u001b[39m \u001b[35m500\u001b[39m})\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m                                                                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 39 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 |\u001b[39m test(\u001b[32m'get started link2'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[0m \u001b[90m 41 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'https://playwright.dev/'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at C:\\_repo\\test-slick\\tests\\example.spec.ts:38:74\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2023-11-19T09:04:13.414Z",
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\_repo\\test-slick\\test-results\\example-get-started-link-chrome-retry1\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\_repo\\test-slick\\tests\\team3example.spec.ts",
+                    "column": 74,
+                    "line": 38
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "a30a6eba1312f6b87ea5-1eb129041d56409ed83c",
+          "file": "team3example.spec.ts",
+          "line": 131,
+          "column": 15
+        }
+      ]
+    },
+    {
+      "title": "1 passed test + 1 skipped test",
+      "file": "team4example.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "success - fake test @team4",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "status": "passed",
+                  "duration": 3305,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-11-19T09:04:08.015Z",
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a30a6eba6313f6b87ea5-4a26ekd06a6b810ddcc2",
+          "file": "team4example.spec.ts",
+          "line": 3,
+          "column": 5
+        },
+        {
+          "title": "skipped - fake test @team4",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "a30a6eba6312f6b82ea5-94ea8c090bba859ce4tb",
+          "file": "team4example.spec.ts",
+          "line": 83,
+          "column": 7
+        }
+      ]
+    },
+    {
+      "title": "2 skipped tests",
+      "file": "team5example.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "skipped - fake test @team5",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "a30a6eba6312f6f82ea5-94ea8c090bba859ce4tb",
+          "file": "team5example.spec.ts",
+          "line": 83,
+          "column": 7
+        },
+        {
+          "title": "skipped - another fake test @team5",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "a30a6eba6312f6f82ea2-94ea8c090bpa859ce4tb",
+          "file": "team5example.spec.ts",
+          "line": 283,
+          "column": 7
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2024-11-19T09:04:07.690Z",
+    "duration": 8557.335,
+    "expected": 4,
+    "skipped": 3,
+    "unexpected": 3,
+    "flaky": 2
+  }
+}

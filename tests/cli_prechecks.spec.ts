@@ -7,10 +7,9 @@ const validTestResults = path.join(
   'test_data',
   'valid_test_results.json',
 );
-test.describe('CLI app - pre-check', () => {
-  test.beforeAll(async ({}) => {});
 
-  test('throws an error when the JSON results file does not exist', async ({}) => {
+test.describe('CLI app - pre-check', () => {
+  test('throws an error when the JSON results file does not exist', async () => {
     const result = await doPreChecks(
       'does-not-exist.json',
       'does-not-exist.json',
@@ -19,13 +18,13 @@ test.describe('CLI app - pre-check', () => {
     expect(result.message).toContain('JSON results file does not exist');
   });
 
-  test('throws an error when the config file does not exist', async ({}) => {
+  test('throws an error when the config file does not exist', async () => {
     const result = await doPreChecks(validTestResults, 'does-not-exist.json');
     expect(result.status).toEqual('error');
     expect(result.message).toContain('Config file does not exist');
   });
 
-  test('throws an error when both sendUsingBot and sendUsingWebhook defined', async ({}) => {
+  test('throws an error when both sendUsingBot and sendUsingWebhook defined', async () => {
     const invalidConfig = path.join(
       __dirname,
       'test_data',
@@ -38,7 +37,7 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
-  test('throws an error when the custom layout js file cannot be found', async ({}) => {
+  test('throws an error when the custom layout js file cannot be found', async () => {
     const invalidConfig = path.join(
       __dirname,
       'test_data',
@@ -51,7 +50,7 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
-  test('throws an error when both sendUsingWebhook and showInThread is true', async ({}) => {
+  test('throws an error when both sendUsingWebhook and showInThread is true', async () => {
     const invalidConfig = path.join(
       __dirname,
       'test_data',
@@ -64,7 +63,7 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
-  test('throws an error when missing both sendUsingBot and sendUsingWebhook keys', async ({}) => {
+  test('throws an error when missing both sendUsingBot and sendUsingWebhook keys', async () => {
     const invalidConfig = path.join(
       __dirname,
       'test_data',
@@ -77,7 +76,7 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
-  test('zod parsing throws an error when cli config misconfigured', async ({}) => {
+  test('zod parsing throws an error when cli config misconfigured', async () => {
     const invalidConfig = path.join(
       __dirname,
       'test_data',
@@ -99,7 +98,7 @@ test.describe('CLI app - pre-check', () => {
 ]`);
   });
 
-  test('ensures the env variable [SLACK_BOT_USER_OAUTH_TOKEN] is set', async ({}) => {
+  test('ensures the env variable [SLACK_BOT_USER_OAUTH_TOKEN] is set', async () => {
     const validConfig = path.join(
       __dirname,
       'test_data',
@@ -113,7 +112,7 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
-  test('provides config value when all pre-checks are valid', async ({}) => {
+  test('provides config value when all pre-checks are valid', async () => {
     const validConfig = path.join(
       __dirname,
       'test_data',

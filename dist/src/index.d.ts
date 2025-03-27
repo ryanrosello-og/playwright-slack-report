@@ -14,7 +14,7 @@ export type SummaryResults = {
         reason: string;
         retry: number;
         startedAt: string;
-        status: 'passed' | 'failed' | 'timedOut' | 'skipped';
+        status: TestStatusType;
         attachments?: {
             body: string | undefined | Buffer;
             contentType: string;
@@ -22,6 +22,13 @@ export type SummaryResults = {
             path: string;
         }[];
     }>;
+};
+export type TestStatusType = (typeof testStatuses)[keyof typeof testStatuses];
+export declare const testStatuses: {
+    readonly PASSED: "passed";
+    readonly FAILED: "failed";
+    readonly TIMED_OUT: "timedOut";
+    readonly SKIPPED: "skipped";
 };
 export type Meta = Array<{
     key: string;
@@ -31,6 +38,10 @@ export type failure = {
     suite: string;
     test: string;
     failureReason: string;
+};
+export type success = {
+    suite: string;
+    test: string;
 };
 export interface JSONResult {
     config: Config;
@@ -106,7 +117,7 @@ export interface Test {
     projectId: string;
     projectName: string;
     results: Result[];
-    status: string;
+    status: TestStatusType;
 }
 export interface Result {
     workerIndex: number;
@@ -173,7 +184,7 @@ export interface Tests {
     projectId: string;
     projectName: string;
     results: Results[];
-    status: string;
+    status: TestStatusType;
 }
 export interface Results {
     workerIndex: number;

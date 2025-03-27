@@ -6,6 +6,7 @@ declare class SlackReporter implements Reporter {
     private customLayoutAsync;
     private customFailureLayout;
     private customFailureLayoutAsync;
+    private customSuccessLayout;
     private maxNumberOfFailuresToShow;
     private showInThread;
     private meta;
@@ -13,7 +14,7 @@ declare class SlackReporter implements Reporter {
     private sendResults;
     private slackChannels;
     private onSuccessSlackChannels;
-    private onFailureSlackChannels;
+    private teamSlackChannels;
     private slackLogLevel;
     private slackOAuthToken;
     private slackWebHookUrl;
@@ -32,6 +33,6 @@ declare class SlackReporter implements Reporter {
     };
     log(message: string | undefined): void;
     printsToStdio(): boolean;
-    postResults(slackClient: SlackClient, channelName: string, summary: SummaryResults, isFailureReport?: boolean): Promise<void>;
+    postResults(slackClient: SlackClient, channelName: string, summary: SummaryResults, isFailureReport?: boolean, isTeamReport?: boolean): Promise<void>;
 }
 export default SlackReporter;

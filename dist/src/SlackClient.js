@@ -67,6 +67,9 @@ class SlackClient {
     async attachDetailsToThread({ channelIds, ts, summaryResults, maxNumberOfFailures, disableUnfurl, fakeRequest, }) {
         const result = [];
         const blocks = await (0, LayoutGenerator_1.generateFailures)(summaryResults, maxNumberOfFailures);
+        if (blocks.length === 0) {
+            return result;
+        }
         const fallbackText = (0, LayoutGenerator_1.generateFallbackText)(summaryResults);
         for (const channel of channelIds) {
             // under test

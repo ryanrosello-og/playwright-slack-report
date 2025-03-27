@@ -172,7 +172,7 @@ test.describe('SlackReporter - onEnd()', () => {
 });
 
 test.describe('SlackReporter - preChecks()', () => {
-  test.beforeEach(async ({}) => {
+  test.beforeEach(async () => {
     process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
   });
 
@@ -349,6 +349,32 @@ test.describe('SlackReporter - preChecks()', () => {
     expect(result).toEqual({
       okToProceed: false,
       message: '❌ On Failure Layout is not a function',
+    });
+  });
+
+  test('okToProceed flag is set to false when the custom on pass layout provided is not a Function', async ({
+    fakeSlackReporter,
+    suite,
+    fullConfig,
+  }) => {
+    const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
+    cloneFullConfig.reporter = [
+      [
+        '/home/ry/_repo/playwright-slack-report/src/SlackReporter.ts',
+        {
+          layout: () => 'fake function',
+          onSuccessLayout: 'not a function',
+          sendResults: 'always',
+          channels: ['zeb', 'pw'],
+        },
+      ],
+    ];
+    fakeSlackReporter.onBegin(cloneFullConfig, suite);
+
+    const result = fakeSlackReporter.preChecks();
+    expect(result).toEqual({
+      okToProceed: false,
+      message: '❌ On Success Layout is not a function',
     });
   });
 

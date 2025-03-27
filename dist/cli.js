@@ -16,13 +16,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -78,12 +88,11 @@ program
             agent,
         });
         const slackWebhookClient = new SlackWebhookClient_1.default(webhook);
-        let summaryResults = resultSummary;
         const meta = replaceEnvVars(config.meta);
-        summaryResults = { ...resultSummary, meta };
+        const summaryResults = { ...resultSummary, meta };
         const webhookResult = await slackWebhookClient.sendMessage({
-            customLayout: undefined,
-            customLayoutAsync: undefined,
+            customLayout: await attemptToImportLayout(config.customLayout?.source, config.customLayout?.functionName),
+            customLayoutAsync: await attemptToImportLayout(config.customLayoutAsync?.source, config.customLayoutAsync?.functionName),
             maxNumberOfFailures: config.maxNumberOfFailures,
             disableUnfurl: config.disableUnfurl,
             summaryResults,
@@ -104,9 +113,8 @@ async function sendResultsUsingBot({ resultSummary, slackClient, config, }) {
         console.log('⏩ Slack CLI reporter - no failures found');
         return true;
     }
-    let summaryResults = resultSummary;
     const meta = replaceEnvVars(config.meta);
-    summaryResults = { ...resultSummary, meta };
+    const summaryResults = { ...resultSummary, meta };
     if (config.sendUsingBot) {
         const result = await slackClient.sendMessage({
             options: {
@@ -120,11 +128,11 @@ async function sendResultsUsingBot({ resultSummary, slackClient, config, }) {
             },
         });
         if (config.showInThread && resultSummary.failures.length > 0) {
-            for (let i = 0; i < result.length; i += 1) {
+            for (const res of result) {
                 // eslint-disable-next-line no-await-in-loop
                 await slackClient.attachDetailsToThread({
-                    channelIds: [result[i].channel],
-                    ts: result[i].ts,
+                    channelIds: [res.channel],
+                    ts: res.ts,
                     summaryResults: resultSummary,
                     maxNumberOfFailures: config.maxNumberOfFailures,
                 });

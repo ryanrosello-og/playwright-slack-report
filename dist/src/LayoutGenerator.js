@@ -55,7 +55,8 @@ const generateFailures = async (summaryResults, maxNumberOfFailures) => {
             },
         });
     }
-    if (summaryResults.failures.length > maxNumberOfFailures) {
+    if (maxNumberOfFailures > 0
+        && summaryResults.failures.length > maxNumberOfFailures) {
         fails.push({
             type: 'section',
             text: {
@@ -63,6 +64,9 @@ const generateFailures = async (summaryResults, maxNumberOfFailures) => {
                 text: `*⚠️ There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
             },
         });
+    }
+    if (fails.length === 0) {
+        return [];
     }
     return [
         {

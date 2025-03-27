@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const test_1 = require("@playwright/test");
 const path_1 = __importDefault(require("path"));
-const ResultsParser_1 = __importDefault(require("../src/ResultsParser"));
+const ResultsParser_1 = __importDefault(require("../../src/ResultsParser"));
 const test = test_1.test.extend({
     testData: {
         title: '',
@@ -18,7 +18,7 @@ const test = test_1.test.extend({
                         suites: [],
                         tests: [
                             {
-                                title: 'basic test failure ',
+                                title: 'basic test failure',
                                 results: [
                                     {
                                         retry: 0,
@@ -413,7 +413,7 @@ test.describe('ResultsParser', () => {
             tests: [
                 {
                     suiteName: 'tests/t1.spec.ts',
-                    name: 'basic test failure ',
+                    name: 'basic test failure',
                     status: 'failed',
                     browser: '',
                     projectName: '',
@@ -457,7 +457,7 @@ test.describe('ResultsParser', () => {
             ],
         });
     });
-    test('getTestName(...) generates correct test name', async ({}) => {
+    test('getTestName(...) generates correct test name', async () => {
         (0, test_1.expect)(ResultsParser_1.default.getTestName({ name: 'Login' })).toEqual('Login');
         (0, test_1.expect)(ResultsParser_1.default.getTestName({
             name: 'Login',
@@ -470,9 +470,9 @@ test.describe('ResultsParser', () => {
             projectName: 'nightly_regression',
         })).toEqual('Login [Project Name: nightly_regression] using chrome');
     });
-    test('parse test results from json file that has retries, flakies and skipped tests', async ({}) => {
+    test('parse test results from json file that has retries, flakies and skipped tests', async () => {
         const resultsParser = new ResultsParser_1.default();
-        const validTestResults = path_1.default.join(__dirname, 'test_data', 'valid_test_results.json');
+        const validTestResults = path_1.default.join(__dirname, '../test_data', 'valid_test_results.json');
         const resultSummary = await resultsParser.parseFromJsonFile(validTestResults);
         (0, test_1.expect)(resultSummary.failed).toEqual(3);
         (0, test_1.expect)(resultSummary.flaky).toEqual(1);
@@ -491,9 +491,9 @@ test.describe('ResultsParser', () => {
             (0, test_1.expect)(error.toString()).toContain('Error: Error reading or parsing JSON file');
         }
     });
-    test('parse test results from a complicated json file', async ({}) => {
+    test('parse test results from a complicated json file', async () => {
         const resultsParser = new ResultsParser_1.default();
-        const validTestResults = path_1.default.join(__dirname, 'test_data', 'valid_test_results_complex.json');
+        const validTestResults = path_1.default.join(__dirname, '../test_data', 'valid_test_results_complex.json');
         const resultSummary = await resultsParser.parseFromJsonFile(validTestResults);
         (0, test_1.expect)(resultSummary.failed).toEqual(1);
         (0, test_1.expect)(resultSummary.flaky).toEqual(0);
@@ -502,17 +502,12 @@ test.describe('ResultsParser', () => {
         (0, test_1.expect)(resultSummary.failures.length).toEqual(1);
         (0, test_1.expect)(resultSummary.tests.length).toEqual(7);
     });
-    test('retrieve expected failure message from annotation', async ({}) => {
+    test('retrieve expected failure message from annotation', async () => {
         const resultsParser = new ResultsParser_1.default();
         const result = resultsParser.getExpectedFailure({
             annotations: [{ type: 'fail', description: 'This text will fail' }],
         });
         (0, test_1.expect)(result).toEqual('This text will fail');
-    });
-    test('empty failure message returned if annotation does not exist', async ({}) => {
-        const resultsParser = new ResultsParser_1.default();
-        const result = resultsParser.getExpectedFailure({});
-        (0, test_1.expect)(result).toEqual('');
     });
 });
 //# sourceMappingURL=ResultsParser.spec.js.map

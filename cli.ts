@@ -68,12 +68,17 @@ program
         agent,
       });
       const slackWebhookClient = new SlackWebhookClient(webhook);
-      let summaryResults = resultSummary;
       const meta = replaceEnvVars(config.meta);
-      summaryResults = { ...resultSummary, meta };
+      const summaryResults = { ...resultSummary, meta };
       const webhookResult = await slackWebhookClient.sendMessage({
-        customLayout: undefined,
-        customLayoutAsync: undefined,
+        customLayout: await attemptToImportLayout(
+          config.customLayout?.source,
+          config.customLayout?.functionName,
+        ),
+        customLayoutAsync: await attemptToImportLayout(
+          config.customLayoutAsync?.source,
+          config.customLayoutAsync?.functionName,
+        ),
         maxNumberOfFailures: config.maxNumberOfFailures,
         disableUnfurl: config.disableUnfurl,
         summaryResults,
@@ -106,9 +111,8 @@ async function sendResultsUsingBot({
     console.log('⏩ Slack CLI reporter - no failures found');
     return true;
   }
-  let summaryResults = resultSummary;
   const meta = replaceEnvVars(config.meta);
-  summaryResults = { ...resultSummary, meta };
+  const summaryResults = { ...resultSummary, meta };
   if (config.sendUsingBot) {
     const result = await slackClient.sendMessage({
       options: {
@@ -129,11 +133,11 @@ async function sendResultsUsingBot({
     });
 
     if (config.showInThread && resultSummary.failures.length > 0) {
-      for (let i = 0; i < result.length; i += 1) {
+      for (const res of result) {
         // eslint-disable-next-line no-await-in-loop
         await slackClient.attachDetailsToThread({
-          channelIds: [result[i].channel],
-          ts: result[i].ts,
+          channelIds: [res.channel],
+          ts: res.ts,
           summaryResults: resultSummary,
           maxNumberOfFailures: config.maxNumberOfFailures,
         });

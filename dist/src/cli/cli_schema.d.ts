@@ -20,21 +20,21 @@ export declare const ZodCliSchema: z.ZodObject<{
         functionName: z.ZodString;
         source: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     }, {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     }>>;
     customLayoutAsync: z.ZodOptional<z.ZodObject<{
         functionName: z.ZodString;
         source: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     }, {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     }>>;
     slackLogLevel: z.ZodNativeEnum<typeof LogLevel>;
     maxNumberOfFailures: z.ZodDefault<z.ZodNumber>;
@@ -52,6 +52,13 @@ export declare const ZodCliSchema: z.ZodObject<{
         value?: string;
     }>, "many">>;
 }, "strip", z.ZodTypeAny, {
+    meta?: {
+        key?: string;
+        value?: string;
+    }[];
+    proxy?: string;
+    maxNumberOfFailures?: number;
+    disableUnfurl?: boolean;
     sendResults?: "always" | "on-failure";
     sendUsingBot?: {
         channels?: [string, ...string[]];
@@ -60,23 +67,23 @@ export declare const ZodCliSchema: z.ZodObject<{
         webhookUrl?: string;
     };
     customLayout?: {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     };
     customLayoutAsync?: {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     };
     slackLogLevel?: LogLevel;
-    maxNumberOfFailures?: number;
-    disableUnfurl?: boolean;
     showInThread?: boolean;
-    proxy?: string;
-    meta?: {
-        key?: string;
-        value?: string;
-    }[];
 }, {
+    meta?: {
+        key?: string;
+        value?: string;
+    }[];
+    proxy?: string;
+    maxNumberOfFailures?: number;
+    disableUnfurl?: boolean;
     sendResults?: "always" | "on-failure";
     sendUsingBot?: {
         channels?: [string, ...string[]];
@@ -85,22 +92,15 @@ export declare const ZodCliSchema: z.ZodObject<{
         webhookUrl?: string;
     };
     customLayout?: {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     };
     customLayoutAsync?: {
-        functionName?: string;
         source?: string;
+        functionName?: string;
     };
     slackLogLevel?: LogLevel;
-    maxNumberOfFailures?: number;
-    disableUnfurl?: boolean;
     showInThread?: boolean;
-    proxy?: string;
-    meta?: {
-        key?: string;
-        value?: string;
-    }[];
 }>;
 export interface ICliConfig {
     sendResults: 'always' | 'on-failure';
