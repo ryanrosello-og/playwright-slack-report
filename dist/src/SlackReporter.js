@@ -136,16 +136,28 @@ class SlackReporter {
             }
             // Send individual results to each team channel if any
             if (this.teamSlackChannels) {
+                console.log('\nSending team results\n');
                 // Send failure results to each channel
                 const failuresGroupedByTeam = await this.resultsParser.getParsedFailureResultsByPattern(this.teamSlackChannels);
+                console.log('\nfailuresGroupedByTeam length: ', failuresGroupedByTeam.length);
+                console.log('\nfailuresGroupedByTeam:');
+                failuresGroupedByTeam.forEach((element) => {
+                    console.log(`\n${JSON.stringify(element)}`);
+                });
                 for (const { channel, team, summary } of failuresGroupedByTeam) {
                     // New copy of this.meta instead of reference, to avoid data accumulation
                     summary.meta = [...this.meta];
                     summary.meta.push({ key: 'Team', value: team });
+                    console.log(`\nSending failure results of ${team}`);
                     await this.postResults(slackClient, channel, summary, true, true);
                 }
                 // Send success results to each team that did not have any failures
                 const successGroupedByTeam = await this.resultsParser.getParsedSuccessResultsByPatternWithoutFailures(this.teamSlackChannels);
+                console.log('\nsuccessGroupedByTeam length: ', successGroupedByTeam.length);
+                console.log('\nsuccessGroupedByTeam:');
+                successGroupedByTeam.forEach((element) => {
+                    console.log(`\n${JSON.stringify(element)}`);
+                });
                 for (const { channel, team, summary } of successGroupedByTeam) {
                     // New copy of this.meta instead of reference, to avoid data accumulation
                     summary.meta = [...this.meta];
