@@ -1,6 +1,6 @@
 name: Node.js Package and Publish
 permissions:
-  contents: read
+  contents: write
 on:
   release:
     types: [created]
