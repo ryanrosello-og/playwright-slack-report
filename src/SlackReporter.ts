@@ -23,6 +23,8 @@ class SlackReporter implements Reporter {
 
   private showInThread: boolean;
 
+  private sendCustomBlocksInThreadAfterIndex?: number;
+
   private meta: Array<{ key: string; value: string }> = [];
 
   private resultsParser: ResultsParser;
@@ -86,6 +88,10 @@ class SlackReporter implements Reporter {
         = slackReporterConfig.slackWebHookChannel || undefined;
       this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
       this.showInThread = slackReporterConfig.showInThread || false;
+      if (slackReporterConfig.sendCustomBlocksInThreadAfterIndex) {
+        this.sendCustomBlocksInThreadAfterIndex
+          = slackReporterConfig.sendCustomBlocksInThreadAfterIndex;
+      }
       this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
       this.proxy = slackReporterConfig.proxy || undefined;
     }
@@ -168,6 +174,7 @@ class SlackReporter implements Reporter {
           disableUnfurl: this.disableUnfurl,
           summaryResults: resultSummary,
           showInThread: this.showInThread,
+          sendCustomBlocksInThreadAfterIndex: this.sendCustomBlocksInThreadAfterIndex,
         },
       });
       // eslint-disable-next-line no-console
