@@ -39,13 +39,33 @@ export default class SlackClient {
       disableUnfurl?: boolean;
       summaryResults: SummaryResults;
       showInThread: boolean;
+      sendCustomBlocksInThreadAfterIndex?: number;
     };
   }): Promise<Array<{ channel: string; outcome: string; ts: string }>> {
     let blocks: (Block | KnownBlock)[];
+    let threadedBlocks: (Block | KnownBlock)[] = [];
     if (options.customLayout) {
-      blocks = options.customLayout(options.summaryResults);
+      const allBlocks = options.customLayout(options.summaryResults);
+      if (options.sendCustomBlocksInThreadAfterIndex) {
+        blocks = allBlocks.slice(0, options.sendCustomBlocksInThreadAfterIndex);
+        threadedBlocks = allBlocks.slice(
+          options.sendCustomBlocksInThreadAfterIndex,
+          allBlocks.length,
+        );
+      } else {
+        blocks = allBlocks;
+      }
     } else if (options.customLayoutAsync) {
-      blocks = await options.customLayoutAsync(options.summaryResults);
+      const allBlocks = await options.customLayoutAsync(options.summaryResults);
+      if (options.sendCustomBlocksInThreadAfterIndex) {
+        blocks = allBlocks.slice(0, options.sendCustomBlocksInThreadAfterIndex);
+        threadedBlocks = allBlocks.slice(
+          options.sendCustomBlocksInThreadAfterIndex,
+          allBlocks.length,
+        );
+      } else {
+        blocks = allBlocks;
+      }
     } else if (options.showInThread) {
       const modifiedOptions = JSON.parse(JSON.stringify(options));
       modifiedOptions.summaryResults.failures = [];
@@ -104,6 +124,35 @@ export default class SlackClient {
           channel,
           outcome: `❌ Message not sent to ${channel} \r\n ${error.message}`,
         });
+      }
+    }
+
+    if (threadedBlocks.length > 0) {
+      for (let i = 0; i < result.length; i += 1) {
+        const threadTs = result[i].ts;
+        for (const block of threadedBlocks) {
+          try {
+            if (options.fakeRequest) {
+              await options.fakeRequest();
+            } else {
+              await SlackClient.doPostRequest(
+                this.slackWebClient,
+                result[i].channel,
+                fallbackText,
+                [block],
+                unfurl,
+                threadTs,
+              );
+            }
+            // eslint-disable-next-line no-console
+            console.log(`✅ Threaded message sent to ${result[i].channel}`);
+          } catch (error: any) {
+            // eslint-disable-next-line no-console
+            console.error(
+              `❌ Failed to send threaded message to ${result[i].channel}: ${error.message}`,
+            );
+          }
+        }
       }
     }
     return result;

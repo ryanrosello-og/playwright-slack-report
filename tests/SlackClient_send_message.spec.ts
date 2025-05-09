@@ -111,6 +111,80 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
+  test('sends custom blocks in one message when sendCustomBlocksInThreadAfterIndex is not set', async ({
+    testSlackClient,
+    testSummaryAllTestsFailed,
+  }) => {
+    let fakeRequestCallCounter = 0;
+
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
+      fakeRequestCallCounter += 1;
+      return {
+        ok: true,
+      };
+    };
+
+    const channelId = 'C12345';
+    const clientResponse = await testSlackClient.sendMessage({
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsFailed,
+        customLayout: generateCustomLayout,
+        customLayoutAsync: undefined,
+        fakeRequest,
+        maxNumberOfFailures: 10,
+        showInThread: false,
+        sendCustomBlocksInThreadAfterIndex: undefined,
+      },
+    });
+
+    expect(fakeRequestCallCounter).toBe(1);
+
+    expect(clientResponse).toEqual([
+      {
+        channel: channelId,
+        outcome: '✅ Message sent to C12345',
+      },
+    ]);
+  });
+
+  test('sends custom blocks in thread when sendCustomBlocksInThreadAfterIndex is set', async ({
+    testSlackClient,
+    testSummaryAllTestsFailed,
+  }) => {
+    let fakeRequestCallCounter = 0;
+
+    const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
+      fakeRequestCallCounter += 1;
+      return {
+        ok: true,
+      };
+    };
+
+    const channelId = 'C12345';
+    const clientResponse = await testSlackClient.sendMessage({
+      options: {
+        channelIds: [channelId],
+        summaryResults: testSummaryAllTestsFailed,
+        customLayout: generateCustomLayout,
+        customLayoutAsync: undefined,
+        fakeRequest,
+        maxNumberOfFailures: 10,
+        showInThread: false,
+        sendCustomBlocksInThreadAfterIndex: 1,
+      },
+    });
+
+    expect(fakeRequestCallCounter).toBe(6);
+
+    expect(clientResponse).toEqual([
+      {
+        channel: channelId,
+        outcome: '✅ Message sent to C12345',
+      },
+    ]);
+  });
+
   test('provides an error when posting message to Slack fails', async ({
     testSlackClient,
     testSummaryAllTestsPassed,

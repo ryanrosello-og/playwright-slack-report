@@ -70,6 +70,14 @@ export const doPreChecks = async (
     };
   }
 
+  if (config.sendUsingWebhook && config.sendCustomBlocksInThreadAfterIndex) {
+    return {
+      status: 'error',
+      message:
+        'The sendCustomBlocksInThreadAfterIndex feature is only supported when using sendUsingBot is configured',
+    };
+  }
+
   if (!config.sendUsingWebhook && !config.sendUsingBot) {
     return {
       status: 'error',

@@ -131,6 +131,7 @@ async function sendResultsUsingBot({
         disableUnfurl: config.disableUnfurl,
         summaryResults,
         showInThread: config.showInThread,
+        sendCustomBlocksInThreadAfterIndex: config.sendCustomBlocksInThreadAfterIndex,
       },
     });
 
