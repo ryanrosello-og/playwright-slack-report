@@ -32,6 +32,7 @@ export const ZodCliSchema = z.object({
   showInThread: z.boolean().default(false),
   proxy: z.string().url().optional(),
   meta: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+  sendCustomBlocksInThreadAfterIndex: z.number().optional(),
 });
 
 export interface ICliConfig {
@@ -56,4 +57,5 @@ export interface ICliConfig {
   showInThread: boolean;
   proxy?: string;
   meta?: Array<{ key: string; value: string }>;
+  sendCustomBlocksInThreadAfterIndex?: number;
 }

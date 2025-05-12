@@ -469,6 +469,12 @@ Instructs the reporter to show the failure details in a thread instead of the ma
 
 ![Show failures in threads](./assets/threads.png)
 
+### **sendCustomBlocksInThreadAfterIndex** (default: undefined)
+
+Instructs the reporter to send blocks provided by your [custom layout](#-define-your-own-slack-message-custom-layout) to a thread following the index specified. _Example_: 
+
+`sendCustomBlocksInThreadAfterIndex: 3`
+
 ### **proxy** (optional)
 
 String representation of your proxy server.

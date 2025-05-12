@@ -64,6 +64,19 @@ test.describe('CLI app - pre-check', () => {
     );
   });
 
+  test('throws an error when both sendUsingWebhook and sendCustomBlocksInThreadAfterIndex are truthy', async ({}) => {
+    const invalidConfig = path.join(
+      __dirname,
+      'test_data',
+      'invalid_cli_config_sendCustomBlocksInThreadAfterIndex_enable_for_webhook.json',
+    );
+    const result = await doPreChecks(validTestResults, invalidConfig);
+    expect(result.status).toEqual('error');
+    expect(result.message).toContain(
+      'The sendCustomBlocksInThreadAfterIndex feature is only supported when using sendUsingBot is configured',
+    );
+  });
+
   test('throws an error when missing both sendUsingBot and sendUsingWebhook keys', async ({}) => {
     const invalidConfig = path.join(
       __dirname,
