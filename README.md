@@ -471,7 +471,7 @@ Instructs the reporter to show the failure details in a thread instead of the ma
 
 ### **sendCustomBlocksInThreadAfterIndex** (default: undefined)
 
-Instructs the reporter to send blocks provided by your [custom layout](#-define-your-own-slack-message-custom-layout) to in the thread following the index specified. _Example_:
+Instructs the reporter to send blocks provided by your [custom layout](#-define-your-own-slack-message-custom-layout) to a thread following the index specified. _Example_: 
 
 `sendCustomBlocksInThreadAfterIndex: 3`
 
