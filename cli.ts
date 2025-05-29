@@ -42,6 +42,12 @@ program
     const resultSummary = await resultsParser.parseFromJsonFile(
       preCheckResult.jsonPath!,
     );
+
+    if (config.sendResults === 'on-failure' && resultSummary.failed === 0) {
+      console.log('⏩ Slack CLI reporter - no failures found');
+      process.exit(0);
+    }
+
     if (config.sendUsingBot) {
       const slackClient = new SlackClient(
         new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
@@ -104,13 +110,6 @@ async function sendResultsUsingBot({
 }): Promise<boolean> {
   if (config.slackLogLevel === LogLevel.DEBUG) {
     console.log({ config });
-  }
-  if (
-    resultSummary.failures.length === 0
-    && config.sendResults === 'on-failure'
-  ) {
-    console.log('⏩ Slack CLI reporter - no failures found');
-    return true;
   }
   let summaryResults = resultSummary;
   const meta = replaceEnvVars(config.meta);
