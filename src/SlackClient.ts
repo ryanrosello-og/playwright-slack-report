@@ -130,28 +130,26 @@ export default class SlackClient {
     if (threadedBlocks.length > 0) {
       for (let i = 0; i < result.length; i += 1) {
         const threadTs = result[i].ts;
-        for (const block of threadedBlocks) {
-          try {
-            if (options.fakeRequest) {
-              await options.fakeRequest();
-            } else {
-              await SlackClient.doPostRequest(
-                this.slackWebClient,
-                result[i].channel,
-                fallbackText,
-                [block],
-                unfurl,
-                threadTs,
-              );
-            }
-            // eslint-disable-next-line no-console
-            console.log(`✅ Threaded message sent to ${result[i].channel}`);
-          } catch (error: any) {
-            // eslint-disable-next-line no-console
-            console.error(
-              `❌ Failed to send threaded message to ${result[i].channel}: ${error.message}`,
+        try {
+          if (options.fakeRequest) {
+            await options.fakeRequest();
+          } else {
+            await SlackClient.doPostRequest(
+              this.slackWebClient,
+              result[i].channel,
+              fallbackText,
+              threadedBlocks,
+              unfurl,
+              threadTs,
             );
           }
+          // eslint-disable-next-line no-console
+          console.log(`✅ Threaded message sent to ${result[i].channel}`);
+        } catch (error: any) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `❌ Failed to send threaded message to ${result[i].channel}: ${error.message}`,
+          );
         }
       }
     }
