@@ -175,7 +175,7 @@ test.describe('SlackClient.sendMessage()', () => {
       },
     });
 
-    expect(fakeRequestCallCounter).toBe(6);
+    expect(fakeRequestCallCounter).toBe(2);
 
     expect(clientResponse).toEqual([
       {
