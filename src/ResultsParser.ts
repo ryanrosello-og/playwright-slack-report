@@ -110,6 +110,11 @@ export default class ResultsParser {
     for (const spec of specs) {
       for (const test of spec.tests) {
         const { expectedStatus } = test;
+        // Calculate actual retries based on the maximum retry attempt for this test
+        const maxRetryAttempt = test.results.length > 0
+          ? Math.max(...test.results.map((r: any) => r.retry))
+          : 0;
+        const effectiveRetries = Math.max(maxRetryAttempt, retries);
         for (const result of test.results) {
           testResults.push({
             suiteName,
@@ -118,7 +123,7 @@ export default class ResultsParser {
             browser: test.projectName,
             projectName: test.projectName,
             retry: result.retry,
-            retries,
+            retries: effectiveRetries,
             startedAt: result.startTime,
             endedAt: new Date(
               new Date(result.startTime).getTime() + result.duration,
