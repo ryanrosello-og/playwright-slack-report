@@ -574,4 +574,373 @@ test.describe('ResultsParser', () => {
     const result = resultsParser.getExpectedFailure({});
     expect(result).toEqual('');
   });
+
+  // Tests for CLI mode retry logic fix
+  test('parseTests calculates effective retries correctly for flaky tests', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    // Mock test data representing a flaky test (failed on retry 0, passed on retry 1)
+    const mockSpecs = [
+      {
+        title: 'Flaky Test',
+        tests: [
+          {
+            projectName: 'chrome',
+            results: [
+              {
+                retry: 0,
+                status: 'failed',
+                duration: 1000,
+                startTime: '2023-01-01T00:00:00.000Z',
+                error: {
+                  snippet: 'Test failed on first attempt',
+                  stack: 'Error stack trace',
+                },
+              },
+              {
+                retry: 1,
+                status: 'passed',
+                duration: 1000,
+                startTime: '2023-01-01T00:00:01.000Z',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const testResults = await resultsParser.parseTests('Test Suite', mockSpecs, 0);
+
+    // Both results should have effectiveRetries = 1 (max retry attempt)
+    expect(testResults).toHaveLength(2);
+    expect(testResults[0].retries).toBe(1); // Failed attempt with effective retries
+    expect(testResults[0].retry).toBe(0);
+    expect(testResults[0].status).toBe('failed');
+
+    expect(testResults[1].retries).toBe(1); // Passed attempt with effective retries
+    expect(testResults[1].retry).toBe(1);
+    expect(testResults[1].status).toBe('passed');
+  });
+
+  test('parseTests handles single failure correctly', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    // Mock test data representing a true failure (no retries)
+    const mockSpecs = [
+      {
+        title: 'Failed Test',
+        tests: [
+          {
+            projectName: 'chrome',
+            results: [
+              {
+                retry: 0,
+                status: 'failed',
+                duration: 1000,
+                startTime: '2023-01-01T00:00:00.000Z',
+                error: {
+                  snippet: 'Test failed',
+                  stack: 'Error stack trace',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const testResults = await resultsParser.parseTests('Test Suite', mockSpecs, 0);
+
+    // Should have retries = 0 (max retry attempt = 0, global retries = 0)
+    expect(testResults).toHaveLength(1);
+    expect(testResults[0].retries).toBe(0);
+    expect(testResults[0].retry).toBe(0);
+    expect(testResults[0].status).toBe('failed');
+  });
+
+  test('parseTests uses global retries when higher than actual retries', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    // Mock test data with global retries higher than actual attempts
+    const mockSpecs = [
+      {
+        title: 'Test with High Global Retries',
+        tests: [
+          {
+            projectName: 'chrome',
+            results: [
+              {
+                retry: 0,
+                status: 'passed',
+                duration: 1000,
+                startTime: '2023-01-01T00:00:00.000Z',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const testResults = await resultsParser.parseTests('Test Suite', mockSpecs, 3);
+
+    // Should use global retries (3) since it's higher than max retry attempt (0)
+    expect(testResults).toHaveLength(1);
+    expect(testResults[0].retries).toBe(3);
+    expect(testResults[0].retry).toBe(0);
+    expect(testResults[0].status).toBe('passed');
+  });
+
+  test('getFailures excludes flaky tests correctly with fix', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    // Add a flaky test (failed on retry 0, passed on retry 1) using parseTestSuite
+    await resultsParser.parseTestSuite({
+      title: 'Flaky Suite',
+      specs: [
+        {
+          title: 'Flaky Test',
+          tests: [
+            {
+              projectName: 'chrome',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 1000,
+                  startTime: '2023-01-01T00:00:00.000Z',
+                  error: {
+                    snippet: 'Test failed on first attempt',
+                    stack: 'Error stack trace',
+                  },
+                },
+                {
+                  retry: 1,
+                  status: 'passed',
+                  duration: 1000,
+                  startTime: '2023-01-01T00:00:01.000Z',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }, 1);
+
+    // Add a true failure (failed on final retry)
+    await resultsParser.parseTestSuite({
+      title: 'Failed Suite',
+      specs: [
+        {
+          title: 'Failed Test',
+          tests: [
+            {
+              projectName: 'chrome',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 1000,
+                  startTime: '2023-01-01T00:00:00.000Z',
+                  error: {
+                    snippet: 'Test failed permanently',
+                    stack: 'Error stack trace',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }, 0);
+
+    const failures = await resultsParser.getFailures();
+
+    // Should only include the true failure, not the flaky test
+    expect(failures).toHaveLength(1);
+    expect(failures[0].test).toBe('Failed Test [chrome]');
+    expect(failures[0].suite).toBe('Failed Suite');
+    expect(failures[0].failureReason).toContain('Test failed permanently');
+  });
+
+  test('getFailures includes test that failed on final retry', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    // Add a test that failed on its final retry attempt using parseTestSuite
+    await resultsParser.parseTestSuite({
+      title: 'Retry Suite',
+      specs: [
+        {
+          title: 'Eventually Failed Test',
+          tests: [
+            {
+              projectName: 'chrome',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 1000,
+                  startTime: '2023-01-01T00:00:00.000Z',
+                  error: {
+                    snippet: 'First failure',
+                    stack: 'Error stack trace 1',
+                  },
+                },
+                {
+                  retry: 1,
+                  status: 'failed',
+                  duration: 1000,
+                  startTime: '2023-01-01T00:00:01.000Z',
+                  error: {
+                    snippet: 'Final failure',
+                    stack: 'Error stack trace 2',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }, 1);
+
+    const failures = await resultsParser.getFailures();
+
+    // Should include the test that failed on its final retry (retry 1, retries = 1)
+    expect(failures).toHaveLength(1);
+    expect(failures[0].test).toBe('Eventually Failed Test [chrome]');
+    expect(failures[0].suite).toBe('Retry Suite');
+    expect(failures[0].failureReason).toContain('Final failure');
+  });
+
+  test('getFailures correctly handles many flaky tests with single real failure', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    // Add multiple flaky tests (failed then passed)
+    await resultsParser.parseTestSuite({
+      title: 'Flaky Tests Suite',
+      specs: [
+        {
+          title: 'Flaky Test 1',
+          tests: [
+            {
+              projectName: 'chrome',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 1000,
+                  startTime: '2023-01-01T00:00:00.000Z',
+                  error: {
+                    snippet: 'Flaky test 1 failed on first attempt',
+                    stack: 'Error: Flaky failure 1',
+                  },
+                },
+                {
+                  retry: 1,
+                  status: 'passed',
+                  duration: 1200,
+                  startTime: '2023-01-01T00:00:01.000Z',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Flaky Test 2',
+          tests: [
+            {
+              projectName: 'chrome',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 800,
+                  startTime: '2023-01-01T00:00:02.000Z',
+                  error: {
+                    snippet: 'Flaky test 2 failed on first attempt',
+                    stack: 'Error: Flaky failure 2',
+                  },
+                },
+                {
+                  retry: 1,
+                  status: 'passed',
+                  duration: 900,
+                  startTime: '2023-01-01T00:00:03.000Z',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Flaky Test 3',
+          tests: [
+            {
+              projectName: 'firefox',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 1500,
+                  startTime: '2023-01-01T00:00:04.000Z',
+                  error: {
+                    snippet: 'Flaky test 3 failed on first attempt',
+                    stack: 'Error: Flaky failure 3',
+                  },
+                },
+                {
+                  retry: 1,
+                  status: 'passed',
+                  duration: 1100,
+                  startTime: '2023-01-01T00:00:05.000Z',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }, 1);
+
+    // Add one real failure that failed on its final retry
+    await resultsParser.parseTestSuite({
+      title: 'Real Failure Suite',
+      specs: [
+        {
+          title: 'Permanently Failed Test',
+          tests: [
+            {
+              projectName: 'safari',
+              results: [
+                {
+                  retry: 0,
+                  status: 'failed',
+                  duration: 2000,
+                  startTime: '2023-01-01T00:00:06.000Z',
+                  error: {
+                    snippet: 'This test always fails permanently',
+                    stack: 'Error: Permanent failure\n    at test.js:15:10',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }, 0);
+
+    const failures = await resultsParser.getFailures();
+
+    // Should only include the single real failure, not any of the flaky tests
+    expect(failures).toHaveLength(1);
+    expect(failures[0].test).toBe('Permanently Failed Test [safari]');
+    expect(failures[0].suite).toBe('Real Failure Suite');
+    expect(failures[0].failureReason).toContain('This test always fails permanently');
+
+    // Verify none of the flaky tests are included
+    const flakyTest1 = failures.find((f) => f.test.includes('Flaky Test 1'));
+    const flakyTest2 = failures.find((f) => f.test.includes('Flaky Test 2'));
+    const flakyTest3 = failures.find((f) => f.test.includes('Flaky Test 3'));
+
+    expect(flakyTest1).toBeUndefined();
+    expect(flakyTest2).toBeUndefined();
+    expect(flakyTest3).toBeUndefined();
+  });
 });
