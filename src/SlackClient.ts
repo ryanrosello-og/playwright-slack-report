@@ -21,8 +21,21 @@ export type additionalInfo = Array<{ key: string; value: string }>;
 export default class SlackClient {
   private slackWebClient: WebClient;
 
+  private static readonly MAX_BLOCKS_PER_MESSAGE = 50;
+
   constructor(slackClient: WebClient) {
     this.slackWebClient = slackClient;
+  }
+
+  private static chunkBlocks(
+    blocks: (Block | KnownBlock)[],
+    chunkSize: number = SlackClient.MAX_BLOCKS_PER_MESSAGE,
+  ): (Block | KnownBlock)[][] {
+    const chunks: (Block | KnownBlock)[][] = [];
+    for (let i = 0; i < blocks.length; i += chunkSize) {
+      chunks.push(blocks.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 
   async sendMessage({
@@ -128,23 +141,28 @@ export default class SlackClient {
     }
 
     if (threadedBlocks.length > 0) {
+      const threadedBlockChunks = SlackClient.chunkBlocks(threadedBlocks);
       for (let i = 0; i < result.length; i += 1) {
         const threadTs = result[i].ts;
         try {
-          if (options.fakeRequest) {
-            await options.fakeRequest();
-          } else {
-            await SlackClient.doPostRequest(
-              this.slackWebClient,
-              result[i].channel,
-              fallbackText,
-              threadedBlocks,
-              unfurl,
-              threadTs,
-            );
+          for (const chunk of threadedBlockChunks) {
+            if (options.fakeRequest) {
+              await options.fakeRequest();
+            } else {
+              await SlackClient.doPostRequest(
+                this.slackWebClient,
+                result[i].channel,
+                fallbackText,
+                chunk,
+                unfurl,
+                threadTs,
+              );
+            }
           }
           // eslint-disable-next-line no-console
-          console.log(`✅ Threaded message sent to ${result[i].channel}`);
+          console.log(
+            `✅ Threaded messages sent to ${result[i].channel} (${threadedBlockChunks.length} message${threadedBlockChunks.length > 1 ? 's' : ''})`,
+          );
         } catch (error: any) {
           // eslint-disable-next-line no-console
           console.error(
@@ -178,28 +196,47 @@ export default class SlackClient {
     }
 
     const fallbackText = generateFallbackText(summaryResults);
+    const blockChunks = SlackClient.chunkBlocks(blocks);
+
     for (const channel of channelIds) {
-      // under test
-      let chatResponse: ChatPostMessageResponse;
-      if (fakeRequest) {
-        chatResponse = await fakeRequest();
-      } else {
-        chatResponse = await SlackClient.doPostRequest(
-          this.slackWebClient,
-          channel,
-          fallbackText,
-          blocks,
-          disableUnfurl,
-          ts,
-        );
-      }
-      if (chatResponse.ok) {
+      try {
+        for (const chunk of blockChunks) {
+          // under test
+          let chatResponse: ChatPostMessageResponse;
+          if (fakeRequest) {
+            chatResponse = await fakeRequest();
+          } else {
+            chatResponse = await SlackClient.doPostRequest(
+              this.slackWebClient,
+              channel,
+              fallbackText,
+              chunk,
+              disableUnfurl,
+              ts,
+            );
+          }
+          if (chatResponse.ok) {
+            // eslint-disable-next-line no-console
+            console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+            result.push({
+              channel,
+              outcome: `✅ Message sent to ${channel} within thread ${ts}`,
+              ts: chatResponse.ts,
+            });
+          }
+        }
         // eslint-disable-next-line no-console
-        console.log(`✅ Message sent to ${channel} within thread ${ts}`);
+        console.log(
+          `✅ All failure details sent to ${channel} within thread ${ts} (${blockChunks.length} message${blockChunks.length > 1 ? 's' : ''})`,
+        );
+      } catch (error: any) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `❌ Failed to send failure details to ${channel} within thread ${ts}: ${error.message}`,
+        );
         result.push({
           channel,
-          outcome: `✅ Message sent to ${channel} within thread ${ts}`,
-          ts: chatResponse.ts,
+          outcome: `❌ Failed to send failure details to ${channel} within thread ${ts}: ${error.message}`,
         });
       }
     }
