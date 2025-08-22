@@ -100,9 +100,8 @@ test.describe('CLI app - pre-check', () => {
     expect(result.status).toEqual('error');
     expect(result.message).toEqual(`Config file is not valid: [
   {
-    "code": "invalid_type",
     "expected": "string",
-    "received": "undefined",
+    "code": "invalid_type",
     "path": [
       "sendUsingWebhook",
       "webhookUrl"
