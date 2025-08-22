@@ -107,7 +107,7 @@ test.describe('CLI app - pre-check', () => {
       "sendUsingWebhook",
       "webhookUrl"
     ],
-    "message": "Required"
+    "message": "Invalid input: expected string, received undefined"
   }
 ]`);
   });
