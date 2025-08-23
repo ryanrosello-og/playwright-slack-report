@@ -80,8 +80,10 @@ export default class SlackClient {
         blocks = allBlocks;
       }
     } else if (options.showInThread) {
-      const modifiedOptions = JSON.parse(JSON.stringify(options));
-      modifiedOptions.summaryResults.failures = [];
+      const modifiedOptions = {
+        ...options,
+        summaryResults: { ...options.summaryResults, failures: [] },
+      };
       blocks = await generateBlocks(
         modifiedOptions.summaryResults,
         options.maxNumberOfFailures,
