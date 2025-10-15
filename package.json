@@ -29,7 +29,6 @@
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
     "pw": "nyc playwright test && nyc report --reporter=lcov",
-    "prepare": "npm build",
     "build": "tsc -p ./tsconfig.json",
     "lint": "npx eslint . --ext .ts",
     "lint-fix": "npx eslint . --ext .ts --fix",
