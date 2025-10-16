@@ -6,6 +6,7 @@ export type SummaryResults = {
   failures: Array<failure>;
   meta?: Meta;
   tests: Array<{
+    file: string
     suiteName: string;
     name: string;
     browser?: string;

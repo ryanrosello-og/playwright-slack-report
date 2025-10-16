@@ -27,6 +27,7 @@ export const test = base.extend<SlackClientFixture>({
     failures: [],
     tests: [
       {
+        file: 'tests/accounts.spec.ts',
         suiteName: 'accounts',
         name: 'overdue will incur a penalty',
         startedAt: new Date().toISOString(),
@@ -52,6 +53,7 @@ export const test = base.extend<SlackClientFixture>({
     ],
     tests: [
       {
+        file: 'tests/t1.spec.ts',
         suiteName: 'tests/t1.spec.ts',
         name: 'basic test failure ',
         status: 'failed',
@@ -79,6 +81,7 @@ export const test = base.extend<SlackClientFixture>({
     failures: [],
     tests: [
       {
+        file: 'tests/accounts.spec.ts',
         suiteName: 'accounts',
         name: 'overdue will incur a penalty',
         startedAt: new Date().toISOString(),
@@ -88,6 +91,7 @@ export const test = base.extend<SlackClientFixture>({
         status: 'passed',
       },
       {
+        file: 'tests/accounts.spec.ts',
         suiteName: 'accounts',
         name: 'withdrawal removes value from balance',
         startedAt: new Date().toISOString(),
@@ -97,6 +101,7 @@ export const test = base.extend<SlackClientFixture>({
         status: 'failed',
       },
       {
+        file: 'tests/accounts.spec.ts',
         suiteName: 'accounts',
         name: 'withdrawal removes value from balance',
         startedAt: new Date().toISOString(),

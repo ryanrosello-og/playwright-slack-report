@@ -185,6 +185,7 @@ test.describe('SlackClient.generateBlocks()', () => {
         failures: [],
         tests: [
           {
+            file: 'tests/accounts.spec.ts',
             suiteName: 'accounts',
             name: 'overdue will incur a penalty',
             browser: 'chrome',
