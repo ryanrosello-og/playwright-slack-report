@@ -1,5 +1,6 @@
 name: Node.js Package and Publish
 permissions:
+  id-token: write
   contents: write
 on:
   release:
@@ -21,3 +22,4 @@ jobs:
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
+
