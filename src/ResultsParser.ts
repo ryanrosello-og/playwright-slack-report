@@ -13,7 +13,6 @@ import {
 
 /* eslint-disable no-restricted-syntax */
 export type testResult = {
-  file: string
   suiteName: string;
   name: string;
   browser?: string;
@@ -118,7 +117,6 @@ export default class ResultsParser {
         const effectiveRetries = Math.max(maxRetryAttempt, retries);
         for (const result of test.results) {
           testResults.push({
-            file: test.location.file,
             suiteName,
             name: spec.title,
             status: result.status === 'unexpected' ? 'failed' : result.status,
@@ -259,7 +257,6 @@ export default class ResultsParser {
     );
     for (const result of testCase.results) {
       testResults.push({
-        file: testCase.location.file,
         suiteName,
         name: spec.title,
         status: result.status,
@@ -291,7 +288,6 @@ export default class ResultsParser {
     );
     for (const result of testCase.results) {
       testResults.push({
-        file: testCase.location.file,
         suiteName,
         name: testCase.title,
         status: result.status,
