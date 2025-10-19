@@ -25,6 +25,7 @@ const test = base.extend<{ summaryResults: SummaryResults }>({
     ],
     tests: [
       {
+        file: 'tests/smoke.spec.ts',
         suiteName: 'checkout',
         name: 'add to cart',
         browser: 'chromium',
