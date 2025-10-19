@@ -71,11 +71,6 @@
                   "expectedStatus": "passed",
                   "projectId": "",
                   "projectName": "",
-                  "location": {
-                    "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                    "line": 9,
-                    "column": 1
-                  },
                   "results": [
                     {
                       "workerIndex": 0,
@@ -108,11 +103,6 @@
                   "expectedStatus": "passed",
                   "projectId": "",
                   "projectName": "",
-                  "location": {
-                    "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                    "line": 9,
-                    "column": 1
-                  },
                   "results": [
                     {
                       "workerIndex": 1,
@@ -179,11 +169,6 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "location": {
-                "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                "line": 9,
-                "column": 1
-              },
               "results": [
                 {
                   "workerIndex": 2,
@@ -216,11 +201,6 @@
               "expectedStatus": "passed",
               "projectId": "",
               "projectName": "",
-              "location": {
-                "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                "line": 9,
-                "column": 1
-              },
               "results": [
                 {
                   "workerIndex": 3,
@@ -261,11 +241,6 @@
                   "expectedStatus": "passed",
                   "projectId": "",
                   "projectName": "",
-                  "location": {
-                    "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                    "line": 9,
-                    "column": 1
-                  },
                   "results": [
                     {
                       "workerIndex": 4,
@@ -306,11 +281,6 @@
                       "expectedStatus": "passed",
                       "projectId": "",
                       "projectName": "",
-                      "location": {
-                        "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                        "line": 9,
-                        "column": 1
-                      },
                       "results": [
                         {
                           "workerIndex": 5,
@@ -353,11 +323,6 @@
                   "expectedStatus": "passed",
                   "projectId": "",
                   "projectName": "",
-                  "location": {
-                    "file": "/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts",
-                    "line": 9,
-                    "column": 1
-                  },
                   "results": [
                     {
                       "workerIndex": 6,

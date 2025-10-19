@@ -12,11 +12,6 @@ test.describe('CLI Mode Retry Threading Fix', () => {
         tests: [
           {
             projectName: 'chrome',
-            location: {
-              file: 'test.js',
-              line: 10,
-              column: 5,
-            },
             results: [
               {
                 retry: 0,
@@ -81,11 +76,6 @@ test.describe('CLI Mode Retry Threading Fix', () => {
         tests: [
           {
             projectName: 'chrome',
-            location: {
-              file: 'test.js',
-              line: 20,
-              column: 5,
-            },
             results: [
               {
                 retry: 0,
@@ -136,11 +126,6 @@ test.describe('CLI Mode Retry Threading Fix', () => {
         tests: [
           {
             projectName: 'chrome',
-            location: {
-              file: 'test.js',
-              line: 30,
-              column: 5,
-            },
             results: [
               {
                 retry: 0,

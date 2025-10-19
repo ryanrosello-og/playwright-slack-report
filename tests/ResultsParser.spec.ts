@@ -446,7 +446,6 @@ test.describe('ResultsParser', () => {
       failures: [],
       tests: [
         {
-          file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
           suiteName: 'tests/t1.spec.ts',
           name: 'basic test failure ',
           status: 'failed',
@@ -587,11 +586,6 @@ test.describe('ResultsParser', () => {
         tests: [
           {
             projectName: 'chrome',
-            location: {
-              file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-              line: 9,
-              column: 1,
-            },
             results: [
               {
                 retry: 0,
@@ -638,11 +632,6 @@ test.describe('ResultsParser', () => {
         tests: [
           {
             projectName: 'chrome',
-            location: {
-              file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-              line: 9,
-              column: 1,
-            },
             results: [
               {
                 retry: 0,
@@ -679,11 +668,6 @@ test.describe('ResultsParser', () => {
         tests: [
           {
             projectName: 'chrome',
-            location: {
-              file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-              line: 9,
-              column: 1,
-            },
             results: [
               {
                 retry: 0,
@@ -718,11 +702,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'chrome',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
@@ -756,11 +735,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'chrome',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
@@ -800,11 +774,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'chrome',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
@@ -854,11 +823,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'chrome',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
@@ -885,11 +849,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'chrome',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
@@ -916,11 +875,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'firefox',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
@@ -954,11 +908,6 @@ test.describe('ResultsParser', () => {
           tests: [
             {
               projectName: 'safari',
-              location: {
-                file: '/home/ry/_repo/playwright-slack-report/tests/t1.spec.ts',
-                line: 9,
-                column: 1,
-              },
               results: [
                 {
                   retry: 0,
