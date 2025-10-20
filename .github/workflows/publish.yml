@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: install node v22
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: yarn install
