@@ -13,7 +13,7 @@
     "@types/node": ">=24.7.2",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.3",
     "eslint": "^7.32.0 || ^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",
