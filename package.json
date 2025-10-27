@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
-    "@slack/types": "^2.14.0",
+    "@slack/types": "^2.18.0",
     "@types/node": ">=24.7.2",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "@typescript-eslint/parser": "^5.30.6",
