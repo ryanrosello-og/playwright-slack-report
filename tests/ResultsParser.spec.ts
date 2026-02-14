@@ -539,7 +539,7 @@ test.describe('ResultsParser', () => {
       await resultsParser.parseFromJsonFile(validTestResults);
     } catch (error) {
       expect(error.toString()).toContain(
-        'Error: Error reading or parsing JSON file',
+        'Error: Failed to parse results',
       );
     }
   });
