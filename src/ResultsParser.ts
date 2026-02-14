@@ -1,17 +1,10 @@
-/* eslint-disable no-shadow */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable import/extensions */
+// /* eslint-disable import/extensions */
 /* eslint-disable no-control-regex */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable no-param-reassign */
 
 import * as fs from 'fs';
 import { TestCase } from '@playwright/test/reporter';
-import {
-  failure, JSONResult, Spec, SummaryResults,
-} from '.';
+import { failure, JSONResult, Spec, SummaryResults } from '.';
 
-/* eslint-disable no-restricted-syntax */
 export type testResult = {
   suiteName: string;
   name: string;
@@ -55,14 +48,11 @@ export default class ResultsParser {
       data = fs.readFileSync(filePath, 'utf-8');
       parsedData = JSON.parse(data);
     } catch (error) {
-      throw new Error(
-        `Error reading or parsing JSON file [${filePath}]: \n\t${error}`,
-      );
+      throw new Error('Failed to parse results', { cause: error });
     }
 
     const retries = parsedData.config.projects[0]?.retries || 0;
     for (const suite of parsedData.suites) {
-      // eslint-disable-next-line no-await-in-loop
       await this.parseTestSuite(suite, retries);
     }
 
@@ -84,11 +74,13 @@ export default class ResultsParser {
   }
 
   async parseTestSuite(suites: any, retries: number) {
-    let testResults = [];
-
     // if it has direct specs
     if (suites.specs?.length > 0) {
-      testResults = await this.parseTests(suites.title, suites.specs, retries);
+      const testResults = await this.parseTests(
+        suites.title,
+        suites.specs,
+        retries,
+      );
       this.updateResults({
         testSuite: {
           title: suites.title ?? suites.file,
@@ -99,7 +91,6 @@ export default class ResultsParser {
 
     if (suites.suites?.length > 0) {
       for (const suite of suites.suites) {
-        // eslint-disable-next-line no-await-in-loop
         await this.parseTestSuite(suite, retries);
       }
     }
@@ -113,9 +104,10 @@ export default class ResultsParser {
         const { expectedStatus } = test;
         const testFile = test.location?.file ?? spec.file;
         // Calculate actual retries based on the maximum retry attempt for this test
-        const maxRetryAttempt = test.results.length > 0
-          ? Math.max(...test.results.map((r: any) => r.retry))
-          : 0;
+        const maxRetryAttempt =
+          test.results.length > 0
+            ? Math.max(...test.results.map((r: any) => r.retry))
+            : 0;
         const effectiveRetries = Math.max(maxRetryAttempt, retries);
         for (const result of test.results) {
           testResults.push({
@@ -166,7 +158,7 @@ export default class ResultsParser {
       unexpected: 0,
       flaky: 0,
     };
-    // eslint-disable-next-line no-plusplus
+
     for (const test of allTests) ++stats[test.outcome()];
     const summary: SummaryResults = {
       passed: stats.expected,
@@ -187,9 +179,9 @@ export default class ResultsParser {
     for (const suite of this.result) {
       for (const test of suite.testSuite.tests) {
         if (
-          test.status === 'failed'
-          || test.status === 'timedOut'
-          || test.expectedStatus === 'failed'
+          test.status === 'failed' ||
+          test.status === 'timedOut' ||
+          test.expectedStatus === 'failed'
         ) {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
@@ -225,8 +217,9 @@ export default class ResultsParser {
       if (resIndex > -1) {
         for (const test of data.testSuite.tests) {
           const testIndex = this.result[resIndex].testSuite.tests.findIndex(
-            (tes) => `${tes.projectName}${tes.name}`
-              === `${test.projectName}${test.name}`,
+            (tes) =>
+              `${tes.projectName}${tes.name}` ===
+              `${test.projectName}${test.name}`,
           );
           if (testIndex > -1) {
             this.result[resIndex].testSuite.tests[testIndex] = test;
@@ -334,7 +327,6 @@ export default class ResultsParser {
   }
 
   cleanseReason(rawReaseon: string): string {
-    // eslint-disable-next-line prefer-regex-literals
     const ansiRegex = new RegExp(
       '([\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~])))',
       'g',

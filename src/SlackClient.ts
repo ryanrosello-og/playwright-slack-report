@@ -1,7 +1,6 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable import/no-extraneous-dependencies */
+
+
+
 import {
   WebClient,
   KnownBlock,
@@ -122,7 +121,7 @@ export default class SlackClient {
             outcome: `✅ Message sent to ${channel}`,
             ts: chatResponse.ts,
           });
-          // eslint-disable-next-line no-console
+
           console.log(`✅ Message sent to ${channel}`);
         } else {
           result.push({
@@ -161,12 +160,12 @@ export default class SlackClient {
               );
             }
           }
-          // eslint-disable-next-line no-console
+
           console.log(
             `✅ Threaded messages sent to ${result[i].channel} (${threadedBlockChunks.length} message${threadedBlockChunks.length > 1 ? 's' : ''})`,
           );
         } catch (error: any) {
-          // eslint-disable-next-line no-console
+
           console.error(
             `❌ Failed to send threaded message to ${result[i].channel}: ${error.message}`,
           );
@@ -218,7 +217,7 @@ export default class SlackClient {
             );
           }
           if (chatResponse.ok) {
-            // eslint-disable-next-line no-console
+
             console.log(`✅ Message sent to ${channel} within thread ${ts}`);
             result.push({
               channel,
@@ -227,12 +226,12 @@ export default class SlackClient {
             });
           }
         }
-        // eslint-disable-next-line no-console
+
         console.log(
           `✅ All failure details sent to ${channel} within thread ${ts} (${blockChunks.length} message${blockChunks.length > 1 ? 's' : ''})`,
         );
       } catch (error: any) {
-        // eslint-disable-next-line no-console
+
         console.error(
           `❌ Failed to send failure details to ${channel} within thread ${ts}: ${error.message}`,
         );
