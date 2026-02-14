@@ -539,7 +539,7 @@ test.describe('ResultsParser', () => {
       await resultsParser.parseFromJsonFile(validTestResults);
     } catch (error) {
       expect(error.toString()).toContain(
-        'Error: Error reading or parsing JSON file',
+        'Error: Failed to parse results',
       );
     }
   });
@@ -688,6 +688,109 @@ test.describe('ResultsParser', () => {
     expect(testResults[0].retries).toBe(3);
     expect(testResults[0].retry).toBe(0);
     expect(testResults[0].status).toBe('passed');
+  });
+
+  test('parseTests handles missing test.location in JSON result', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    const mockSpecs = [
+      {
+        title: 'No Location Test',
+        file: 'example.spec.ts',
+        tests: [
+          {
+            projectName: 'webkit',
+            results: [
+              {
+                retry: 0,
+                status: 'passed',
+                duration: 150,
+                startTime: '2023-01-01T00:00:00.000Z',
+                attachments: [],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const testResults = await resultsParser.parseTests('Test Suite', mockSpecs, 0);
+
+    expect(testResults).toHaveLength(1);
+    expect(testResults[0].file).toBe('example.spec.ts');
+    expect(testResults[0].status).toBe('passed');
+  });
+
+  test('parseTests handles missing both test.location.file and spec.file', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    const mockSpecs = [
+      {
+        title: 'No File Anywhere',
+        tests: [
+          {
+            projectName: 'chromium',
+            // location is intentionally missing
+            results: [
+              {
+                retry: 0,
+                status: 'passed',
+                duration: 120,
+                startTime: '2023-01-01T00:00:00.000Z',
+                attachments: [],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const testResults = await resultsParser.parseTests('Edge Suite', mockSpecs, 0);
+
+    expect(testResults).toHaveLength(1);
+    expect(testResults[0].file).toBeUndefined();
+    expect(testResults[0].status).toBe('passed');
+    expect(testResults[0].suiteName).toBe('Edge Suite');
+    expect(testResults[0].name).toBe('No File Anywhere');
+  });
+
+  test('parseTests handles test.location object without file and no spec.file', async ({}) => {
+    const resultsParser = new ResultsParser();
+
+    const mockSpecs = [
+      {
+        title: 'Location Without File',
+        tests: [
+          {
+            projectName: 'firefox',
+            location: {
+              line: 10,
+              column: 2,
+            },
+            results: [
+              {
+                retry: 0,
+                status: 'failed',
+                duration: 250,
+                startTime: '2023-01-01T00:00:00.000Z',
+                error: {
+                  snippet: 'Failure snippet',
+                  stack: 'Failure stack',
+                },
+                attachments: [],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const testResults = await resultsParser.parseTests('Edge Suite', mockSpecs, 0);
+
+    expect(testResults).toHaveLength(1);
+    expect(testResults[0].file).toBeUndefined();
+    expect(testResults[0].status).toBe('failed');
+    expect(testResults[0].reason).toContain('Failure snippet');
   });
 
   test('getFailures excludes flaky tests correctly with fix', async ({}) => {

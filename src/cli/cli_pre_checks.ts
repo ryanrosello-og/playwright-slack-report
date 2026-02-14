@@ -106,6 +106,7 @@ function fileExists(filePath: string): boolean {
   try {
     absolutePath = path.resolve(filePath);
   } catch (error) {
+    console.error(`Error resolving path: ${filePath}`, error);
     return false;
   }
   return existsSync(absolutePath);

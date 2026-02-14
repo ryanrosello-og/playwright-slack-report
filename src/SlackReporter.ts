@@ -1,5 +1,3 @@
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-unresolved */
 import {
   FullConfig,
   Reporter,
@@ -60,7 +58,7 @@ class SlackReporter implements Reporter {
     if (fullConfig.projects.length === 0) {
       this.browsers = [];
     } else {
-      // eslint-disable-next-line max-len
+
       this.browsers = fullConfig.projects.map((obj) => ({
         projectName: obj.name,
         browser: obj.use.browserName
@@ -98,8 +96,9 @@ class SlackReporter implements Reporter {
     this.resultsParser = new ResultsParser();
   }
 
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  onTestEnd(test: TestCase, result: TestResult): void {
+
+  onTestEnd(test: TestCase, _result: TestResult): void {
+    void _result;
     this.resultsParser.addTestResult(test.parent.title, test, this.browsers);
   }
 
@@ -148,7 +147,7 @@ class SlackReporter implements Reporter {
         disableUnfurl: this.disableUnfurl,
         summaryResults: resultSummary,
       });
-      // eslint-disable-next-line no-console
+
       console.log(JSON.stringify(webhookResult, null, 2));
     } else {
       const slackClient = new SlackClient(
@@ -177,11 +176,11 @@ class SlackReporter implements Reporter {
           sendCustomBlocksInThreadAfterIndex: this.sendCustomBlocksInThreadAfterIndex,
         },
       });
-      // eslint-disable-next-line no-console
+
       console.log(JSON.stringify(result, null, 2));
       if (this.showInThread && resultSummary.failures.length > 0) {
         for (let i = 0; i < result.length; i += 1) {
-          // eslint-disable-next-line no-await-in-loop
+
           await slackClient.attachDetailsToThread({
             channelIds: [result[i].channel],
             ts: result[i].ts,
@@ -295,14 +294,14 @@ class SlackReporter implements Reporter {
   }
 
   log(message: string | undefined): void {
-    // eslint-disable-next-line no-console
+
     console.log(message);
     if (message) {
       this.logs.push(message);
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+
   printsToStdio(): boolean {
     return false;
   }
