@@ -46,7 +46,10 @@
   },
   "main": "dist/cli.js",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:ryanrosello-og/playwright-slack-report.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ryanrosello-og/playwright-slack-report.git"
+  },
   "author": "Ryan Rosello <ryanrosello@hotmail.com>",
   "license": "MIT",
   "files": [
