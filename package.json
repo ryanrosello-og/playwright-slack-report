@@ -7,6 +7,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
     "@slack/types": "^2.20.0",
     "@types/node": ">=25.2.3",
@@ -18,19 +19,22 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-playwright": "^2.5.1",
     "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17.3.0",
     "nyc": "^17.1.0",
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "ts-sinon": "^2.0.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0"
   },
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
     "pw": "nyc playwright test && nyc report --reporter=lcov",
     "build": "tsc -p ./tsconfig.json",
-    "lint": "npx eslint . --ext .ts",
-    "lint-fix": "npx eslint . --ext .ts --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "cli": "yarn build && node dist/cli.js",
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
