@@ -1,27 +1,26 @@
 {
   "dependencies": {
-    "@slack/web-api": "^7.9.3",
-    "@slack/webhook": "^7.0.5",
-    "commander": "^14.0.1",
+    "@slack/web-api": "^7.14.1",
+    "@slack/webhook": "^7.0.7",
+    "commander": "^14.0.3",
     "https-proxy-agent": "^7.0.6",
-    "zod": "^4.1.12"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.0",
-    "@slack/types": "^2.14.0",
-    "@types/node": ">=24.7.2",
-    "@typescript-eslint/eslint-plugin": "^5.30.6",
-    "@typescript-eslint/parser": "^5.30.6",
-    "dotenv": "^17.2.1",
-    "eslint": "^7.32.0 || ^8.2.0",
+    "@playwright/test": "^1.58.2",
+    "@slack/types": "^2.20.0",
+    "@types/node": ">=25.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
+    "dotenv": "^17.3.1",
+    "eslint": "^10.0.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-node": "^4.1.0",
-    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-prettier": "^5.5.5",
     "nyc": "^17.1.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.9.3"
@@ -36,7 +35,7 @@
     "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.100",
+  "version": "1.1.102",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },

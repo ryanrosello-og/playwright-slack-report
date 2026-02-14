@@ -15,6 +15,7 @@ import {
 export type testResult = {
   suiteName: string;
   name: string;
+  file?: string;
   browser?: string;
   projectName: string;
   endedAt: string;
@@ -110,6 +111,7 @@ export default class ResultsParser {
     for (const spec of specs) {
       for (const test of spec.tests) {
         const { expectedStatus } = test;
+        const testFile = test.location?.file ?? spec.file;
         // Calculate actual retries based on the maximum retry attempt for this test
         const maxRetryAttempt = test.results.length > 0
           ? Math.max(...test.results.map((r: any) => r.retry))
@@ -119,6 +121,7 @@ export default class ResultsParser {
           testResults.push({
             suiteName,
             name: spec.title,
+            file: testFile,
             status: result.status === 'unexpected' ? 'failed' : result.status,
             browser: test.projectName,
             projectName: test.projectName,
