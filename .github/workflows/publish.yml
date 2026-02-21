@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 permissions:
-  id-token: writ
+  id-token: write
   contents: read
 
 jobs:
