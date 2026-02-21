@@ -18,7 +18,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: |
+          if [ -f yarn.lock ]; then
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
       - run: npm run build --if-present
-      - run: npm publish
+      - run: npm publish --provenance
