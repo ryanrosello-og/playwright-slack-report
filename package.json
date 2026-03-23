@@ -9,7 +9,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
-    "@slack/types": "^2.20.0",
+    "@slack/types": "^2.20.1",
     "@types/node": ">=25.3.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
