@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.59.1",
     "@slack/types": "^2.20.0",
     "@types/node": ">=25.3.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
