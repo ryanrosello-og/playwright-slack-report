@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@slack/web-api": "^7.14.1",
+    "@slack/web-api": "^7.15.1",
     "@slack/webhook": "^7.0.8",
     "commander": "^14.0.3",
     "https-proxy-agent": "^7.0.6",
@@ -55,6 +55,9 @@
   "files": [
     "/dist/src"
   ],
+  "resolutions": {
+    "axios": "^1.15.0"
+  },
   "keywords": [
     "slack",
     "report",
