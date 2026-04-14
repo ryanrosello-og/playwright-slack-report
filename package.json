@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@slack/web-api": "^7.14.1",
+    "@slack/web-api": "^7.15.1",
     "@slack/webhook": "^7.0.8",
     "commander": "^14.0.3",
     "https-proxy-agent": "^7.0.6",
@@ -8,13 +8,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.59.1",
     "@slack/types": "^2.20.0",
     "@types/node": ">=25.3.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.57.1",
-    "dotenv": "^17.3.1",
-    "eslint": "^10.1.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -24,11 +24,11 @@
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.4.0",
     "nyc": "^17.1.0",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.2",
     "ts-node": "^10.9.2",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0"
+    "typescript-eslint": "^8.58.1"
   },
   "scripts": {
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
@@ -55,6 +55,9 @@
   "files": [
     "/dist/src"
   ],
+  "resolutions": {
+    "axios": "^1.15.0"
+  },
   "keywords": [
     "slack",
     "report",
