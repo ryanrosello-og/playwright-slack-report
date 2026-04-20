@@ -3,7 +3,7 @@
     "@slack/web-api": "^7.15.1",
     "@slack/webhook": "^7.0.8",
     "commander": "^14.0.3",
-    "https-proxy-agent": "^7.0.6",
+    "https-proxy-agent": "^9.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
