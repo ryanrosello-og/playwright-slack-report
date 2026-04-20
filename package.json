@@ -23,7 +23,7 @@
     "eslint-plugin-playwright": "^2.7.0",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.4.0",
-    "nyc": "^17.1.0",
+    "nyc": "^18.0.0",
     "prettier": "^3.8.2",
     "ts-node": "^10.9.2",
     "ts-sinon": "^2.0.2",
