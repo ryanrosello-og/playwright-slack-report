@@ -4,7 +4,7 @@
     "@slack/webhook": "^7.0.8",
     "commander": "^14.0.3",
     "https-proxy-agent": "^7.0.6",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
