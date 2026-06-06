@@ -56,7 +56,7 @@
     "/dist/src"
   ],
   "resolutions": {
-    "axios": "^1.15.0"
+    "axios": "^1.17.0"
   },
   "keywords": [
     "slack",
