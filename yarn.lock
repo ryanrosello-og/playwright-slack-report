@@ -388,14 +388,14 @@
     p-retry "^4"
     retry "^0.13.1"
 
-"@slack/webhook@^7.0.8":
-  version "7.0.8"
-  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-7.0.8.tgz#1343221e9e85e854d639572343a130c4bf7075ae"
-  integrity sha512-x3gttyRJGZSeIm+juObzYsYEMa/weoeZUU3WDWwOCwmHhShSwtq1sj1jvuKx0mLNIA6VveVlc4zWvluhA6qcxg==
+"@slack/webhook@^7.0.9":
+  version "7.0.9"
+  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-7.0.9.tgz#563f7605287bd844c3507084d62d1d5ecf0d95d8"
+  integrity sha512-hMfkQ5Y3Y7FtL+ZYhcxFblidx4Z2LPRFrhY1KJb6NqQdnK6kzTzTS1mjH5taVQIB496eqwpg9FE9mq9BFx0DWw==
   dependencies:
     "@slack/types" "^2.20.1"
     "@types/node" ">=18"
-    axios "^1.13.5"
+    axios "^1.15.0"
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.12"
@@ -928,7 +928,7 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-axios@^1.13.5, axios@^1.16.0, axios@^1.17.0:
+axios@^1.15.0, axios@^1.16.0, axios@^1.17.0:
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.17.0.tgz#ae5a1164a4f719942cd73c67e6a3f62d3ccb8f2b"
   integrity sha512-J8SwNxprqqpbfenehxWYXE7CW+wM1BB4w3+N+g+/Wx40xM4rsLrfPmHHxSWIxJLYDgSY/HqlFPIYb2/S3rxafw==
