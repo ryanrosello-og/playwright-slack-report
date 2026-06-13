@@ -477,7 +477,7 @@ Instructs the reporter to send blocks provided by your [custom layout](#-define-
 
 ### **proxy** (optional)
 
-String representation of your proxy server.
+String representation of your proxy server. Proxy support is provided via [https-proxy-agent](https://github.com/TooTallNate/proxy-agents/tree/main/packages/https-proxy-agent) from the active [proxy-agents](https://github.com/TooTallNate/proxy-agents) monorepo.
 _Example_:
 
 `proxy: "http://proxy.mycompany.com:8080",`
