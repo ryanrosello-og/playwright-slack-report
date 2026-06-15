@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@slack/web-api": "^7.16.0",
+    "@slack/web-api": "^7.17.0",
     "@slack/webhook": "^7.0.9",
     "commander": "^14.0.3",
     "https-proxy-agent": "^7.0.6",
