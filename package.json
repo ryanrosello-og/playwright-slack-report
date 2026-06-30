@@ -48,7 +48,7 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/ryanrosello-og/playwright-slack-report.git"
+    "url": "git+https://github.com/ryanrosello-og/playwright-slack-report.git"
   },
   "author": "Ryan Rosello <ryanrosello@hotmail.com>",
   "license": "MIT",
