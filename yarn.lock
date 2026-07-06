@@ -1398,10 +1398,10 @@ eslint-plugin-node@^11.1.0:
     resolve "^1.10.1"
     semver "^6.1.0"
 
-eslint-plugin-playwright@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.7.0.tgz#2fa40fa1205fae710e8037b30851229335df7b7e"
-  integrity sha512-kUgwDZL3knnuJF53WSf5xNnB1aLPnX8furoh0PSrmmFIfMfIMmY3sNd4gtZ2MUUnaIX1/A9ndYtD7bhV1dj+1g==
+eslint-plugin-playwright@^2.10.4:
+  version "2.10.4"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.10.4.tgz#24e3e6123dbb06089ba0ef1cf9a6c6c5b34deb3b"
+  integrity sha512-l0V/VxyqfFbtqCTxj5AdRn3Q6S/hIW4nKBnKZVleVbZ24N2My6Usj//ytX3dKKqAoSbvKck9YtSytfdZ5qjLuA==
   dependencies:
     globals "^17.3.0"
 
