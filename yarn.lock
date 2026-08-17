@@ -390,10 +390,15 @@
   dependencies:
     "@types/node" ">=18"
 
-"@slack/types@^2.20.0", "@slack/types@^2.20.1", "@slack/types@^2.21.0":
+"@slack/types@^2.20.1", "@slack/types@^2.21.0":
   version "2.21.1"
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-2.21.1.tgz#d49105b97f372640af050bec6e84b5b2f29a21e5"
   integrity sha512-I8vmSjNYWsaxuWPx6dz4yeh0h7vRBWbgAMK14LEmblbZ404BtrPbXs6jDPx4cYgGf8msDGF4A9opLZBu21FViQ==
+
+"@slack/types@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@slack/types/-/types-3.0.0.tgz#be620fb6ff6e7150b26f189c09760ffbb026428d"
+  integrity sha512-KNOqpnNAlsFt5Jk9XBclslQ0lobRIg/0tnhpmvZJAglHJx9E8oceN8hC3gaBzkR6UzQ9Wzq4rLsJ98wUcxWPfw==
 
 "@slack/web-api@^7.17.0":
   version "7.17.0"
