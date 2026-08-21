@@ -5,8 +5,9 @@ import {
   TestCase,
   TestResult,
 } from '@playwright/test/reporter';
-import { LogLevel, WebClient } from '@slack/web-api';
+import { LogLevel, WebClient, FetchFunction } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { ProxyAgent, fetch as undiciFetch } from 'undici';
 import { IncomingWebhook } from '@slack/webhook';
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
@@ -133,6 +134,10 @@ class SlackReporter implements Reporter {
     }
 
     const agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
+    const proxyFetch: FetchFunction | undefined = this.proxy
+      ? (url, init) =>
+          undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(this.proxy!) }) as unknown as ReturnType<FetchFunction>
+      : undefined;
 
     if (this.slackWebHookUrl) {
       const webhook = new IncomingWebhook(this.slackWebHookUrl, {
@@ -155,7 +160,7 @@ class SlackReporter implements Reporter {
           this.slackOAuthToken || process.env.SLACK_BOT_USER_OAUTH_TOKEN,
           {
             logLevel: this.slackLogLevel || LogLevel.DEBUG,
-            agent,
+            fetch: proxyFetch,
           },
         ),
       );
