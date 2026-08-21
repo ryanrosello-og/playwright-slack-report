@@ -129,6 +129,7 @@ export default class ResultsParser {
               : '',
             attachments: result.attachments,
             expectedStatus,
+            tags: spec.tags,
           });
         }
       }
