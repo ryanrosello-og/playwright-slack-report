@@ -18,6 +18,7 @@ export type testResult = {
   startedAt: string;
   status: 'passed' | 'failed' | 'timedOut' | 'skipped';
   expectedStatus?: 'passed' | 'failed' | 'skipped';
+  tags?: string[];
   attachments?: {
     body: string | undefined | Buffer;
     contentType: string;
@@ -266,6 +267,7 @@ export default class ResultsParser {
         ).toISOString(),
         reason: this.safelyDetermineFailure(result),
         attachments: result.attachments,
+        tags: spec.tags,
       });
     }
     this.updateResults({
@@ -301,6 +303,7 @@ export default class ResultsParser {
             : this.safelyDetermineFailure(result),
         attachments: result.attachments,
         expectedStatus: testCase.expectedStatus,
+        tags: testCase.tags,
       });
     }
     this.updateResults({
