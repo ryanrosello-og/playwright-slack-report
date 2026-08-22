@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 import { Command } from 'commander';
-import { LogLevel, WebClient } from '@slack/web-api';
+import { LogLevel, WebClient, FetchFunction } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { ProxyAgent, fetch as undiciFetch } from 'undici';
 import { IncomingWebhook } from '@slack/webhook';
 import path from 'path';
 import ResultsParser from './src/ResultsParser';
@@ -37,6 +38,11 @@ program
       process.exit(1);
     }
     const agent = config.proxy ? new HttpsProxyAgent(config.proxy) : undefined;
+    const proxyFetch: FetchFunction | undefined = config.proxy
+      ? (url, init) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(config.proxy!) }) as unknown as ReturnType<FetchFunction>
+      : undefined;
 
     const resultsParser = new ResultsParser();
     const resultSummary = await resultsParser.parseFromJsonFile(
@@ -52,7 +58,7 @@ program
       const slackClient = new SlackClient(
         new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
           logLevel: config.slackLogLevel,
-          agent,
+          fetch: proxyFetch,
         }),
       );
       const success = await sendResultsUsingBot({
