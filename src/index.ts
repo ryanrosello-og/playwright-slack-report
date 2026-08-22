@@ -15,6 +15,7 @@ export type SummaryResults = {
     retry: number;
     startedAt: string;
     status: 'passed' | 'failed' | 'timedOut' | 'skipped';
+    tags?: string[];
     attachments?: {
       body: string | undefined | Buffer;
       contentType: string;
