@@ -390,11 +390,6 @@
   dependencies:
     "@types/node" ">=20"
 
-"@slack/types@^2.20.1":
-  version "2.21.1"
-  resolved "https://registry.yarnpkg.com/@slack/types/-/types-2.21.1.tgz#d49105b97f372640af050bec6e84b5b2f29a21e5"
-  integrity sha512-I8vmSjNYWsaxuWPx6dz4yeh0h7vRBWbgAMK14LEmblbZ404BtrPbXs6jDPx4cYgGf8msDGF4A9opLZBu21FViQ==
-
 "@slack/types@^3.0.0", "@slack/types@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@slack/types/-/types-3.1.0.tgz#7509e4a3530ab42f290e8a58a6ed1a0459eea3e7"
@@ -414,14 +409,16 @@
     p-retry "^4.6.2"
     retry "^0.13.1"
 
-"@slack/webhook@^7.0.9":
-  version "7.0.9"
-  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-7.0.9.tgz#563f7605287bd844c3507084d62d1d5ecf0d95d8"
-  integrity sha512-hMfkQ5Y3Y7FtL+ZYhcxFblidx4Z2LPRFrhY1KJb6NqQdnK6kzTzTS1mjH5taVQIB496eqwpg9FE9mq9BFx0DWw==
+"@slack/webhook@^8.0.2":
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-8.0.2.tgz#87167e8db2ee30a70d7f47b0f049b9e95bb12690"
+  integrity sha512-gBPlV9W6zfP4qcijX47Ni5GznbZ8Q7oZYnCQMGkOGnEHPny+gR1xpjaUdafSwGNEVKjHtW39+A2Upzg1GPHyVg==
   dependencies:
-    "@slack/types" "^2.20.1"
-    "@types/node" ">=18"
-    axios "^1.15.0"
+    "@slack/types" "^3.1.0"
+    "@types/node" ">=20"
+    "@types/retry" "0.12.5"
+    p-retry "^4.6.2"
+    retry "^0.13.1"
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.12"
@@ -483,7 +480,7 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
-"@types/node@>=18", "@types/node@>=20", "@types/node@>=26.2.0":
+"@types/node@>=20", "@types/node@>=26.2.0":
   version "26.2.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-26.2.0.tgz#5a4875a862fda8fdc57de8faa579bb81ecba1685"
   integrity sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==
@@ -898,7 +895,7 @@ available-typed-arrays@^1.0.7:
   dependencies:
     possible-typed-array-names "^1.0.0"
 
-axios@^1.15.0, axios@^1.17.0:
+axios@^1.17.0:
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.17.0.tgz#ae5a1164a4f719942cd73c67e6a3f62d3ccb8f2b"
   integrity sha512-J8SwNxprqqpbfenehxWYXE7CW+wM1BB4w3+N+g+/Wx40xM4rsLrfPmHHxSWIxJLYDgSY/HqlFPIYb2/S3rxafw==
