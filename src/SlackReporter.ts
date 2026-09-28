@@ -7,7 +7,6 @@ import {
 } from '@playwright/test/reporter';
 import { LogLevel, WebClient, FetchFunction } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { ProxyAgent, fetch as undiciFetch } from 'undici';
 import { IncomingWebhook } from '@slack/webhook';
 import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
@@ -134,10 +133,13 @@ class SlackReporter implements Reporter {
     }
 
     const agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
-    const proxyFetch: FetchFunction | undefined = this.proxy
-      ? (url, init) =>
-          undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(this.proxy!) }) as unknown as ReturnType<FetchFunction>
-      : undefined;
+    let proxyFetch: FetchFunction | undefined;
+    if (this.proxy) {
+      // Loading undici replaces the global dispatcher of Node's built-in fetch, so load it only when a proxy is used
+      const { ProxyAgent, fetch: undiciFetch } = await import('undici');
+      proxyFetch = (url, init) =>
+        undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(this.proxy!) }) as unknown as ReturnType<FetchFunction>;
+    }
 
     if (this.slackWebHookUrl) {
       const webhook = new IncomingWebhook(this.slackWebHookUrl, {
