@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import { LogLevel, WebClient, FetchFunction } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { ProxyAgent, fetch as undiciFetch } from 'undici';
 import { IncomingWebhook } from '@slack/webhook';
 import path from 'path';
 import ResultsParser from './src/ResultsParser';
@@ -38,11 +37,14 @@ program
       process.exit(1);
     }
     const agent = config.proxy ? new HttpsProxyAgent(config.proxy) : undefined;
-    const proxyFetch: FetchFunction | undefined = config.proxy
-      ? (url, init) =>
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(config.proxy!) }) as unknown as ReturnType<FetchFunction>
-      : undefined;
+    let proxyFetch: FetchFunction | undefined;
+    if (config.proxy) {
+      // Loading undici replaces the global dispatcher of Node's built-in fetch, so load it only when a proxy is used
+      const { ProxyAgent, fetch: undiciFetch } = await import('undici');
+      proxyFetch = (url, init) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(config.proxy!) }) as unknown as ReturnType<FetchFunction>;
+    }
 
     const resultsParser = new ResultsParser();
     const resultSummary = await resultsParser.parseFromJsonFile(
