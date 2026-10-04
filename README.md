@@ -6,6 +6,9 @@
 
 Publish your Playwright test results to your favorite Slack channel(s).
 
+For local and GitHub Actions end-to-end testing of the packaged reporter and CLI
+with bot and webhook delivery, see the [consumer harness](harness/README.md).
+
 ![Gif](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-15_20-22-59.png?raw=true)
 
 ## 🚀 Features

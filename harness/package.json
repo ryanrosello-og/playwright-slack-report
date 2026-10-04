@@ -1,0 +1,8 @@
+{
+  "name": "playwright-slack-report-consumer-harness",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "1.60.0"
+  }
+}
