@@ -27,7 +27,7 @@ jobs:
       - name: Verify tarball and browser outcomes (fork PR)
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
         run: yarn harness:offline
-      - name: Verify all four live Slack paths
+      - name: Verify direct and proxied Slack paths
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: yarn harness
         env:

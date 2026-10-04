@@ -26,7 +26,7 @@ Offline mode verifies tarball contents, isolated installation, CLI startup, and 
 
 The browser fixtures exercise a passing interaction, permanent failure, unexpected pass, flaky retry, explicit skip, serial failure, and propagated serial skip. The runner checks each outcome and retry attempts, expecting 1 passed, 3 failed, 1 flaky, and 2 skipped. Playwright's deliberate exit code 1 is expected; any other exit code or different results fail the harness.
 
-All four live paths are verified:
+All four live paths are verified twice: directly and through a local HTTP proxy.
 
 | Path | Input | Slack verification |
 | --- | --- | --- |
@@ -37,12 +37,14 @@ All four live paths are verified:
 
 The CLI is executed from the installed tarball, never from source. Webhook children do not receive the bot token, avoiding the package's mutually exclusive transport checks. The parent runner retains the token for read-back and cleanup. Webhook reports do not support failure threads.
 
+For proxy coverage, the runner starts a loopback HTTP proxy on an automatically assigned port and passes its URL through the reporter and CLI `proxy` options. The fixture forwards HTTPS `CONNECT` tunnels to Slack without intercepting TLS. Each proxied scenario must exchange bytes with the expected Slack host through the proxy and independently pass Slack message verification. API verification and cleanup run directly, so they cannot create a false positive in the proxy checks. Host and byte-count diagnostics are saved without HTTP headers, URLs, tokens, or message bodies. The fixture closes its sockets after the run. It needs no additional secrets or external proxy service, including in GitHub Actions. Authenticated proxies are not covered.
+
 Each path has a unique run marker. The runner checks reports through `conversations.history` and threads through `conversations.replies`, validates summary counts and failure names/reasons, and rejects duplicate reports. For bot reports, it always attempts to delete its thread replies before their parents using `chat.delete`, including when verification fails. It only deletes messages from the configured bot in its own marked threads. Bot cleanup failures fail the run. Webhook reports remain in Slack by design; `summary.json` records them as retained rather than cleanup failures. Forced termination or runner shutdown can prevent bot cleanup; the run marker in the diagnostics identifies any remaining messages.
 
 Redacted logs, package contents, actual Playwright JSON, Slack messages, and `summary.json` are saved under ignored `harness/artifacts/<run-id>/`. Temporary consumers, including generated webhook configuration, are deleted. Never upload the `.env` file.
 
 ## GitHub Actions
 
-Set repository secrets `SLACK_BOT_USER_OAUTH_TOKEN` and `SLACK_WEBHOOK_URL`. The `Package consumer harness` workflow runs on PR opening, updates, reopening, and manual dispatch. Same-repository PRs and manual runs require both secrets and execute all four paths. Fork PRs run offline and explicitly announce skipped Slack verification. Workflow approval does not expose repository secrets to fork PRs.
+Set repository secrets `SLACK_BOT_USER_OAUTH_TOKEN` and `SLACK_WEBHOOK_URL`. The `Package consumer harness` workflow runs on PR opening, updates, reopening, and manual dispatch. Same-repository PRs and manual runs require both secrets and execute all eight direct/proxy scenarios. Fork PRs run offline and explicitly announce skipped Slack verification, including live proxy coverage. Workflow approval does not expose repository secrets to fork PRs.
 
 Live runs are serialized without cancellation to allow cleanup. Diagnostics are uploaded even on failure and retained for seven days. No Slack credentials are embedded in workflow files or artifacts.

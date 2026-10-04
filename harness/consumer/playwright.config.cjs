@@ -11,6 +11,7 @@ if (mode.startsWith('reporter-')) {
     showInThread: bot,
     maxNumberOfFailuresToShow: 10,
     disableUnfurl: true,
+    proxy: process.env.HARNESS_PROXY || undefined,
     meta: [{ key: 'Harness run', value: process.env.HARNESS_RUN_ID }],
     ...(bot ? {} : { slackWebHookUrl: process.env.SLACK_WEBHOOK_URL }),
   }]);

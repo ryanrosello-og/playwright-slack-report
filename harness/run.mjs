@@ -9,6 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
+import { startProxy } from './proxy.mjs';
 
 const harness = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(harness);
@@ -37,6 +38,7 @@ function baseEnv() {
   const env = { ...process.env, NODE_PATH: '' };
   delete env.SLACK_BOT_USER_OAUTH_TOKEN;
   delete env.SLACK_WEBHOOK_URL;
+  delete env.HARNESS_PROXY;
   return env;
 }
 // Execute commands directly with argument arrays to avoid shell interpretation.
@@ -98,8 +100,10 @@ let botUser;
 let botId;
 let started;
 let consumer;
+let proxy;
 const markers = new Set();
 const markerChannels = new Map();
+const webhookMarkers = new Set();
 const knownParents = new Map();
 const expectedStats = { expected: 1, unexpected: 3, flaky: 1, skipped: 2 };
 const failures = ['permanent failure', 'unexpected pass', 'serial failure'];
@@ -145,7 +149,7 @@ function verifyMessage(parent, replies, threaded, marker) {
   assert(!details.includes('flaky retry'), 'Recovered flaky test reported as a failure');
 }
 
-async function verifySlack(mode, marker) {
+async function verifySlack(mode, marker, label = mode) {
   const deadline = Date.now() + 45000;
   let lastError;
   do {
@@ -157,7 +161,7 @@ async function verifySlack(mode, marker) {
       const replies = mode.endsWith('bot')
         ? (await pages('conversations.replies', { channel, ts: parent.ts }, 'messages')).filter(message => message.ts !== parent.ts)
         : [];
-      await save(`${mode}-slack.json`, { parent, replies });
+      await save(`${label}-slack.json`, { parent, replies });
       verifyMessage(parent, replies, mode.endsWith('bot'), marker);
       return { parentTs: parent.ts, replies: replies.length };
     } catch (error) {
@@ -242,7 +246,7 @@ async function cleanup() {
 
 function isWebhookReport(parent) {
   const text = messageText(parent);
-  return ['reporter-webhook', 'cli-webhook'].some(mode => text.includes(`${runId}:${mode}`));
+  return [...webhookMarkers].some(marker => text.includes(marker));
 }
 
 try {
@@ -287,47 +291,70 @@ try {
   await command(process.execPath, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
   started = String(Date.now() / 1000);
   const port = await freePort();
+  if (!offline) proxy = await startProxy();
+  const modes = ['reporter-bot', 'reporter-webhook', 'cli-bot', 'cli-webhook'];
+  const scenarios = offline ? [{ mode: 'offline', viaProxy: false }]
+    : [false, true].flatMap(viaProxy => modes.map(mode => ({ mode, viaProxy })));
   let resultsPath;
-  for (const mode of offline ? ['offline'] : ['reporter-bot', 'reporter-webhook', 'cli-bot', 'cli-webhook']) {
+  for (const { mode, viaProxy } of scenarios) {
+    const label = viaProxy ? `proxy-${mode}` : mode;
     channel = mode.endsWith('webhook') ? webhookChannel : botChannel;
-    const marker = `${runId}:${mode}`;
+    const marker = `${runId}:${label}`;
     markers.add(marker);
+    if (mode.endsWith('webhook')) webhookMarkers.add(marker);
     if (!offline) markerChannels.set(marker, channel);
     const env = { ...baseEnv(), HARNESS_MODE: mode, HARNESS_RUN_ID: marker, HARNESS_PORT: port, SLACK_CHANNEL: channel || channelName };
     if (mode.endsWith('bot')) env.SLACK_BOT_USER_OAUTH_TOKEN = token;
     if (mode === 'reporter-webhook') env.SLACK_WEBHOOK_URL = webhook;
-    const entry = { mode, status: 'failed' };
+    if (viaProxy) env.HARNESS_PROXY = proxy.url;
+    const connectionIndex = proxy?.connections.length || 0;
+    const entry = { mode, transport: viaProxy ? 'proxy' : 'direct', status: 'failed' };
     report.paths.push(entry);
     try {
       if (!mode.startsWith('cli-')) {
-        resultsPath = path.join(consumer, `${mode}-results.json`);
+        resultsPath = path.join(consumer, `${label}-results.json`);
         env.HARNESS_JSON = resultsPath;
-        await command(process.execPath, [pw, 'test'], consumer, mode, env, 1);
+        await command(process.execPath, [pw, 'test'], consumer, label, env, 1);
         await verifyPlaywright(resultsPath);
       } else {
         const configPath = path.join(consumer, 'cli-config.json');
         const config = {
           sendResults: 'always', slackLogLevel: 'error', maxNumberOfFailures: 10,
           disableUnfurl: true, showInThread: mode.endsWith('bot'),
+          ...(viaProxy ? { proxy: proxy.url } : {}),
           meta: [{ key: 'Harness run', value: marker }],
           ...(mode.endsWith('bot') ? { sendUsingBot: { channels: [channel] } } : { sendUsingWebhook: { webhookUrl: webhook } }),
         };
         await writeFile(configPath, JSON.stringify(config));
-        try { await command(process.execPath, [cli, '-c', configPath, '-j', resultsPath], consumer, mode, env); }
+        try { await command(process.execPath, [cli, '-c', configPath, '-j', resultsPath], consumer, label, env); }
         finally { await rm(configPath, { force: true }); }
       }
-      if (!offline) Object.assign(entry, await verifySlack(mode, marker));
+      if (viaProxy) {
+        const connections = proxy.connections.slice(connectionIndex);
+        await save(`${label}-proxy.json`, connections);
+        const expectedHost = mode.endsWith('bot') ? 'slack.com' : new URL(webhook).hostname;
+        assert(connections.length > 0, `${label}: no traffic traversed the proxy`);
+        assert(connections.every(connection => connection.host === expectedHost && connection.connected
+          && connection.bytesUp > 0 && connection.bytesDown > 0 && !connection.error),
+        `${label}: proxy did not successfully tunnel Slack traffic`);
+        entry.proxyConnections = connections.length;
+      }
+      if (!offline) Object.assign(entry, await verifySlack(mode, marker, label));
       entry.status = 'passed';
-      console.log(`[harness] ${mode} verified${offline ? '; Slack verification SKIPPED' : ''}`);
+      console.log(`[harness] ${label} verified${offline ? '; Slack verification SKIPPED' : ''}`);
     } catch (error) {
       entry.error = error.message;
-      report.errors.push(`${mode}: ${error.message}`);
+      report.errors.push(`${label}: ${error.message}`);
     }
   }
-  if (offline) report.slackVerification = 'SKIPPED: offline run; all four live paths require Slack credentials';
+  if (offline) report.slackVerification = 'SKIPPED: offline run; live direct/proxy scenarios require Slack credentials';
 } catch (error) {
   report.errors.push(error.message);
 } finally {
+  if (proxy) {
+    await save('proxy-connections.json', proxy.connections);
+    await proxy.close();
+  }
   await cleanup();
   if (consumer) {
     // Only remove the exact temporary directory created by this process.
