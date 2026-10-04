@@ -1,4 +1,5 @@
 {
+  "exclude": ["node_modules", "dist", "harness"],
   "compilerOptions": {
       "target": "ESNext",
       "module": "commonjs",
