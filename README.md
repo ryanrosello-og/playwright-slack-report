@@ -6,6 +6,8 @@
 
 Publish your Playwright test results to your favorite Slack channel(s).
 
+For an LLM-friendly repository overview, source map, and development commands, see [llms.txt](llms.txt).
+
 For local and GitHub Actions end-to-end testing of the packaged reporter and CLI
 with bot and webhook delivery, see the [consumer harness](harness/README.md).
 

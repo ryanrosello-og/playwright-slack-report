@@ -1,0 +1,56 @@
+# playwright-slack-report
+
+> A TypeScript package that publishes Playwright test summaries to Slack through a bot or incoming webhook. Use it as a Playwright reporter or as a CLI consuming Playwright JSON results.
+
+This file is the repository's concise entry point for LLMs. Links are relative to the repository root. Read the linked source for exact behavior and defaults; README examples may differ from the current implementation. The project is MIT licensed, builds CommonJS JavaScript and TypeScript declarations into `dist/`, and uses Playwright Test for its test suite.
+
+Install repository dependencies with `yarn install --frozen-lockfile` (the checked-in lockfile is `yarn.lock`). Use `yarn build` to compile, `yarn lint` to lint `src`, and `yarn pw` to run tests with NYC coverage. For tests without the configured Slack reporter, use `yarn playwright test --reporter=dot`; the root Playwright configuration otherwise enables Slack delivery when credentials are available. The package consumer harness requires Node 24 or newer and Yarn 1. `yarn harness:offline` checks the packed package, isolated consumer installation, CLI startup, and browser outcomes without sending Slack messages. `yarn harness` exercises live bot/webhook delivery and proxy paths using credentials described in the harness documentation.
+
+The installed reporter entry point is `playwright-slack-report/dist/src/SlackReporter.js`. Reporter options include `channels`, `onSuccessChannels`, `onFailureChannels`, `sendResults` (`always`, `on-failure`, or `off`), `slackOAuthToken`, `slackWebHookUrl`, `layout`, `layoutAsync`, `maxNumberOfFailuresToShow`, `meta`, `disableUnfurl`, `showInThread`, `sendCustomBlocksInThreadAfterIndex`, and `proxy`. Bot authentication can use `SLACK_BOT_USER_OAUTH_TOKEN`. Webhooks do not support failure threads or custom blocks in threads.
+
+The CLI takes a separate JSON configuration and a Playwright JSON report: `npx playwright-slack-report --config cli_config.json --json-results merged_tests_results.json`. Both file arguments are required. Generate merged input with `npx playwright merge-reports --reporter json ./all-blob-reports > merged_tests_results.json`. CLI configuration requires `sendResults` (`always` or `on-failure`), `slackLogLevel`, and exactly one of `sendUsingBot` or `sendUsingWebhook`. CLI option names include `maxNumberOfFailures`, `customLayout`, and `customLayoutAsync`, unlike the reporter's corresponding names. CLI metadata values beginning with `__ENV_` resolve environment variables, for example `__ENV_BUILD_ID` reads `BUILD_ID`.
+
+Custom layouts receive `SummaryResults` and return Slack Block Kit blocks, synchronously or asynchronously. Keep live-reporter and JSON-parser outcome handling consistent, including retries, flaky tests, expected failures, unexpected passes, and skipped tests. Edit source files rather than generated `dist/` output. Keep Slack tokens, webhook URLs, and local `.env` files out of commits and diagnostics. Live harness runs post real Slack messages; bot reports are cleaned up, while webhook reports remain.
+
+## Documentation
+
+- [README](README.md): Installation, reporter and CLI configuration, Slack setup, custom layouts, and contribution examples.
+- [Consumer harness guide](harness/README.md): Offline and live execution, prerequisites, outcome checks, proxy coverage, cleanup, and diagnostics.
+- [Package manifest](package.json): Dependency versions, build/test scripts, published files, and executable entry point.
+- [License](LICENSE): MIT license terms.
+
+## Implementation
+
+- [Playwright reporter](src/SlackReporter.ts): Reporter lifecycle, configuration, outcome collection, authentication, proxy setup, and delivery selection.
+- [CLI](cli.ts): Command arguments, JSON report processing, metadata substitution, layout loading, and Slack delivery.
+- [CLI schema](src/cli/cli_schema.ts): Zod validation, CLI option types, accepted values, and defaults.
+- [CLI prechecks](src/cli/cli_pre_checks.ts): File checks, configuration validation, transport exclusivity, and webhook/thread restrictions.
+- [Results parser](src/ResultsParser.ts): Live test results and JSON report parsing, summary counts, retry handling, and failure details.
+- [Shared types](src/index.ts): `SummaryResults`, metadata, failures, and Playwright JSON report structures.
+- [Bot client](src/SlackClient.ts): Bot message generation, channel delivery, and threading.
+- [Webhook client](src/SlackWebhookClient.ts): Incoming webhook message generation and delivery.
+- [Layout generator](src/LayoutGenerator.ts): Default Slack summary and failure blocks.
+
+## Verification
+
+- [Playwright configuration](playwright.config.ts): Repository test directory, project, retries, and enabled reporters.
+- [Parser tests](tests/ResultsParser.spec.ts): Summary and outcome parsing expectations.
+- [Reporter tests](tests/SlackReporter.spec.ts): Reporter configuration and lifecycle expectations.
+- [Bot delivery tests](tests/SlackClient_send_message.spec.ts): Bot sending and thread behavior.
+- [Bot layout tests](tests/SlackClient_generate_blocks.spec.ts): Generated Slack blocks.
+- [Webhook tests](tests/SlackWehookClient.spec.ts): Webhook behavior; the filename intentionally matches the repository spelling.
+- [CLI precheck tests](tests/cli_prechecks.spec.ts): Valid and invalid CLI inputs.
+- [CLI retry/thread tests](tests/CLI_RetryThreading.spec.ts): CLI retry summaries and failure threading.
+- [Proxy tests](tests/ProxyConfiguration.spec.ts): Reporter and CLI proxy behavior.
+- [Harness runner](harness/run.mjs): Build, pack, isolated installation, browser scenarios, Slack verification, and cleanup.
+- [Test workflow](.github/workflows/playwright.yml): CI lint, TypeScript compilation, tests, and coverage.
+- [Harness workflow](.github/workflows/harness.yml): Packaged consumer integration checks in CI.
+
+## Optional
+
+- [Simple layout example](custom_block/simple.ts): Minimal custom summary layout.
+- [Metadata layout example](custom_block/simple_with_meta.ts): Custom layout including metadata.
+- [CLI layout example](custom_block/cli_block_with_meta.ts): CLI-compatible exported layout functions.
+- [TypeScript configuration](tsconfig.json): Compiler settings and output directory.
+- [ESLint configuration](eslint.config.js): Source lint rules.
+- [Harness environment template](harness/.env.example): Names of live harness configuration variables.
