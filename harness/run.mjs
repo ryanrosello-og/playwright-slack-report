@@ -39,16 +39,11 @@ function baseEnv() {
   delete env.SLACK_WEBHOOK_URL;
   return env;
 }
-// Execute .cmd tools through cmd.exe on Windows; arguments are controlled paths.
+// Execute commands directly with argument arrays to avoid shell interpretation.
 async function command(name, args, cwd, label, env = baseEnv(), expectedCode = 0) {
   console.log(`[harness] ${label}`);
-  const windowsTool = process.platform === 'win32' && ['npm', 'yarn'].includes(name);
-  const executable = windowsTool ? process.env.ComSpec || 'cmd.exe' : name;
-  const argv = windowsTool
-    ? ['/d', '/s', '/c', `"${name} ${args.map(arg => `"${arg}"`).join(' ')}"`]
-    : args;
   const result = await new Promise((resolve, reject) => {
-    const child = spawn(executable, argv, { cwd, env, windowsHide: true, windowsVerbatimArguments: windowsTool, timeout: 600000 });
+    const child = spawn(name, args, { cwd, env, windowsHide: true, timeout: 600000 });
     let output = '';
     child.stdout.on('data', data => { output += data; });
     child.stderr.on('data', data => { output += data; });
