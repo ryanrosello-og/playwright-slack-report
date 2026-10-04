@@ -24,11 +24,21 @@ jobs:
           node-version: '24.x'
           cache: yarn
       - run: yarn install --frozen-lockfile
-      - name: Verify tarball and browser outcomes (fork PR)
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+      - name: Verify tarball and browser outcomes (fork PR or missing secrets)
+        if: >-
+          ${
+            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+            secrets.SLACK_BOT_USER_OAUTH_TOKEN == '' ||
+            secrets.SLACK_WEBHOOK_URL == ''
+          }}
         run: yarn harness:offline
       - name: Verify direct and proxied Slack paths
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        if: >-
+          ${
+            (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+            secrets.SLACK_BOT_USER_OAUTH_TOKEN != '' &&
+            secrets.SLACK_WEBHOOK_URL != ''
+          }}
         run: yarn harness
         env:
           SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_TOKEN }}
@@ -36,8 +46,18 @@ jobs:
           SLACK_CHANNEL: pw
           SLACK_WEBHOOK_CHANNEL: webhook
       - name: Explain skipped Slack verification
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
-        run: echo "Slack API verification was skipped because fork PRs cannot access repository secrets." >> "$GITHUB_STEP_SUMMARY"
+        if: >-
+          ${
+            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) ||
+            secrets.SLACK_BOT_USER_OAUTH_TOKEN == '' ||
+            secrets.SLACK_WEBHOOK_URL == ''
+          }}
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            echo "Slack API verification was skipped because fork PRs cannot access repository secrets." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Slack API verification was skipped because repository secrets are not configured." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
