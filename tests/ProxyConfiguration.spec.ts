@@ -55,8 +55,7 @@ for (const entryPoint of ['cli', 'reporter'] as const) {
           expect(result.clients).toEqual([{ token: 'unit-test-token', hasFetch: false }]);
           expect(result.posts).toBe(1);
         } else {
-          expect(result.webhooks).toEqual([expect.objectContaining({ hasFetch: false })]);
-          expect(result.webhooks[0].agentUrl).toBeUndefined();
+          expect(result.webhooks).toEqual([expect.objectContaining({ hasFetch: false, hasAgent: false })]);
           expect(result.sends).toBe(1);
         }
       });
@@ -65,7 +64,7 @@ for (const entryPoint of ['cli', 'reporter'] as const) {
         const result = await runScenario({ entryPoint, transport, proxy });
         expect(result.loadsAfterImport).toBe(0);
         expect(result.undiciLoads).toBe(1);
-        expect(result.httpsAgents).toEqual([proxy]);
+        expect(result.httpsAgents).toEqual([]);
         if (transport === 'bot') {
           expect(result.clients).toEqual([{ token: 'unit-test-token', hasFetch: true }]);
           expect(result.proxyAgents).toEqual([proxy]);
@@ -74,10 +73,12 @@ for (const entryPoint of ['cli', 'reporter'] as const) {
           expect(result.fetchResponsePreserved).toBe(true);
           expect(result.posts).toBe(1);
         } else {
-          // @slack/webhook v7 uses its HTTP agent, not the WebClient fetch adapter.
-          expect(result.webhooks).toEqual([expect.objectContaining({ agentUrl: proxy, hasFetch: false })]);
-          expect(result.proxyAgents).toEqual([]);
-          expect(result.fetchCalls).toEqual([]);
+          // @slack/webhook v8 uses the same fetch/dispatcher adapter as bots.
+          expect(result.webhooks).toEqual([expect.objectContaining({ hasFetch: true, hasAgent: false })]);
+          expect(result.proxyAgents).toEqual([proxy]);
+          expect(result.fetchCalls).toEqual([{ url: 'https://example.invalid/unit-webhook', dispatcherUrl: proxy }]);
+          expect(result.requestInitPreserved).toBe(true);
+          expect(result.fetchResponsePreserved).toBe(true);
           expect(result.sends).toBe(1);
         }
       });
