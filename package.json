@@ -32,6 +32,8 @@
     "typescript-eslint": "^8.67.0"
   },
   "scripts": {
+    "harness": "node harness/run.mjs",
+    "harness:offline": "node harness/run.mjs --offline",
     "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
     "pw": "nyc playwright test && nyc report --reporter=lcov",
     "build": "tsc -p ./tsconfig.json",
@@ -54,7 +56,8 @@
   "author": "Ryan Rosello <ryanrosello@hotmail.com>",
   "license": "MIT",
   "files": [
-    "/dist/src"
+    "/dist/src",
+    "/dist/cli.js"
   ],
   "resolutions": {
     "axios": "^1.17.0"

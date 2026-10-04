@@ -1,0 +1,46 @@
+name: Package consumer harness
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Serialize live runs without cancelling a process that needs to clean up Slack.
+concurrency:
+  group: package-consumer-harness
+  cancel-in-progress: false
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      - name: Verify tarball and browser outcomes (fork PR)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: yarn harness:offline
+      - name: Verify all four live Slack paths
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: yarn harness
+        env:
+          SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_CHANNEL: pw
+          SLACK_WEBHOOK_CHANNEL: webhook
+      - name: Explain skipped Slack verification
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: echo "Slack API verification was skipped because fork PRs cannot access repository secrets." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: consumer-harness-diagnostics
+          path: harness/artifacts/
+          retention-days: 7
