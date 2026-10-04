@@ -44,8 +44,20 @@ function baseEnv() {
 // Execute commands directly with argument arrays to avoid shell interpretation.
 async function command(name, args, cwd, label, env = baseEnv(), expectedCode = 0) {
   console.log(`[harness] ${label}`);
+  let executable = name;
+  let argv = args;
+  if (process.platform === 'win32' && ['npm', 'yarn'].includes(name)) {
+    // Windows package managers are .cmd shims. Run their JavaScript CLI with
+    // Node instead, preserving argument arrays without invoking a shell.
+    const relativeCli = name === 'npm' ? 'npm/bin/npm-cli.js' : 'yarn/bin/yarn.js';
+    const directories = [path.dirname(process.execPath), ...(process.env.PATH || '').split(path.delimiter)];
+    const cli = directories.map(directory => path.join(directory, 'node_modules', relativeCli)).find(existsSync);
+    assert(cli, `Cannot locate ${name}'s JavaScript CLI; install ${name} on PATH`);
+    executable = process.execPath;
+    argv = [cli, ...args];
+  }
   const result = await new Promise((resolve, reject) => {
-    const child = spawn(name, args, { cwd, env, windowsHide: true, timeout: 600000 });
+    const child = spawn(executable, argv, { cwd, env, windowsHide: true, timeout: 600000 });
     let output = '';
     child.stdout.on('data', data => { output += data; });
     child.stderr.on('data', data => { output += data; });
