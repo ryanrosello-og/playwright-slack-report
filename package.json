@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@slack/web-api": "^8.1.1",
-    "@slack/webhook": "^7.0.9",
+    "@slack/web-api": "^8.2.0",
+    "@slack/webhook": "^8.0.2",
     "commander": "^15.0.0",
     "https-proxy-agent": "^7.0.6",
     "undici": "^8.11.1",
@@ -25,7 +25,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.11.0",
     "nyc": "^17.1.0",
-    "prettier": "^3.9.8",
+    "prettier": "^3.9.9",
     "ts-node": "^10.9.2",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.9.3",

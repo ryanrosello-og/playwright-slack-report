@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 import { Command } from 'commander';
 import { LogLevel, WebClient, FetchFunction } from '@slack/web-api';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 import { IncomingWebhook } from '@slack/webhook';
 import path from 'path';
 import ResultsParser from './src/ResultsParser';
@@ -36,7 +35,6 @@ program
       console.error(`❌ ${preCheckResult.message}`);
       process.exit(1);
     }
-    const agent = config.proxy ? new HttpsProxyAgent(config.proxy) : undefined;
     let proxyFetch: FetchFunction | undefined;
     if (config.proxy) {
       // Loading undici replaces the global dispatcher of Node's built-in fetch, so load it only when a proxy is used
@@ -79,7 +77,7 @@ program
 
     if (config.sendUsingWebhook) {
       const webhook = new IncomingWebhook(config.sendUsingWebhook.webhookUrl, {
-        agent,
+        fetch: proxyFetch,
       });
       const slackWebhookClient = new SlackWebhookClient(webhook);
       let summaryResults = resultSummary;
