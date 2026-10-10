@@ -75,8 +75,10 @@ export default class ResultsParser {
     }
 
     const retries = parsedData.config.projects[0]?.retries || 0;
+    let interrupted = false;
     for (const suite of parsedData.suites) {
-      await this.parseTestSuite(suite, retries);
+      const suiteInterrupted = await this.parseTestSuite(suite, retries);
+      interrupted = interrupted || suiteInterrupted;
     }
     for (const error of parsedData.errors || []) this.addRunError(error);
 
@@ -95,14 +97,16 @@ export default class ResultsParser {
     }
 
     // Playwright's JSON reporter does not serialize FullResult.status.
-    // Global timeouts without interrupted test results need the CLI override.
-    this.runStatus = summary.tests.some((test) => test.status === 'interrupted')
-      ? 'interrupted'
-      : summary.failed > 0 || this.runErrors.length > 0 ? 'failed' : 'passed';
+    // Global timeouts need the CLI override to distinguish them from failures.
+    // Fail-fast can interrupt other workers, so recorded failures take priority.
+    this.runStatus = summary.failed > 0 || this.runErrors.length > 0
+      ? 'failed'
+      : interrupted ? 'interrupted' : 'passed';
     return this.addRunInfo(summary);
   }
 
-  async parseTestSuite(suites: any, retries: number) {
+  async parseTestSuite(suites: any, retries: number): Promise<boolean> {
+    let interrupted = false;
     // if it has direct specs
     if (suites.specs?.length > 0) {
       const testResults = await this.parseTests(
@@ -110,6 +114,8 @@ export default class ResultsParser {
         suites.specs,
         retries,
       );
+      // Detect interruptions before same-named suites/tests are merged.
+      interrupted = testResults.some((test) => test.status === 'interrupted');
       this.updateResults({
         testSuite: {
           title: suites.title ?? suites.file,
@@ -120,9 +126,11 @@ export default class ResultsParser {
 
     if (suites.suites?.length > 0) {
       for (const suite of suites.suites) {
-        await this.parseTestSuite(suite, retries);
+        const suiteInterrupted = await this.parseTestSuite(suite, retries);
+        interrupted = interrupted || suiteInterrupted;
       }
     }
+    return interrupted;
   }
 
   async parseTests(suiteName: any, specs: any, retries: number) {

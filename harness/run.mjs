@@ -280,7 +280,8 @@ async function verifyRunLevelScenarios(pw, cli) {
           }
         };
         await verifyCapture('reporter');
-        // JSON lacks overall status; supply the captured FullResult to the CLI.
+        // Exercise inference from real JSON. Only global timeouts need an
+        // explicit status because JSON cannot distinguish them reliably.
         await writeFile(capture, '');
         const configPath = path.join(consumer, `${label}-cli.json`);
         await writeFile(configPath, JSON.stringify({
@@ -290,7 +291,7 @@ async function verifyRunLevelScenarios(pw, cli) {
             : { sendUsingWebhook: { webhookUrl: 'https://example.invalid/harness-webhook' } }),
         }));
         await command(process.execPath, ['-r', preload, cli, '-c', configPath, '-j', resultsPath,
-          '--run-status', fullResult.status], consumer, `${label}-cli`, env);
+          ...(fixture.status === 'timedout' ? ['--run-status', fullResult.status] : [])], consumer, `${label}-cli`, env);
         await verifyCapture('cli');
         entry.status = 'passed';
         console.log(`[harness] ${label}: reporter and CLI verified locally`);

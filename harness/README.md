@@ -40,9 +40,11 @@ notification delivery in `on-failure` mode, failure-channel routing, readable
 fallback text, global error details in bot threads or inline webhook reports,
 and silence for successful runs. The interruption fixture emits `SIGINT` in the
 runner process to exercise Playwright's graceful handler on Windows and Unix.
-The CLI receives the status captured from `FullResult` via `--run-status`, because
-standard JSON omits it. Lifecycle results and captured payloads are saved with
-the other diagnostics. These checks do not verify real Slack API delivery.
+The CLI infers the outcome from the generated JSON for all fixtures except global
+timeouts, which receive the status captured from `FullResult` via `--run-status`
+because standard JSON cannot distinguish that outcome reliably. Lifecycle results
+and captured payloads are saved with the other diagnostics. These checks do not
+verify real Slack API delivery.
 
 The browser fixtures exercise a passing interaction, permanent failure, unexpected pass, flaky retry, explicit skip, serial failure, and propagated serial skip. The runner checks each outcome and retry attempts, expecting 1 passed, 3 failed, 1 flaky, and 2 skipped. Playwright's deliberate exit code 1 is expected; any other exit code or different results fail the harness.
 

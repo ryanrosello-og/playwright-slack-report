@@ -137,8 +137,9 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 # Option C - send your JSON results via CLI
 
 The CLI includes top-level Playwright JSON `errors` in its report. It infers a
-failed run from global errors or failed tests, and an interrupted run from
-interrupted test results. Standard Playwright JSON does not contain the overall
+failed run from global errors or failed tests, and otherwise an interrupted run
+from interrupted test results. Failures take precedence because fail-fast runs
+can interrupt other workers. Standard Playwright JSON does not contain the overall
 run status, so provide `--run-status` when your runner knows the exact outcome:
 
 ```sh

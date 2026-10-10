@@ -47,6 +47,44 @@ const json = (overrides = {}) => ({
 const blockText = (blocks: any[]) =>
   blocks.map((block) => block.text?.text || '').join('\n');
 
+// Repeated describe/test titles in separate files are valid Playwright tests.
+const jsonWithNamedTests = (statuses: string[]) =>
+  json({
+    suites: statuses.map((status, index) => ({
+      title: `${index}.spec.ts`,
+      suites: [
+        {
+          title: 'shared describe title',
+          specs: [
+            {
+              title: 'shared test title',
+              file: `${index}.spec.ts`,
+              tests: [
+                {
+                  projectName: 'chromium',
+                  results: [
+                    {
+                      status,
+                      retry: 0,
+                      startTime: new Date().toISOString(),
+                      duration: 10,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })),
+    stats: {
+      expected: statuses.filter((status) => status === 'passed').length,
+      unexpected: statuses.filter((status) => status === 'failed').length,
+      skipped: statuses.filter((status) => status === 'interrupted').length,
+      flaky: 0,
+    },
+  });
+
 test.afterEach(() => sinon.restore());
 
 for (const outcome of ['expected', 'flaky', 'skipped'] as const) {
@@ -252,6 +290,28 @@ test('legacy JSON without an errors field remains supported', async ({}, testInf
   });
 });
 
+test('JSON interruption detection survives matching test titles across files', async ({}, testInfo) => {
+  const file = testInfo.outputPath('results.json');
+  await writeFile(
+    file,
+    JSON.stringify(jsonWithNamedTests(['interrupted', 'passed'])),
+  );
+  const summary = await new ResultsParser().parseFromJsonFile(file);
+  expect(summary.runStatus).toBe('interrupted');
+  expect(hasRunFailure(summary)).toBe(true);
+});
+
+test('JSON failures take precedence over tests interrupted by fail-fast', async ({}, testInfo) => {
+  const file = testInfo.outputPath('results.json');
+  await writeFile(
+    file,
+    JSON.stringify(jsonWithNamedTests(['failed', 'interrupted'])),
+  );
+  const summary = await new ResultsParser().parseFromJsonFile(file);
+  expect(summary.failed).toBe(1);
+  expect(summary.runStatus).toBe('failed');
+});
+
 for (const status of ['failed', 'timedout', 'interrupted'] as const) {
   test(`layout and fallback expose ${status} even when details are disabled`, async () => {
     const summary = {
@@ -372,6 +432,7 @@ for (const transport of ['bot', 'webhook'] as const) {
     'global-error',
     'timedout',
     'interrupted',
+    'interrupted-json',
     'clean',
     'invalid-status',
   ] as const) {
@@ -387,7 +448,9 @@ for (const transport of ['bot', 'webhook'] as const) {
             json(
               scenario === 'global-error'
                 ? { errors: [{ message: 'Setup failed' }] }
-                : {},
+                : scenario === 'interrupted-json'
+                  ? jsonWithNamedTests(['interrupted', 'passed'])
+                  : {},
             ),
           ),
         );
@@ -424,7 +487,11 @@ for (const transport of ['bot', 'webhook'] as const) {
           '-j',
           results,
         ];
-        if (scenario !== 'global-error' && scenario !== 'clean')
+        if (
+          scenario !== 'global-error' &&
+          scenario !== 'clean' &&
+          scenario !== 'interrupted-json'
+        )
           args.push(
             '--run-status',
             scenario === 'invalid-status' ? 'unknown' : scenario,
@@ -442,6 +509,7 @@ for (const transport of ['bot', 'webhook'] as const) {
           expect(captured).toBe('');
           return;
         }
+        expect(captured).not.toBe('');
         const messages = captured.split('\n').map((line) => JSON.parse(line));
         expect(messages).toHaveLength(
           scenario === 'global-error' && transport === 'bot' ? 2 : 1,
@@ -449,9 +517,11 @@ for (const transport of ['bot', 'webhook'] as const) {
         const status =
           scenario === 'global-error'
             ? 'failed'
-            : scenario === 'timedout'
-              ? 'timed out'
-              : scenario;
+            : scenario === 'interrupted-json'
+              ? 'interrupted'
+              : scenario === 'timedout'
+                ? 'timed out'
+                : scenario;
         expect(blockText(messages[0].payload.blocks)).toContain(
           `Run status: ${status}`,
         );
