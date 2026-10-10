@@ -49,4 +49,7 @@ avoid unrelated formatting or dependency updates. Use `yarn.lock` for root
 dependency changes; the consumer harness has its own npm lockfile.
 
 When asked to increment the package version without a specified release type,
-bump the patch version in `package.json`. Do not publish a release unless asked.
+bump the patch version in `package.json` and update the hardcoded `.version(...)`
+in `cli.ts` to match. Run `yarn harness:offline` before pushing a version bump;
+it checks that the packaged CLI version matches the package version.
+Do not publish a release unless asked.
