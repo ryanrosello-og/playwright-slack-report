@@ -1,4 +1,10 @@
+export type RunStatus = 'passed' | 'failed' | 'timedout' | 'interrupted';
+
 export type SummaryResults = {
+  /** Overall run outcome, including failures outside individual tests. */
+  runStatus?: RunStatus;
+  /** Global errors, separate from test failure counts and details. */
+  runErrors?: string[];
   passed: number;
   failed: number;
   flaky: number | undefined;
@@ -14,7 +20,7 @@ export type SummaryResults = {
     reason: string;
     retry: number;
     startedAt: string;
-    status: 'passed' | 'failed' | 'timedOut' | 'skipped';
+    status: 'passed' | 'failed' | 'timedOut' | 'skipped' | 'interrupted';
     tags?: string[];
     attachments?: {
       body: string | undefined | Buffer;

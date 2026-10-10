@@ -1,5 +1,12 @@
 import { KnownBlock, Block } from '@slack/types';
 import { SummaryResults } from '.';
+import { getRunStatus } from './RunResults';
+
+const unsuccessfulRunLabel = (summaryResults: SummaryResults): string => {
+  const status = getRunStatus(summaryResults);
+  if (!status || status === 'passed') return '';
+  return status === 'timedout' ? 'timed out' : status;
+};
 
 const generateBlocks = async (
   summaryResults: SummaryResults,
@@ -40,7 +47,12 @@ const generateBlocks = async (
     }
   }
 
-  return [header, summary, ...meta, ...fails];
+  const runLabel = unsuccessfulRunLabel(summaryResults);
+  const run = runLabel ? [{
+    type: 'section',
+    text: { type: 'mrkdwn', text: `*Run status: ${runLabel}*` },
+  }] : [];
+  return [header, summary, ...run, ...meta, ...fails];
 };
 
 const generateFailures = async (
@@ -50,13 +62,19 @@ const generateFailures = async (
   const maxNumberOfFailureLength = 650;
   const fails = [];
 
+  const details = [
+    ...(summaryResults.runErrors || []).map((failureReason) => ({
+      suite: 'Run-level error', test: '', failureReason,
+    })),
+    ...summaryResults.failures,
+  ];
   const numberOfFailuresToShow = Math.min(
-    summaryResults.failures.length,
+    details.length,
     maxNumberOfFailures,
   );
 
   for (let i = 0; i < numberOfFailuresToShow; i += 1) {
-    const { failureReason, test, suite } = summaryResults.failures[i];
+    const { failureReason, test, suite } = details[i];
     const formattedFailure = failureReason
       .substring(0, maxNumberOfFailureLength)
       .split('\n')
@@ -66,7 +84,7 @@ const generateFailures = async (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${suite} > ${test}*
+        text: `*${test ? `${suite} > ${test}` : suite}*
         \n${formattedFailure}`,
       },
     });
@@ -74,13 +92,13 @@ const generateFailures = async (
 
   if (
     maxNumberOfFailures > 0
-    && summaryResults.failures.length > maxNumberOfFailures
+    && details.length > maxNumberOfFailures
   ) {
     fails.push({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*⚠️ There are too many failures to display - ${fails.length} out of ${summaryResults.failures.length} failures shown*`,
+        text: `*⚠️ There are too many failures to display - ${fails.length} out of ${details.length} failures shown*`,
       },
     });
   }
@@ -97,8 +115,11 @@ const generateFailures = async (
   ];
 };
 
-const generateFallbackText = (summaryResults: SummaryResults): string => `✅ ${summaryResults.passed} ❌ ${summaryResults.failed} ${
-  summaryResults.flaky !== undefined ? ` 🟡 ${summaryResults.flaky} ` : ' '
-}⏩ ${summaryResults.skipped}`;
+const generateFallbackText = (summaryResults: SummaryResults): string => {
+  const runLabel = unsuccessfulRunLabel(summaryResults);
+  return `${runLabel ? `Run status: ${runLabel}. ` : ''}✅ ${summaryResults.passed} ❌ ${summaryResults.failed} ${
+    summaryResults.flaky !== undefined ? ` 🟡 ${summaryResults.flaky} ` : ' '
+  }⏩ ${summaryResults.skipped}`;
+};
 
 export { generateBlocks, generateFailures, generateFallbackText };

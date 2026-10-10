@@ -3,7 +3,7 @@
 
 import * as fs from 'fs';
 import { TestCase } from '@playwright/test/reporter';
-import { failure, JSONResult, Spec, SummaryResults } from '.';
+import { failure, JSONResult, RunStatus, Spec, SummaryResults } from '.';
 
 export type testResult = {
   suiteName: string;
@@ -16,7 +16,7 @@ export type testResult = {
   retry: number;
   retries: number;
   startedAt: string;
-  status: 'passed' | 'failed' | 'timedOut' | 'skipped';
+  status: 'passed' | 'failed' | 'timedOut' | 'skipped' | 'interrupted';
   expectedStatus?: 'passed' | 'failed' | 'skipped';
   tags?: string[];
   attachments?: {
@@ -38,6 +38,28 @@ export type testSuite = {
 export default class ResultsParser {
   private result: testSuite[];
 
+  private runErrors: string[] = [];
+
+  private runStatus?: RunStatus;
+
+  addRunError(error: { message?: string; stack?: string; value?: string; snippet?: string }): void {
+    const reason = this.cleanseReason(
+      [error.snippet, error.stack || error.message || error.value]
+        .filter(Boolean).join('\n'),
+    );
+    this.runErrors.push(reason || 'Unknown run-level error');
+  }
+
+  setRunStatus(status: RunStatus): void {
+    this.runStatus = status;
+  }
+
+  private addRunInfo(summary: SummaryResults): SummaryResults {
+    if (this.runStatus) summary.runStatus = this.runStatus;
+    if (this.runErrors.length > 0) summary.runErrors = [...this.runErrors];
+    return summary;
+  }
+
   constructor() {
     this.result = [];
   }
@@ -53,9 +75,12 @@ export default class ResultsParser {
     }
 
     const retries = parsedData.config.projects[0]?.retries || 0;
+    let interrupted = false;
     for (const suite of parsedData.suites) {
-      await this.parseTestSuite(suite, retries);
+      const suiteInterrupted = await this.parseTestSuite(suite, retries);
+      interrupted = interrupted || suiteInterrupted;
     }
+    for (const error of parsedData.errors || []) this.addRunError(error);
 
     const failures = await this.getFailures();
     const summary: SummaryResults = {
@@ -71,10 +96,17 @@ export default class ResultsParser {
       summary.tests = summary.tests.concat(suite.testSuite.tests);
     }
 
-    return summary;
+    // Playwright's JSON reporter does not serialize FullResult.status.
+    // Global timeouts need the CLI override to distinguish them from failures.
+    // Fail-fast can interrupt other workers, so recorded failures take priority.
+    this.runStatus = summary.failed > 0 || this.runErrors.length > 0
+      ? 'failed'
+      : interrupted ? 'interrupted' : 'passed';
+    return this.addRunInfo(summary);
   }
 
-  async parseTestSuite(suites: any, retries: number) {
+  async parseTestSuite(suites: any, retries: number): Promise<boolean> {
+    let interrupted = false;
     // if it has direct specs
     if (suites.specs?.length > 0) {
       const testResults = await this.parseTests(
@@ -82,6 +114,8 @@ export default class ResultsParser {
         suites.specs,
         retries,
       );
+      // Detect interruptions before same-named suites/tests are merged.
+      interrupted = testResults.some((test) => test.status === 'interrupted');
       this.updateResults({
         testSuite: {
           title: suites.title ?? suites.file,
@@ -92,9 +126,11 @@ export default class ResultsParser {
 
     if (suites.suites?.length > 0) {
       for (const suite of suites.suites) {
-        await this.parseTestSuite(suite, retries);
+        const suiteInterrupted = await this.parseTestSuite(suite, retries);
+        interrupted = interrupted || suiteInterrupted;
       }
     }
+    return interrupted;
   }
 
   async parseTests(suiteName: any, specs: any, retries: number) {
@@ -173,7 +209,7 @@ export default class ResultsParser {
     for (const suite of this.result) {
       summary.tests = summary.tests.concat(suite.testSuite.tests);
     }
-    return summary;
+    return this.addRunInfo(summary);
   }
 
   async getFailures(): Promise<Array<failure>> {

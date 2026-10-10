@@ -1,7 +1,7 @@
 import { Block, KnownBlock } from '@slack/types';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { SummaryResults } from '.';
-import { generateBlocks } from './LayoutGenerator';
+import { generateBlocks, generateFallbackText } from './LayoutGenerator';
 
 export default class SlackWebhookClient {
   private webhook: IncomingWebhook;
@@ -35,6 +35,8 @@ export default class SlackWebhookClient {
     try {
       result = await this.webhook.send({
         blocks,
+        ...(summaryResults.runStatus || summaryResults.runErrors?.length
+          ? { text: generateFallbackText(summaryResults) } : {}),
         unfurl_links: !disableUnfurl,
       });
     } catch (error) {

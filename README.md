@@ -18,6 +18,7 @@ with bot and webhook delivery, see the [consumer harness](harness/README.md).
 - 💌 Send results your Playwright test results to one or more Slack channels
 - 🎚️ Leverage JSON results created by Playwright and seamlessly post them on Slack
 - 📊 Conditionally send results to Slack channels based on test results
+- 🚨 Report global errors, run timeouts, and graceful interruptions, including runs with zero failed tests
 - 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
 - 🧑‍🎨 Define your own custom Slack message layout!
 
@@ -136,6 +137,22 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 ---
 
 # Option C - send your JSON results via CLI
+
+The CLI includes top-level Playwright JSON `errors` in its report. It infers a
+failed run from global errors or failed tests, and otherwise an interrupted run
+from interrupted test results. Failures take precedence because fail-fast runs
+can interrupt other workers. Standard Playwright JSON does not contain the overall
+run status, so provide `--run-status` when your runner knows the exact outcome:
+
+```sh
+npx playwright-slack-report -c cli_config.json -j results.json --run-status timedout
+```
+
+Allowed values are `passed`, `failed`, `timedout`, and `interrupted`. This option
+sets the reported run status without changing test counts or hiding global
+errors. Without it, a global timeout may be reported as failed or interrupted,
+depending on the recorded errors and test results. The CLI's exit code continues
+to describe reporting success, rather than the original test run outcome.
 
 Playwright now provides a nice way to [merge multiple reports from multiple shards](https://playwright.dev/docs/test-sharding#merging-reports-from-multiple-shards). You can use this feature to generate a single JSON report and then send it to Slack, alleviating the need to have separate messages sent per shard:
 
@@ -343,6 +360,315 @@ export default defineConfig({
       },
     ],
   ],
+```
+
+### **channels**
+
+An array of Slack channels to post to, at least one channel is required
+
+### **onSuccessChannels**
+
+(Optional) An array of Slack channels to post to when tests have passed. Value from `channels` is used if not defined here
+
+### **onFailureChannels**
+
+(Optional) An array of Slack channels to post to when tests have failed, global errors occurred, or the run timed out or was interrupted. Value from `channels` is used if not defined here
+
+### **sendResults**
+
+Can either be _"always"_, _"on-failure"_ or _"off"_, this configuration is required:
+
+- **always** - will send the results to Slack at completion of the test run
+- **on-failure** - sends results for failed tests, global errors, run timeouts, and graceful interruptions, including when no tests failed
+- **off** - turns off the reporter, it will not send the results to Slack
+
+### **layout**
+
+A function that returns a layout object, this configuration is optional. See section below for more details.
+
+- meta - an array of meta data to be sent to Slack, this configuration is optional.
+
+### **layoutAsync**
+
+Same as **layout** above, but asynchronous in that it returns a promise.
+
+### **maxNumberOfFailuresToShow**
+
+Limits the combined number of global errors and test failures shown in the Slack
+message, defaults to 10. Global errors are shown first. Set to 0 to hide details;
+the overall unsuccessful run status remains visible. The CLI uses
+`maxNumberOfFailures` for the same limit.
+
+### Run-level errors and interruptions
+
+The reporter captures Playwright's global `onError` events and the final run
+status from `onEnd`. Setup/teardown errors, worker errors, global timeouts, and
+gracefully interrupted runs can therefore notify Slack even when the failed-test
+count is zero. An actual Playwright "No tests found" error also sends a failure
+notification; a clean empty run without errors stays silent.
+
+The default layout shows an unsuccessful run status above the details. Global
+errors are separate from test failures, so they do not inflate test counts.
+With `showInThread: true`, bot reports put both kinds of error details in the
+report's thread while retaining the run status in the parent. Webhook reports
+show the details inline.
+
+Custom layouts receive these optional `SummaryResults` fields:
+
+| Field | Meaning |
+| --- | --- |
+| `runStatus` | `passed`, `failed`, `timedout`, or `interrupted` |
+| `runErrors` | Global error strings with ANSI formatting removed; absent when there are none |
+
+Use both fields when deciding whether a custom layout should display success;
+`failed === 0` alone does not imply that the whole run succeeded. Existing custom
+layouts retain control of their output and must render these fields themselves.
+Notifications require Playwright to reach the reporter's completion callback;
+forced termination, `SIGKILL`, or loss of the CI machine can prevent delivery.
+
+### **slackOAuthToken**
+
+Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.
+
+### **slackLogLevel** (default LogLevel.DEBUG)
+
+This option allows you to control slack client severity levels for log entries. It accepts a value from @slack/web-api `LogLevel` enum:
+
+- ERROR
+- WARN
+- INFO
+- DEBUG
+
+Example: `slackLogLevel: "ERROR",` will only log errors to the console.
+
+### **disableUnfurl** (default: true)
+
+Enable or disable unfurling of links in Slack messages.
+
+### **showInThread** (default: false)
+
+Instructs the reporter to show the failure details in a thread instead of the main channel.
+
+![Show failures in threads](./assets/threads.png)
+
+### **sendCustomBlocksInThreadAfterIndex** (default: undefined)
+
+Instructs the reporter to send blocks provided by your [custom layout](#-define-your-own-slack-message-custom-layout) to a thread following the index specified. _Example_: 
+
+`sendCustomBlocksInThreadAfterIndex: 3`
+
+### **proxy** (optional)
+
+String representation of your proxy server.
+_Example_:
+
+`proxy: "http://proxy.mycompany.com:8080",`
+
+### **meta** (default: empty array)
+
+The meta data to be sent to Slack. This is useful for providing additional context to your test run.
+
+**Examples:**
+
+```typescript
+...
+meta: [
+  {
+    key: 'Suite',
+    value: 'Nightly full regression',
+  },
+  {
+    key: 'GITHUB_REPOSITORY',
+    value: 'octocat/telsa-ui',
+  },
+  {
+    key: 'GITHUB_REF',
+    value: process.env.GITHUB_REF,
+  },
+],
+...
+```
+
+# 🎨 Define your own Slack message custom layout
+
+You can define your own Slack message layout to suit your needs.
+
+Firstly, install the necessary type definitions:
+
+`yarn add @slack/types -D`
+
+Next, define your layout function. The signature of this function should adhere to example below:
+
+```typescript
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from 'playwright-slack-report/dist/src';
+
+const generateCustomLayout = (
+  summaryResults: SummaryResults,
+): Array<KnownBlock | Block> => {
+  // your implementation goes here
+};
+
+export default generateCustomLayout;
+```
+
+In your, `playwright.config.ts` file, add your function into the config.
+
+```typescript
+  import { generateCustomLayout } from "./my_custom_layout";
+
+  ...
+
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        channels: ["pw-tests", "ci"], // provide one or more Slack channels
+        sendResults: "always", // "always" , "on-failure", "off"
+        layout: generateCustomLayout,
+        ...
+      },
+    ],
+  ],
+```
+
+> Pro Tip: You can use the [block-kit provided by Slack when creating your layout.](https://app.slack.com/block-kit-builder/)
+
+### Examples:
+
+**Example 1: - very simple summary**
+
+```typescript
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from '..';
+
+export default function generateCustomLayoutSimpleExample(
+  summaryResults: SummaryResults,
+): Array<Block | KnownBlock> {
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text:
+          summaryResults.failed === 0
+            ? ':tada: All tests passed!'
+            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+      },
+    },
+  ];
+}
+```
+
+Generates the following message in Slack:
+
+![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-02-54.png?raw=true)
+
+**Example 2: - very simple summary (with Meta information)**
+
+Add the meta block in your config:
+
+```typescript
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        channels: ["demo"],
+        sendResults: "always", // "always" , "on-failure", "off",
+        layout: generateCustomLayout,
+        meta: [
+          {
+            key: 'EXAMPLE_META_node_env',
+            value: process.env.HOME ,
+          },
+        ],
+      },
+    ],
+  ],
+```
+
+Create the function to generate the layout:
+
+```typescript
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from '..';
+
+export default function generateCustomLayoutSimpleMeta(
+  summaryResults: SummaryResults,
+): Array<Block | KnownBlock> {
+  const meta: { type: string; text: { type: string; text: string } }[] = [];
+  if (summaryResults.meta) {
+    for (let i = 0; i < summaryResults.meta.length; i += 1) {
+      const { key, value } = summaryResults.meta[i];
+      meta.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `\n*${key}* :\t${value}`,
+        },
+      });
+    }
+  }
+  return [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text:
+          summaryResults.failed === 0
+            ? ':tada: All tests passed!'
+            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+      },
+    },
+    ...meta,
+  ];
+}
+```
+
+Generates the following message in Slack:
+
+![Final](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/2022-08-13_8-17-46.png?raw=true)
+
+**Example 3: - With screenshots and/or recorded videos (using AWS S3)**
+
+In your, `playwright.config.ts` file, add these params (Make sure you use **layoutAsync** rather than **layout**):
+
+```typescript
+  import { generateCustomLayoutAsync } from "./my_custom_layout";
+  ...
+  reporter: [
+    [
+      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        ...
+        layoutAsync: generateCustomLayoutAsync,
+        ...
+      },
+    ],
+  ],
+  use: {
+    ...
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+    ...
+  },
+```
+
+Create the function to generate the layout asynchronously in `my_custom_layout.ts`:
+
+```typescript
+import fs from 'fs';
+import path from 'path';
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from 'playwright-slack-report/dist/src';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+
+const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY || '',
+    secretAccessKey: process.env.S3_SECRET || '',
+  },
+  region: process.env.S3_REGION,
 });
 ```
 
