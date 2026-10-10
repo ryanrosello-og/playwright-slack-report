@@ -219,6 +219,89 @@ async function freePort() {
   return String(port);
 }
 
+// Always test the installed package against real lifecycle failures, with only
+// Slack's external transport captured locally in both live and offline mode.
+async function verifyRunLevelScenarios(pw, cli) {
+  const preload = path.join(consumer, 'capture-slack.cjs');
+  const fixtures = [
+    { name: 'setup-error', status: 'failed', error: 'Deliberate global setup failure', code: 1 },
+    { name: 'teardown-error', status: 'failed', error: 'Deliberate global teardown failure', code: 1 },
+    { name: 'timeout', status: 'timedout', error: 'Timed out waiting', code: 1 },
+    { name: 'interruption', status: 'interrupted', code: 130 },
+    { name: 'no-tests', status: 'failed', error: 'No tests found', code: 1 },
+    { name: 'clean', status: 'passed', code: 0 },
+  ];
+  for (const fixture of fixtures) {
+    for (const transport of ['bot', 'webhook']) {
+      const label = `run-${fixture.name}-${transport}`;
+      const resultsPath = path.join(consumer, `${label}-results.json`);
+      const runInfo = path.join(consumer, `${label}-run.json`);
+      const capture = path.join(consumer, `${label}-capture.jsonl`);
+      const env = {
+        ...baseEnv(), HARNESS_MODE: `reporter-${transport}`, HARNESS_RUN_FIXTURE: fixture.name,
+        HARNESS_JSON: resultsPath, HARNESS_RUN_INFO: runInfo, HARNESS_CAPTURE: capture, HARNESS_RUN_ID: `${runId}:${label}`,
+        ...(transport === 'bot' ? { SLACK_BOT_USER_OAUTH_TOKEN: 'harness-local-token' } : {}),
+      };
+      const entry = { mode: label, transport: 'local-capture', status: 'failed' };
+      report.paths.push(entry);
+      try {
+        await writeFile(capture, '');
+        await command(process.execPath, ['-r', preload, pw, 'test', '-c', 'run-errors.config.cjs'], consumer, label, env, fixture.code);
+        const fullResult = JSON.parse(await readFile(runInfo, 'utf8'));
+        assert.equal(fullResult.status, fixture.status, `${label}: actual Playwright run status`);
+        const json = JSON.parse(await readFile(resultsPath, 'utf8'));
+        await save(`${label}-results.json`, json);
+        await save(`${label}-run.json`, fullResult);
+        assert.equal(json.stats.unexpected, 0, `${label}: must exercise zero failed tests`);
+        if (fixture.error) assert(JSON.stringify(json.errors).includes(fixture.error), `${label}: missing global error`);
+        const verifyCapture = async suffix => {
+          const data = (await readFile(capture, 'utf8')).trim();
+          const messages = data ? data.split('\n').map(line => JSON.parse(line)) : [];
+          await save(`${label}-${suffix}-capture.json`, messages);
+          if (fixture.status === 'passed') {
+            assert.equal(messages.length, 0, `${label}: successful on-failure run must remain silent`);
+            return;
+          }
+          const parents = messages.filter(message => !message.payload.thread_ts);
+          assert.equal(parents.length, 1, `${label}: expected one parent report`);
+          const parent = parents[0];
+          const labelStatus = fixture.status === 'timedout' ? 'timed out' : fixture.status;
+          assert(messageText(parent.payload).includes(`Run status: ${labelStatus}`), `${label}: missing overall status`);
+          assert(parent.payload.text.includes(`Run status: ${labelStatus}`), `${label}: missing fallback status`);
+          const replies = messages.filter(message => message.payload.thread_ts);
+          if (transport === 'bot') {
+            assert.equal(parent.payload.channel, 'harness-failures', `${label}: wrong channel`);
+            for (const reply of replies) assert.equal(reply.payload.thread_ts, parent.ts, `${label}: wrong thread`);
+          } else assert.equal(replies.length, 0, `${label}: webhook must be inline`);
+          if (fixture.error) {
+            const details = transport === 'bot' ? replies.map(message => messageText(message.payload)).join('\n') : messageText(parent.payload);
+            assert(details.includes(fixture.error), `${label}: missing global error detail`);
+            if (transport === 'bot') assert(!messageText(parent.payload).includes(fixture.error), `${label}: details belong in thread`);
+          }
+        };
+        await verifyCapture('reporter');
+        // JSON lacks overall status; supply the captured FullResult to the CLI.
+        await writeFile(capture, '');
+        const configPath = path.join(consumer, `${label}-cli.json`);
+        await writeFile(configPath, JSON.stringify({
+          sendResults: 'on-failure', slackLogLevel: 'error', showInThread: transport === 'bot',
+          meta: [{ key: 'Harness run', value: `${runId}:${label}:cli` }],
+          ...(transport === 'bot' ? { sendUsingBot: { channels: ['harness-failures'] } }
+            : { sendUsingWebhook: { webhookUrl: 'https://example.invalid/harness-webhook' } }),
+        }));
+        await command(process.execPath, ['-r', preload, cli, '-c', configPath, '-j', resultsPath,
+          '--run-status', fullResult.status], consumer, `${label}-cli`, env);
+        await verifyCapture('cli');
+        entry.status = 'passed';
+        console.log(`[harness] ${label}: reporter and CLI verified locally`);
+      } catch (error) {
+        entry.error = error.message;
+        report.errors.push(`${label}: ${error.message}`);
+      }
+    }
+  }
+}
+
 async function cleanup() {
   if (!channel || !started || markers.size === 0) return;
   console.log('[harness] Cleaning up Slack messages');
@@ -300,6 +383,9 @@ try {
   const cli = path.join(consumer, 'node_modules', 'playwright-slack-report', 'dist', 'cli.js');
   const pw = requireConsumer.resolve('@playwright/test/cli');
   await command(process.execPath, [cli, '--help'], consumer, 'cli-help');
+  const cliVersion = await command(process.execPath, [cli, '--version'], consumer, 'cli-version');
+  assert.equal(cliVersion.trim(), pack.version, 'CLI version differs from packaged version');
+  await verifyRunLevelScenarios(pw, cli);
   await command(process.execPath, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
   started = String(Date.now() / 1000);
   const port = await freePort();

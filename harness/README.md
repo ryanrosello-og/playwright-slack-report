@@ -20,9 +20,29 @@ Configure `SLACK_BOT_USER_OAUTH_TOKEN` and `SLACK_WEBHOOK_URL`. Bot reports use 
 yarn harness:offline
 ```
 
-Offline mode verifies tarball contents, isolated installation, CLI startup, and browser outcomes without sending messages. It explicitly skips live Slack delivery and API verification and is not a substitute for the full test.
+Offline mode verifies tarball contents, isolated installation, CLI startup,
+browser outcomes, and run-level reporting through a local transport capture.
+It explicitly skips live Slack delivery and API verification and is not a
+substitute for the full test.
 
 ## Coverage and success criteria
+
+Both offline and live runs first execute six additional fixtures against the
+installed tarball: global setup failure, global teardown failure, global timeout,
+graceful interruption, no tests found, and a clean successful run. Each runs
+through bot and webhook reporter paths, then through both CLI paths using the
+actual generated JSON. This adds 24 reporter/CLI checks without Slack traffic.
+Only the external Slack SDK transports are replaced with a local payload capture;
+the Playwright runner, installed reporter, parsing, layouts, and CLI are real.
+
+These checks assert the actual overall Playwright status, zero failed-test counts,
+notification delivery in `on-failure` mode, failure-channel routing, readable
+fallback text, global error details in bot threads or inline webhook reports,
+and silence for successful runs. The interruption fixture emits `SIGINT` in the
+runner process to exercise Playwright's graceful handler on Windows and Unix.
+The CLI receives the status captured from `FullResult` via `--run-status`, because
+standard JSON omits it. Lifecycle results and captured payloads are saved with
+the other diagnostics. These checks do not verify real Slack API delivery.
 
 The browser fixtures exercise a passing interaction, permanent failure, unexpected pass, flaky retry, explicit skip, serial failure, and propagated serial skip. The runner checks each outcome and retry attempts, expecting 1 passed, 3 failed, 1 flaky, and 2 skipped. Playwright's deliberate exit code 1 is expected; any other exit code or different results fail the harness.
 

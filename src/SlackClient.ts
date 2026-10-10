@@ -9,6 +9,7 @@ import {
   LogLevel,
 } from '@slack/web-api';
 import { SummaryResults } from '.';
+import { getRunStatus } from './RunResults';
 import {
   generateBlocks,
   generateFailures,
@@ -81,7 +82,12 @@ export default class SlackClient {
     } else if (options.showInThread) {
       const modifiedOptions = {
         ...options,
-        summaryResults: { ...options.summaryResults, failures: [] },
+        summaryResults: {
+          ...options.summaryResults,
+          runStatus: getRunStatus(options.summaryResults),
+          failures: [],
+          runErrors: [],
+        },
       };
       blocks = await generateBlocks(
         modifiedOptions.summaryResults,

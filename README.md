@@ -16,6 +16,7 @@ with bot and webhook delivery, see the [consumer harness](harness/README.md).
 - 💌 Send results your Playwright test results to one or more Slack channels
 - 🎚️ Leverage JSON results created by Playwright and seamlessly post them on Slack
 - 📊 Conditionally send results to Slack channels based on test results
+- 🚨 Report global errors, run timeouts, and graceful interruptions, including runs with zero failed tests
 - 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
 - 🧑‍🎨 Define your own custom Slack message layout!
 
@@ -134,6 +135,21 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 ---
 
 # Option C - send your JSON results via CLI
+
+The CLI includes top-level Playwright JSON `errors` in its report. It infers a
+failed run from global errors or failed tests, and an interrupted run from
+interrupted test results. Standard Playwright JSON does not contain the overall
+run status, so provide `--run-status` when your runner knows the exact outcome:
+
+```sh
+npx playwright-slack-report -c cli_config.json -j results.json --run-status timedout
+```
+
+Allowed values are `passed`, `failed`, `timedout`, and `interrupted`. This option
+sets the reported run status without changing test counts or hiding global
+errors. Without it, a global timeout may be reported as failed or interrupted,
+depending on the recorded errors and test results. The CLI's exit code continues
+to describe reporting success, rather than the original test run outcome.
 
 Playwright now provides a nice way to [merge multiple reports from multiple shards](https://playwright.dev/docs/test-sharding#merging-reports-from-multiple-shards). You can use this feature to generate a single JSON report and then send it to Slack, alleviating the need to have separate messages sent per shard:
 
@@ -423,14 +439,14 @@ An array of Slack channels to post to, at least one channel is required
 
 ### **onFailureChannels**
 
-(Optional) An array of Slack channels to post to when tests have failed. Value from `channels` is used if not defined here
+(Optional) An array of Slack channels to post to when tests have failed, global errors occurred, or the run timed out or was interrupted. Value from `channels` is used if not defined here
 
 ### **sendResults**
 
 Can either be _"always"_, _"on-failure"_ or _"off"_, this configuration is required:
 
 - **always** - will send the results to Slack at completion of the test run
-- **on-failure** - will send the results to Slack only if a test failures are encountered
+- **on-failure** - sends results for failed tests, global errors, run timeouts, and graceful interruptions, including when no tests failed
 - **off** - turns off the reporter, it will not send the results to Slack
 
 ### **layout**
@@ -445,7 +461,37 @@ Same as **layout** above, but asynchronous in that it returns a promise.
 
 ### **maxNumberOfFailuresToShow**
 
-Limits the number of failures shown in the Slack message, defaults to 10.
+Limits the combined number of global errors and test failures shown in the Slack
+message, defaults to 10. Global errors are shown first. Set to 0 to hide details;
+the overall unsuccessful run status remains visible. The CLI uses
+`maxNumberOfFailures` for the same limit.
+
+### Run-level errors and interruptions
+
+The reporter captures Playwright's global `onError` events and the final run
+status from `onEnd`. Setup/teardown errors, worker errors, global timeouts, and
+gracefully interrupted runs can therefore notify Slack even when the failed-test
+count is zero. An actual Playwright "No tests found" error also sends a failure
+notification; a clean empty run without errors stays silent.
+
+The default layout shows an unsuccessful run status above the details. Global
+errors are separate from test failures, so they do not inflate test counts.
+With `showInThread: true`, bot reports put both kinds of error details in the
+report's thread while retaining the run status in the parent. Webhook reports
+show the details inline.
+
+Custom layouts receive these optional `SummaryResults` fields:
+
+| Field | Meaning |
+| --- | --- |
+| `runStatus` | `passed`, `failed`, `timedout`, or `interrupted` |
+| `runErrors` | Global error strings with ANSI formatting removed; absent when there are none |
+
+Use both fields when deciding whether a custom layout should display success;
+`failed === 0` alone does not imply that the whole run succeeded. Existing custom
+layouts retain control of their output and must render these fields themselves.
+Notifications require Playwright to reach the reporter's completion callback;
+forced termination, `SIGKILL`, or loss of the CI machine can prevent delivery.
 
 ### **slackOAuthToken**
 

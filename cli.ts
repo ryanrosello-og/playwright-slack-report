@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { LogLevel, WebClient, FetchFunction } from '@slack/web-api';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { IncomingWebhook } from '@slack/webhook';
@@ -11,12 +11,13 @@ import doPreChecks from './src/cli/cli_pre_checks';
 import { ICliConfig } from './src/cli/cli_schema';
 import { Meta, SummaryResults } from './src';
 import SlackWebhookClient from './src/SlackWebhookClient';
+import { hasRunFailure } from './src/RunResults';
 
 const program = new Command();
 
 program
   .name('playwright-slack-report - cli')
-  .version('1.0.0')
+  .version('1.1.115')
   .description('📦 Send Playwright json results to directly Slack ')
   .option(
     '-c, --config <path>',
@@ -26,6 +27,8 @@ program
     '-j, --json-results <path>',
     'Generated Playwright json results file e.g. ./results.json',
   )
+  .addOption(new Option('--run-status <status>', 'Overall Playwright run status (JSON omits this field)')
+    .choices(['passed', 'failed', 'timedout', 'interrupted']))
   .action(async (options) => {
     const preCheckResult = await doPreChecks(
       options.jsonResults,
@@ -51,7 +54,8 @@ program
       preCheckResult.jsonPath!,
     );
 
-    if (config.sendResults === 'on-failure' && resultSummary.failed === 0) {
+    if (options.runStatus) resultSummary.runStatus = options.runStatus;
+    if (config.sendResults === 'on-failure' && !hasRunFailure(resultSummary)) {
       console.log('⏩ Slack CLI reporter - no failures found');
       process.exit(0);
     }
@@ -142,7 +146,7 @@ async function sendResultsUsingBot({
       },
     });
 
-    if (config.showInThread && resultSummary.failures.length > 0) {
+    if (config.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0)) {
       for (let i = 0; i < result.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await slackClient.attachDetailsToThread({
@@ -181,7 +185,7 @@ async function attemptToImportLayout(source: string, functionName: string) {
   return undefined;
 }
 
-function replaceEnvVars(originalMeta: Meta) {
+function replaceEnvVars(originalMeta: Meta = []) {
   const newMeta: Meta = [];
   // eslint-disable-next-line no-restricted-syntax
   for (const m of originalMeta) {
