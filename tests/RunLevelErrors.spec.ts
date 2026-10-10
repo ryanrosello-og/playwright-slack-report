@@ -478,9 +478,8 @@ for (const transport of ['bot', 'webhook'] as const) {
         if (transport === 'bot') env.SLACK_BOT_USER_OAUTH_TOKEN = 'unit-token';
         const args = [
           '-r',
-          'ts-node/register/transpile-only',
-          '-r',
           path.resolve('harness/consumer/capture-slack.cjs'),
+          path.resolve('tests/helpers/run-typescript.cjs'),
           path.resolve('cli.ts'),
           '-c',
           configFile,
