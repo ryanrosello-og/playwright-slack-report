@@ -44,12 +44,21 @@ class WebClient {
 }
 class IncomingWebhook {
   constructor(url, options) {
+    this.url = url;
+    this.options = options;
     result.webhooks.push({
       url, hasFetch: typeof options.fetch === 'function',
-      agentUrl: options.agent?.url, channel: options.channel,
+      hasAgent: 'agent' in options, channel: options.channel,
     });
   }
-  async send() { result.sends++; return { text: 'ok' }; }
+  async send() {
+    result.sends++;
+    if (this.options.fetch) {
+      const actual = await this.options.fetch(this.url, requestInit);
+      result.fetchResponsePreserved = actual === response;
+    }
+    return { text: 'ok' };
+  }
 }
 class ResultsParser {
   async getParsedResults() {

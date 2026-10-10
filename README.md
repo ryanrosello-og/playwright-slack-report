@@ -1,10 +1,12 @@
-# playwright-slack-report ![Builds](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryanrosello-og/playwright-slack-report/blob/master/LICENSE) [![Coverage Status](https://coveralls.io/repos/github/ryanrosello-og/playwright-slack-report/badge.svg?branch=main)](https://coveralls.io/github/ryanrosello-og/playwright-slack-report?branch=main) [![CodeQL](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/github-code-scanning/codeql) <a href="https://www.buymeacoffee.com/ryanrosello.og"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" height="20px"></a>
+# playwright-slack-report
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ryanrosello-og/playwright-slack-report)
+Publish Playwright test results to the Slack channels where your team works. Supports incoming webhooks, Slack bots, failure threads, custom message layouts, and merged reports from sharded runs.
 
-![Main Logo](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/assets/_logo.png?raw=true)
+[Documentation](https://ryanrosello-og.github.io/playwright-slack-report/) · [Getting started](https://ryanrosello-og.github.io/playwright-slack-report/docs/getting-started/) · [Configuration](https://ryanrosello-og.github.io/playwright-slack-report/docs/configuration/)
 
-Publish your Playwright test results to your favorite Slack channel(s).
+## Install
+
+For an LLM-friendly repository overview, source map, and development commands, see [llms.txt](llms.txt).
 
 For local and GitHub Actions end-to-end testing of the packaged reporter and CLI
 with bot and webhook delivery, see the [consumer harness](harness/README.md).
@@ -340,92 +342,22 @@ Both the `-c` and `-j` options are required. The `-c` option is the path to your
 }
 ```
 
-In your `cli_config.json` file:
+## Quick start
 
-`__ENV_BUILD_ID` is equivalent to `process.env.BUILD_ID`. This will be automatically handled for you.
-
-You will encounter the following error if the environment variable is not defined:
-
-```bash
-❌ Environment variable [blah] was not set.
-        This variable was found in the [meta] section of the config file, ensure the variable is set in your environment.
-```
-
-### Sample Github Actions workflow
-
-```yaml
-  ...
-
-  merge-reports:
-    # Merge reports after playwright-tests, even if some shards have failed
-    if: always()
-    needs: [playwright-tests]
-
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 18
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: all-blob-reports
-        path: all-blob-reports
-
-    - name: Merge into JSON Report
-      run: npx playwright merge-reports --reporter json ./all-blob-reports > merged_tests_results.json
-
-    - name: View merged results
-      run: cat ${GITHUB_WORKSPACE}/merged_tests_results.json
-
-    - name: Send report to Slack using CLI
-      env:
-        SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_TOKEN }}
-      run: npx playwright-slack-report --config="${GITHUB_WORKSPACE}/cli_config.json" --json-results="${GITHUB_WORKSPACE}/merged_tests_results.json"
-  ...
-```
-
-# ⚙️ Configuration (applicable for Option A and Option B)
-
-An example advanced configuration is shown below:
+Create a [Slack incoming webhook](https://ryanrosello-og.github.io/playwright-slack-report/docs/webhooks/) and set `SLACK_WEBHOOK_URL` in your environment. Add the reporter to `playwright.config.ts`:
 
 ```typescript
-  import { generateCustomLayout } from "./my_custom_layout";
-  import { LogLevel } from '@slack/web-api';
-  ...
+import { defineConfig } from '@playwright/test';
 
+export default defineConfig({
   reporter: [
+    ['dot'],
     [
-      "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      './node_modules/playwright-slack-report/dist/src/SlackReporter.js',
       {
-        channels: ["pw-tests", "ci"], // provide one or more Slack channels
-        sendResults: "always", // "always" , "on-failure", "off"
-        layout: generateCustomLayout,
-        maxNumberOfFailuresToShow: 4,
-        meta: [
-            {
-                key: 'BUILD_NUMBER',
-                value: '323332-2341',
-            },
-            {
-                key: 'WHATEVER_ENV_VARIABLE',
-                value: process.env.SOME_ENV_VARIABLE, // depending on your CI environment, this can be the branch name, build id, etc
-            },
-            {
-                key: 'HTML Results',
-                value: '<https://your-build-artifacts.my.company.dev/pw/23887/playwright-report/index.html|📊>',
-            },
-        ],
-        slackOAuthToken: 'YOUR_SLACK_OAUTH_TOKEN',
-        slackLogLevel: LogLevel.DEBUG,
-        disableUnfurl: true,
-        showInThread: true,
+        slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
+        sendResults: 'always',
       },
-
     ],
   ],
 ```
@@ -738,225 +670,12 @@ const s3Client = new S3Client({
   },
   region: process.env.S3_REGION,
 });
-
-async function uploadFile(filePath, fileName) {
-  try {
-    const ext = path.extname(filePath);
-    const name = `${fileName}${ext}`;
-
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET,
-        Key: name,
-        Body: fs.createReadStream(filePath),
-      }),
-    );
-
-    return `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${name}`;
-  } catch (err) {
-    console.log('🔥🔥 Error', err);
-  }
-}
-
-export async function generateCustomLayoutAsync(
-  summaryResults: SummaryResults,
-): Promise<Array<KnownBlock | Block>> {
-  const { tests } = summaryResults;
-  // create your custom slack blocks
-
-  const header = {
-    type: 'header',
-    text: {
-      type: 'plain_text',
-      text: '🎭 *Playwright E2E Test Results*',
-      emoji: true,
-    },
-  };
-
-  const summary = {
-    type: 'section',
-    text: {
-      type: 'mrkdwn',
-      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
-    },
-  };
-
-  const fails: Array<KnownBlock | Block> = [];
-
-  for (const t of tests) {
-    if (t.status === 'failed' || t.status === 'timedOut') {
-      fails.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `👎 *[${t.browser}] | ${t.suiteName.replace(/\W/gi, '-')}*`,
-        },
-      });
-
-      const assets: Array<string> = [];
-
-      if (t.attachments) {
-        for (const a of t.attachments) {
-          // Upload failed tests screenshots and videos to the service of your choice
-          // In my case I upload the to S3 bucket
-          const permalink = await uploadFile(
-            a.path,
-            `${t.suiteName}--${t.name}`.replace(/\W/gi, '-').toLowerCase(),
-          );
-
-          if (permalink) {
-            let icon = '';
-            if (a.name === 'screenshot') {
-              icon = '📸';
-            } else if (a.name === 'video') {
-              icon = '🎥';
-            }
-
-            assets.push(`${icon}  See the <${permalink}|${a.name}>`);
-          }
-        }
-      }
-
-      if (assets.length > 0) {
-        fails.push({
-          type: 'context',
-          elements: [{ type: 'mrkdwn', text: assets.join('\n') }],
-        });
-      }
-    }
-  }
-
-  return [header, summary, { type: 'divider' }, ...fails];
-}
 ```
 
-**Example 4: - Upload the attachments to directly to Slack**
+Run `npx playwright test`. For multiple channels and failure threads, follow the [Slack bot guide](https://ryanrosello-og.github.io/playwright-slack-report/docs/slack-bot/).
 
-To enable this functionality, make sure the slackbot user has the following additional scopes:
+## Contribute
 
-- `files:write`
-- `files:read`
+Read the [contributor guide](website/docs/contributing.md), [consumer harness guide](website/docs/consumer-harness.md), and [website development guide](website/docs/website.md). [Open an issue](https://github.com/ryanrosello-og/playwright-slack-report/issues) for bugs or feature requests.
 
-You will need to re-install the app and re-invite the bot into the channel.
-
-The value of the channel_id should be the channel id of the channel you want to upload the file to. This channel id can be found in the url when you are in the channel. e.g.
-
-**https://app.slack.com/client/T02RVEEFPDH/C05H7TKVDUK**
-
-^ the bit starting with 'C...' is your channel id. In this case, the channel id is `C05H7TKVDUK`
-
-```typescript
-import web_api_1 from '@slack/web-api';
-import fs from 'fs';
-const slackClient = new web_api_1.WebClient(
-  process.env.SLACK_BOT_USER_OAUTH_TOKEN,
-);
-
-async function uploadFile(
-  filePath: string,
-): Promise<web_api_1.FilesCompleteUploadExternalResponse[] | undefined> {
-  try {
-    const result = await slackClient.filesUploadV2({
-      channel_id: 'C05H7TKVDUK', // << this is the channel id not channel name! ☠️
-      file: fs.createReadStream(filePath),
-      filename: filePath.split('/').at(-1),
-    });
-
-    return result.files;
-  } catch (error) {
-    console.log('🔥🔥 error', error);
-  }
-}
-
-export default async function generateCustomLayout(
-  summaryResults: SummaryResults,
-): Promise<({ type: string; text: { type: string; text: string } } | Block)[]> {
-  const header = {
-    type: 'header',
-    text: {
-      type: 'plain_text',
-      text: '🎭 *Playwright E2E Test Results*',
-      emoji: true,
-    },
-  };
-
-  const summary = {
-    type: 'section',
-    text: {
-      type: 'mrkdwn',
-      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
-    },
-  };
-
-  const fails: Array<KnownBlock | Block> = [];
-  const { tests } = summaryResults;
-  for (const test of tests) {
-    if (test.attachments) {
-      for (const attachment of test.attachments) {
-        const uploadResult = await uploadFile(attachment.path);
-
-        if (uploadResult && uploadResult[0].files) {
-          const { name, permalink } = uploadResult[0].files[0];
-          if (name === 'image' && permalink) {
-            fails.push({
-              alt_text: '',
-              image_url: permalink,
-              title: { type: 'plain_text', text: name || '' },
-              type: 'image',
-            });
-          }
-
-          if (name === 'video' && permalink) {
-            fails.push({
-              alt_text: '',
-              // NOTE:
-              // Slack requires thumbnail_url length to be more that 0
-              // Either set screenshot url as the thumbnail or add a placeholder image url
-              thumbnail_url: '',
-              title: { type: 'plain_text', text: name || '' },
-              type: 'video',
-              video_url: permalink,
-            });
-          }
-        }
-      }
-    }
-  }
-  return [header, summary, ...fails];
-}
-```
-
-# 🔑 License
-
-[MIT](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/LICENSE)
-
-# ✨ Contributing
-
-Clone the project and run `npm install`
-
-Make your changes
-Run the tests using `npm run pw`
-
-**To execute and test the entire package:**
-
-Run `npm pack`
-
-Create a new playwright project using `yarn create playwright`
-Modify the `package.json` and a local dependency to the generated `tgz` file
-
-e.g.
-
-```
-  "dependencies": {
-    "playwright-slack-report": "/home/ry/_repo/playwright-slack-report/playwright-slack-report-1.0.3.tgz"
-  }
-```
-
-- Execute `npm install`
-- Set your `SLACK_BOT_USER_OAUTH_TOKEN` environment variable
-- Modify the `playwright.config.ts` as above
-- Run the tests using `npx playwright text`
-
-# 🐛 Something not working for you?
-
-Feel free to [raise a github issue](https://github.com/ryanrosello-og/playwright-slack-report/issues) for any bugs or feature requests.
+[MIT license](LICENSE).

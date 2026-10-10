@@ -123,3 +123,6 @@ bag2.json
 
 # Intellij Idea Code files
 .idea
+
+# Docusaurus generated files
+website/.docusaurus/
