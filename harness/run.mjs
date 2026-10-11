@@ -214,6 +214,68 @@ async function freePort() {
   return String(port);
 }
 
+// Compare reporter and CLI alerts from actual retries, projects and repetitions.
+async function verifyFlakyScenarios(pw, cli) {
+  const preload = path.join(consumer, 'capture-slack.cjs');
+  for (const transport of ['bot', 'webhook']) {
+    for (const flaky of [false, true]) {
+      const label = `flaky-${transport}-${flaky ? 'retry' : 'clean'}`;
+      const results = path.join(consumer, `${label}-results.json`);
+      const capture = path.join(consumer, `${label}-capture.jsonl`);
+      const env = {
+        ...baseEnv(), HARNESS_MODE: `reporter-${transport}`, HARNESS_JSON: results,
+        HARNESS_CAPTURE: capture, HARNESS_FLAKY: String(flaky),
+        ...(transport === 'bot' ? { SLACK_BOT_USER_OAUTH_TOKEN: 'harness-unit-token' } : {}),
+      };
+      const entry = { mode: label, transport: 'local-capture', status: 'failed' };
+      report.paths.push(entry);
+      try {
+        const check = async mode => {
+          const data = (await readFile(capture, 'utf8')).trim();
+          const messages = data ? data.split('\n').map(line => JSON.parse(line)) : [];
+          await save(`${label}-${mode}-capture.json`, messages);
+          if (!flaky) {
+            assert.equal(messages.length, 0, `${label}: clean run must remain silent`);
+            return [];
+          }
+          assert.equal(messages.length, transport === 'bot' ? 2 : 1, `${label}: report and thread count`);
+          assert(messageText(messages[0].payload).includes('🟡 *4*'), `${label}: flaky count`);
+          const details = messages.at(-1).payload.blocks.filter(block => block.text?.text?.includes('passes on retry'));
+          assert.equal(details.length, 4, `${label}: one detail per project/repetition`);
+          for (const project of ['chromium', 'firefox']) {
+            assert.equal(details.filter(block => block.text.text.includes(`[${project}]`)).length, 2, `${label}: ${project} repetitions`);
+          }
+          assert(details.every(block => block.text.text.includes('1 retry')), `${label}: actual retries, not configured budget`);
+          if (transport === 'bot') {
+            assert.equal(messages[1].payload.thread_ts, messages[0].ts, `${label}: thread parent`);
+            assert(!messageText(messages[0].payload).includes('passes on retry'), `${label}: parent has counts only`);
+          }
+          return details.map(block => block.text.text).sort();
+        };
+        await writeFile(capture, '');
+        await command(node, ['--require', preload, pw, 'test', '-c', 'flaky.config.cjs'], consumer, label, env);
+        const parsed = JSON.parse(await readFile(results, 'utf8'));
+        assert.equal(parsed.stats.flaky, flaky ? 4 : 0, `${label}: Playwright flaky stats`);
+        assert.equal(parsed.stats.unexpected, 0, `${label}: all retries should recover`);
+        const reporterDetails = await check('reporter');
+        const config = path.join(consumer, `${label}-cli-config.json`);
+        await writeFile(config, JSON.stringify({
+          sendResults: 'on-flaky', slackLogLevel: 'error', showInThread: transport === 'bot',
+          ...(transport === 'bot' ? { sendUsingBot: { channels: ['harness-flaky'] } }
+            : { sendUsingWebhook: { webhookUrl: 'https://example.invalid/harness-webhook' } }),
+        }));
+        await writeFile(capture, '');
+        await command(node, ['--require', preload, cli, '-c', config, '-j', results], consumer, `${label}-cli`, env);
+        assert.deepEqual(await check('cli'), reporterDetails, `${label}: reporter and CLI agree`);
+        entry.status = 'passed';
+      } catch (error) {
+        entry.error = error.message;
+        report.errors.push(`${label}: ${error.message}`);
+      }
+    }
+  }
+}
+
 // Always test the installed package against real lifecycle failures, with only
 // Slack's external transport captured locally in both live and offline mode.
 async function verifyRunLevelScenarios(pw, cli) {
@@ -387,6 +449,7 @@ try {
   const cliVersion = await command(node, [cli, '--version'], consumer, 'cli-version');
   assert.equal(cliVersion.trim(), pack.version, 'CLI version differs from packaged version');
   await verifyRunLevelScenarios(pw, cli);
+  await verifyFlakyScenarios(pw, cli);
   await command(node, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
   started = String(Date.now() / 1000);
   const port = await freePort();

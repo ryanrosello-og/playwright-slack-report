@@ -10,6 +10,7 @@ export type SummaryResults = {
   flaky: number | undefined;
   skipped: number;
   failures: Array<failure>;
+  flakyTests?: FlakyTest[];
   meta?: Meta;
   tests: Array<{
     suiteName: string;
@@ -37,6 +38,15 @@ export type failure = {
   suite: string;
   test: string;
   failureReason: string;
+};
+
+export type FlakyTest = {
+  suite: string;
+  test: string;
+  projectName?: string;
+  file?: string;
+  /** Actual retries performed, excluding the initial attempt. */
+  retries: number;
 };
 
 export interface JSONResult {

@@ -3,7 +3,7 @@
 
 import * as fs from 'fs';
 import { TestCase } from '@playwright/test/reporter';
-import { failure, JSONResult, RunStatus, Spec, SummaryResults } from '.';
+import { failure, FlakyTest, JSONResult, RunStatus, Spec, SummaryResults } from '.';
 
 export type testResult = {
   suiteName: string;
@@ -38,6 +38,8 @@ export type testSuite = {
 export default class ResultsParser {
   private result: testSuite[];
 
+  private flakyTests = new Map<string, FlakyTest>();
+
   private runErrors: string[] = [];
 
   private runStatus?: RunStatus;
@@ -65,6 +67,7 @@ export default class ResultsParser {
   }
 
   async parseFromJsonFile(filePath: string) {
+    this.flakyTests.clear();
     let data: string;
     let parsedData: JSONResult;
     try {
@@ -89,6 +92,7 @@ export default class ResultsParser {
       flaky: parsedData.stats.flaky,
       skipped: parsedData.stats.skipped,
       failures,
+      flakyTests: [...this.flakyTests.values()],
       tests: [],
     };
 
@@ -137,7 +141,7 @@ export default class ResultsParser {
     const testResults: testResult[] = [];
 
     for (const spec of specs) {
-      for (const test of spec.tests) {
+      for (const [testIndex, test] of spec.tests.entries()) {
         const { expectedStatus } = test;
         const testFile = test.location?.file ?? spec.file;
         // Calculate actual retries based on the maximum retry attempt for this test
@@ -146,6 +150,32 @@ export default class ResultsParser {
             ? Math.max(...test.results.map((r: any) => r.retry))
             : 0;
         const effectiveRetries = Math.max(maxRetryAttempt, retries);
+        // JSON's test status is the final Playwright outcome, not an attempt status.
+        // Use a per-spec/project/repetition identity independently of stored attempts.
+        const identity = JSON.stringify([
+          spec.id ?? [testFile, suiteName, spec.title, spec.line, spec.column],
+          test.projectName,
+          testIndex,
+        ]);
+        const expected = expectedStatus ?? 'passed';
+        const completed = test.results.filter((result: any) =>
+          result.status !== 'skipped' && result.status !== 'interrupted');
+        const inferredFlaky = completed.some((result: any) => result.status === expected)
+          && completed.some((result: any) => result.status !== expected);
+        const isFlaky = test.status ? test.status === 'flaky' : inferredFlaky;
+        if (isFlaky) {
+          this.flakyTests.set(identity, {
+            suite: suiteName,
+            test: ResultsParser.getTestName({
+              name: spec.title, browser: test.projectName, projectName: test.projectName,
+            }),
+            projectName: test.projectName,
+            file: testFile,
+            retries: maxRetryAttempt,
+          });
+        } else {
+          this.flakyTests.delete(identity);
+        }
         for (const result of test.results) {
           testResults.push({
             suiteName,
@@ -197,13 +227,30 @@ export default class ResultsParser {
       flaky: 0,
     };
 
-    for (const test of allTests) ++stats[test.outcome()];
+    const flakyTests: FlakyTest[] = [];
+    for (const test of allTests) {
+      const outcome = test.outcome();
+      ++stats[outcome];
+      if (outcome === 'flaky') {
+        const projectName = test.parent?.project?.()?.name;
+        flakyTests.push({
+          suite: test.parent.title,
+          test: ResultsParser.getTestName({
+            name: test.title, browser: projectName, projectName,
+          }),
+          projectName,
+          file: test.location?.file,
+          retries: Math.max(0, ...test.results.map((result) => result.retry)),
+        });
+      }
+    }
     const summary: SummaryResults = {
       passed: stats.expected,
       failed: stats.unexpected,
       flaky: stats.flaky,
       skipped: stats.skipped,
       failures,
+      flakyTests,
       tests: [],
     };
     for (const suite of this.result) {

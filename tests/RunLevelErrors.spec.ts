@@ -102,7 +102,10 @@ for (const outcome of ['expected', 'flaky', 'skipped'] as const) {
     };
     const reporter = new SlackReporter(options);
     reporter.onBegin(config(options), {
-      allTests: () => [{ outcome: () => outcome }],
+      allTests: () => [{ outcome: () => outcome, title: 'test',
+        parent: { title: 'suite', project: () => ({ name: 'chromium' }) },
+        results: outcome === 'flaky' ? [{ retry: 0 }, { retry: 1 }] : [{ retry: 0 }],
+      }],
     } as unknown as Suite);
     await reporter.onEnd(fullResult('passed'));
     expect(send.called).toBe(false);

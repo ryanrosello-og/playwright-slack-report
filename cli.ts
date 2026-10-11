@@ -58,6 +58,11 @@ program
       process.exit(0);
     }
 
+    if (config.sendResults === 'on-flaky' && !(resultSummary.flaky > 0)) {
+      console.log('⏩ Slack CLI reporter - no flaky tests found');
+      process.exit(0);
+    }
+
     if (config.sendUsingBot) {
       const slackClient = new SlackClient(
         new WebClient(process.env.SLACK_BOT_USER_OAUTH_TOKEN, {
@@ -97,6 +102,7 @@ program
           config.customLayoutAsync?.functionName,
         ),
         maxNumberOfFailures: config.maxNumberOfFailures,
+        maxNumberOfFlakyTests: config.maxNumberOfFlakyTests,
         disableUnfurl: config.disableUnfurl,
         summaryResults,
       });
@@ -137,6 +143,7 @@ async function sendResultsUsingBot({
           config.customLayoutAsync?.functionName,
         ),
         maxNumberOfFailures: config.maxNumberOfFailures,
+        maxNumberOfFlakyTests: config.maxNumberOfFlakyTests,
         disableUnfurl: config.disableUnfurl,
         summaryResults,
         showInThread: config.showInThread,
@@ -144,7 +151,7 @@ async function sendResultsUsingBot({
       },
     });
 
-    if (config.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0)) {
+    if (config.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0 || resultSummary.flakyTests?.length > 0)) {
       for (let i = 0; i < result.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await slackClient.attachDetailsToThread({
@@ -152,6 +159,7 @@ async function sendResultsUsingBot({
           ts: result[i].ts,
           summaryResults: resultSummary,
           maxNumberOfFailures: config.maxNumberOfFailures,
+          maxNumberOfFlakyTests: config.maxNumberOfFlakyTests,
         });
       }
     }

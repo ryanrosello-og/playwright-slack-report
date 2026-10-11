@@ -21,6 +21,8 @@ class SlackReporter implements Reporter {
 
   private maxNumberOfFailuresToShow: number;
 
+  private maxNumberOfFlakyTestsToShow: number = 10;
+
   private showInThread: boolean;
 
   private sendCustomBlocksInThreadAfterIndex?: number;
@@ -29,7 +31,7 @@ class SlackReporter implements Reporter {
 
   private resultsParser = new ResultsParser();
 
-  private sendResults: 'always' | 'on-failure' | 'off' = 'on-failure';
+  private sendResults: 'always' | 'on-failure' | 'on-flaky' | 'off' = 'on-failure';
 
   private onSuccessSlackChannels: string[] = [];
 
@@ -89,6 +91,7 @@ class SlackReporter implements Reporter {
       = slackReporterConfig.maxNumberOfFailuresToShow !== undefined
         ? slackReporterConfig.maxNumberOfFailuresToShow
         : 10;
+    this.maxNumberOfFlakyTestsToShow = slackReporterConfig.maxNumberOfFlakyTestsToShow ?? 10;
     this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
     this.slackWebHookUrl = slackReporterConfig.slackWebHookUrl || undefined;
     this.slackWebHookChannel
@@ -132,6 +135,11 @@ class SlackReporter implements Reporter {
       return;
     }
 
+    if (this.sendResults === 'on-flaky' && !(resultSummary.flaky > 0)) {
+      this.log('⏩ Slack reporter - no flaky tests found');
+      return;
+    }
+
     if (
       resultSummary.passed === 0
       && resultSummary.failed === 0
@@ -164,6 +172,7 @@ class SlackReporter implements Reporter {
         customLayout: this.customLayout,
         customLayoutAsync: this.customLayoutAsync,
         maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+        maxNumberOfFlakyTests: this.maxNumberOfFlakyTestsToShow,
         disableUnfurl: this.disableUnfurl,
         summaryResults: resultSummary,
       });
@@ -190,6 +199,7 @@ class SlackReporter implements Reporter {
           customLayout: this.customLayout,
           customLayoutAsync: this.customLayoutAsync,
           maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+          maxNumberOfFlakyTests: this.maxNumberOfFlakyTestsToShow,
           disableUnfurl: this.disableUnfurl,
           summaryResults: resultSummary,
           showInThread: this.showInThread,
@@ -198,7 +208,7 @@ class SlackReporter implements Reporter {
       });
 
       console.log(JSON.stringify(result, null, 2));
-      if (this.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0)) {
+      if (this.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0 || resultSummary.flakyTests?.length > 0)) {
         for (let i = 0; i < result.length; i += 1) {
 
           await slackClient.attachDetailsToThread({
@@ -206,6 +216,7 @@ class SlackReporter implements Reporter {
             ts: result[i].ts,
             summaryResults: resultSummary,
             maxNumberOfFailures: this.maxNumberOfFailuresToShow,
+            maxNumberOfFlakyTests: this.maxNumberOfFlakyTestsToShow,
           });
         }
       }
@@ -250,21 +261,21 @@ class SlackReporter implements Reporter {
 
     if (
       !this.sendResults
-      || !['always', 'on-failure', 'off'].includes(this.sendResults)
+      || !['always', 'on-failure', 'on-flaky', 'off'].includes(this.sendResults)
     ) {
       return {
         okToProceed: false,
         message:
-          "❌ \"sendResults\" is not valid. Expecting one of ['always', 'on-failure', 'off'].",
+          "❌ \"sendResults\" is not valid. Expecting one of ['always', 'on-failure', 'on-flaky', 'off'].",
       };
     }
 
     const noSuccessChannelsProvided
-      = this.sendResults === 'always'
+      = ['always', 'on-flaky'].includes(this.sendResults)
       && (!this.onSuccessSlackChannels
         || this.onSuccessSlackChannels.length === 0);
     const noFailureChannelsProvided
-      = ['always', 'on-failure'].includes(this.sendResults)
+      = ['always', 'on-failure', 'on-flaky'].includes(this.sendResults)
       && (!this.onFailureSlackChannels
         || this.onFailureSlackChannels.length === 0);
 
@@ -309,6 +320,9 @@ class SlackReporter implements Reporter {
 
     if (this.meta && !Array.isArray(this.meta)) {
       return { okToProceed: false, message: '❌ Meta is not an array' };
+    }
+    if (!Number.isInteger(this.maxNumberOfFlakyTestsToShow) || this.maxNumberOfFlakyTestsToShow < 0) {
+      return { okToProceed: false, message: '❌ maxNumberOfFlakyTestsToShow must be a non-negative integer' };
     }
     return { okToProceed: true };
   }

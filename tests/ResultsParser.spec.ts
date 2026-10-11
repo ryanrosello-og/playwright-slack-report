@@ -444,6 +444,7 @@ describe('ResultsParser', () => {
       flaky: 0,
       skipped: 0,
       failures: [],
+      flakyTests: [],
       tests: [
         {
           suiteName: 'tests/t1.spec.ts',

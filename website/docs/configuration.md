@@ -15,7 +15,7 @@ An example advanced configuration is shown below:
       "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
       {
         channels: ["pw-tests", "ci"], // provide one or more Slack channels
-        sendResults: "always", // "always" , "on-failure", "off"
+        sendResults: "always", // "always", "on-failure", "on-flaky", "off"
         layout: generateCustomLayout,
         maxNumberOfFailuresToShow: 4,
         meta: [
@@ -56,11 +56,14 @@ An array of Slack channels to post to, at least one channel is required
 
 ### **sendResults**
 
-Can either be _"always"_, _"on-failure"_ or _"off"_, this configuration is required:
+Can be _"always"_, _"on-failure"_, _"on-flaky"_ or _"off"_:
 
 - **always** - will send the results to Slack at completion of the test run
-- **on-failure** - will send the results to Slack only if a test failures are encountered
+- **on-failure** - sends results for failed tests, global errors, run timeouts, and graceful interruptions. Flaky-only runs are skipped.
+- **on-flaky** - sends only when Playwright reports at least one flaky test, including tests that pass on retry. Runs with failures but no flaky tests are skipped. Mixed runs with both failures and flaky tests are sent.
 - **off** - turns off the reporter, it will not send the results to Slack
+
+Flaky-only runs use `onSuccessChannels`; runs with flaky tests and a test or run-level failure use `onFailureChannels`. Both fall back to `channels` as usual. `on-failure` continues to skip flaky-only runs.
 
 ### **layout**
 
@@ -75,6 +78,23 @@ Same as **layout** above, but asynchronous in that it returns a promise.
 ### **maxNumberOfFailuresToShow**
 
 Limits the number of failures shown in the Slack message, defaults to 10.
+
+### **maxNumberOfFlakyTestsToShow**
+
+Limits the flaky test details shown by the default layout, defaults to 10. Must be a non-negative integer. Set to `0` to hide the details while keeping the flaky count and notification behavior.
+
+Each flaky entry includes the suite, test name, project, and actual retries performed (excluding the initial attempt). It is reported once per test/project/repetition, rather than once per failed attempt. Flaky details have their own limit, independent of `maxNumberOfFailuresToShow`.
+
+```typescript
+{
+  channels: ['qa'],
+  sendResults: 'on-flaky',
+  maxNumberOfFlakyTestsToShow: 5,
+  showInThread: true,
+}
+```
+
+Custom layouts receive `summaryResults.flakyTests`, an optional array of `{ suite, test, projectName, file, retries }`. Layout callbacks control how these details appear; the default layout's display limit does not trim the array passed to callbacks.
 
 ### **slackOAuthToken**
 
@@ -97,7 +117,7 @@ Enable or disable unfurling of links in Slack messages.
 
 ### **showInThread** (default: false)
 
-Instructs the reporter to show the failure details in a thread instead of the main channel.
+Instructs the reporter to show failure and flaky test details in a thread instead of the main channel. The summary counts remain in the parent message. Webhooks show details inline.
 
 ![Show failures in threads](../static/img/threads.png)
 

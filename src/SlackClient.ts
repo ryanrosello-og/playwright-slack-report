@@ -13,6 +13,7 @@ import { getRunStatus } from './RunResults';
 import {
   generateBlocks,
   generateFailures,
+  generateFlakyTests,
   generateFallbackText,
 } from './LayoutGenerator';
 
@@ -47,6 +48,7 @@ export default class SlackClient {
       customLayoutAsync: Function | undefined;
       fakeRequest?: Function;
       maxNumberOfFailures: number;
+      maxNumberOfFlakyTests?: number;
       slackOAuthToken?: string;
       slackLogLevel?: LogLevel;
       disableUnfurl?: boolean;
@@ -87,16 +89,19 @@ export default class SlackClient {
           runStatus: getRunStatus(options.summaryResults),
           failures: [],
           runErrors: [],
+          flakyTests: [],
         },
       };
       blocks = await generateBlocks(
         modifiedOptions.summaryResults,
         options.maxNumberOfFailures,
+        options.maxNumberOfFlakyTests,
       );
     } else {
       blocks = await generateBlocks(
         options.summaryResults,
         options.maxNumberOfFailures,
+        options.maxNumberOfFlakyTests,
       );
     }
     if (!options.channelIds) {
@@ -186,6 +191,7 @@ export default class SlackClient {
     ts,
     summaryResults,
     maxNumberOfFailures,
+    maxNumberOfFlakyTests,
     disableUnfurl,
     fakeRequest,
   }: {
@@ -193,11 +199,15 @@ export default class SlackClient {
     ts: string;
     summaryResults: SummaryResults;
     maxNumberOfFailures: number;
+    maxNumberOfFlakyTests?: number;
     disableUnfurl?: boolean;
     fakeRequest?: Function;
   }) {
     const result = [];
-    const blocks = await generateFailures(summaryResults, maxNumberOfFailures);
+    const blocks = [
+      ...await generateFailures(summaryResults, maxNumberOfFailures),
+      ...generateFlakyTests(summaryResults, maxNumberOfFlakyTests),
+    ];
     if (blocks.length === 0) {
       return result;
     }

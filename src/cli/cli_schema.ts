@@ -3,7 +3,7 @@ import { LogLevel } from '@slack/web-api';
 
 const LogLevelEnum = z.nativeEnum(LogLevel);
 export const ZodCliSchema = z.object({
-  sendResults: z.enum(['always', 'on-failure']),
+  sendResults: z.enum(['always', 'on-failure', 'on-flaky']),
   sendUsingBot: z
     .object({
       channels: z.array(z.string()).nonempty(),
@@ -28,6 +28,7 @@ export const ZodCliSchema = z.object({
     .optional(),
   slackLogLevel: LogLevelEnum,
   maxNumberOfFailures: z.number().default(5),
+  maxNumberOfFlakyTests: z.number().int().nonnegative().default(10),
   disableUnfurl: z.boolean().default(false),
   showInThread: z.boolean().default(false),
   proxy: z.string().url().optional(),
@@ -36,7 +37,7 @@ export const ZodCliSchema = z.object({
 });
 
 export interface ICliConfig {
-  sendResults: 'always' | 'on-failure';
+  sendResults: 'always' | 'on-failure' | 'on-flaky';
   sendUsingBot?: {
     channels: string[];
   };
@@ -53,6 +54,7 @@ export interface ICliConfig {
     source: string;
   };
   maxNumberOfFailures: number;
+  maxNumberOfFlakyTests?: number;
   disableUnfurl: boolean;
   showInThread: boolean;
   proxy?: string;
