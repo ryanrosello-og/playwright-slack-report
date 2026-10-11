@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Bun checks
 permissions:
   contents: read
 
@@ -7,30 +7,34 @@ on:
     branches: [main, master, dev, enable-coveralls]
   pull_request:
     branches: [main, master]
+
 jobs:
-  yarn_lint_build_test_coverage:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+  build_test_coverage:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: '24.x'
-      - name: Install dependencies
-        run: yarn
-      - name: Run ESLint
-        run: yarn run lint
-      - name: TypeScript check
-        run: yarn tsc --noEmit --noErrorTruncation --pretty false --incremental false --project ./tsconfig.json
-      - name: Run Playwright tests
-        run: yarn run pw
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run build
+      - run: bun run test:coverage
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: coverage-${{ matrix.os }}
+          path: coverage/
           retention-days: 30
       - name: Coveralls
+        if: matrix.os == 'ubuntu-latest'
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage/lcov.info

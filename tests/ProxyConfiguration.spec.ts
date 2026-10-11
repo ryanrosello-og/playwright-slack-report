@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { coveragePreload } from './helpers/coverage';
+import { describe, expect, test } from 'bun:test';
 import { execFile } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -8,6 +9,12 @@ import { promisify } from 'node:util';
 const execute = promisify(execFile);
 const root = path.resolve(__dirname, '..');
 const proxy = 'http://proxy.example.com:8080';
+
+test('installed undici honors a real loopback proxy under Bun', async () => {
+  await execute(process.execPath, [path.join(__dirname, 'helpers/proxy-transport.mjs')], {
+    cwd: root, timeout: 10000,
+  });
+}, 15000);
 
 async function runScenario(scenario: {
   entryPoint: 'cli' | 'reporter';
@@ -30,7 +37,7 @@ async function runScenario(scenario: {
     const env: NodeJS.ProcessEnv = { ...process.env, PROXY_UNIT_SCENARIO: JSON.stringify({ ...scenario, configPath, resultsPath }) };
     delete env.SLACK_BOT_USER_OAUTH_TOKEN;
     delete env.SLACK_WEBHOOK_URL;
-    const { stdout } = await execute(process.execPath, [path.join(__dirname, 'helpers/proxy-scenario.cjs')], {
+    const { stdout } = await execute(process.execPath, [...coveragePreload(), path.join(__dirname, 'helpers/proxy-scenario.mjs')], {
       cwd: root, env, timeout: 10000,
     });
     const line = stdout.split(/\r?\n/).find(value => value.startsWith('PROXY_UNIT_RESULT='));
@@ -42,7 +49,7 @@ async function runScenario(scenario: {
 }
 
 for (const entryPoint of ['cli', 'reporter'] as const) {
-  test.describe(`${entryPoint} proxy configuration`, () => {
+  describe(`${entryPoint} proxy configuration`, () => {
     for (const transport of ['bot', 'webhook'] as const) {
       test(`${transport}: does not load undici or replace global fetch without proxy`, async () => {
         const result = await runScenario({ entryPoint, transport });

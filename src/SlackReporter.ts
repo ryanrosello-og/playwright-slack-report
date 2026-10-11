@@ -148,7 +148,8 @@ class SlackReporter implements Reporter {
     let proxyFetch: FetchFunction | undefined;
     if (this.proxy) {
       // Loading undici replaces the global dispatcher of Node's built-in fetch, so load it only when a proxy is used
-      const { ProxyAgent, fetch: undiciFetch } = await import('undici');
+      // Bypass Bun's undici shim so the configured proxy dispatcher is honored.
+      const { ProxyAgent, fetch: undiciFetch } = await import('undici/index.js');
       proxyFetch = (url, init) =>
         undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(this.proxy!) }) as unknown as ReturnType<FetchFunction>;
     }

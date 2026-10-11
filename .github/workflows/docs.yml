@@ -3,9 +3,9 @@ name: Documentation
 on:
   push:
     branches: [main]
-    paths: ['website/**', '.github/workflows/docs.yml']
+    paths: ['website/**', '.bun-version', '.github/workflows/docs.yml']
   pull_request:
-    paths: ['website/**', '.github/workflows/docs.yml']
+    paths: ['website/**', '.bun-version', '.github/workflows/docs.yml']
   workflow_dispatch:
 
 permissions:
@@ -23,13 +23,11 @@ jobs:
         working-directory: website
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: '24'
-          cache: npm
-          cache-dependency-path: website/package-lock.json
-      - run: npm ci
-      - run: npm run build
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - uses: actions/upload-pages-artifact@v5
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         with:

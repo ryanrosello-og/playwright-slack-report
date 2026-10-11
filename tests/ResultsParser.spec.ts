@@ -1,9 +1,9 @@
-import { expect, test as base } from '@playwright/test';
+import { describe, expect, test } from 'bun:test';
 import { TestCase } from '@playwright/test/reporter';
 import path from 'path';
 import ResultsParser from '../src/ResultsParser';
 
-const test = base.extend<{ testData: any }>({
+const createFixtures = (): { testData: any } => ({
   testData: {
     title: '',
     suites: [
@@ -383,10 +383,9 @@ const test = base.extend<{ testData: any }>({
   },
 });
 
-test.describe('ResultsParser', () => {
-  test('determines correct browser based on project config', async ({
-    testData,
-  }) => {
+describe('ResultsParser', () => {
+  test('determines correct browser based on project config', async () => {
+    const { testData } = createFixtures();
     const resultsParser = new ResultsParser();
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
@@ -407,7 +406,8 @@ test.describe('ResultsParser', () => {
     expect(results.tests[0].browser).toEqual('chrome');
   });
 
-  test('parses results successfully', async ({ testData }) => {
+  test('parses results successfully', async () => {
+    const { testData } = createFixtures();
     const resultsParser = new ResultsParser();
     resultsParser.addTestResult(
       testData.suites[0].suites[0].title,
@@ -438,7 +438,7 @@ test.describe('ResultsParser', () => {
       type: 'test',
     };
     const results = await resultsParser.getParsedResults([testA]);
-    expect(results).toEqual({
+    expect(results).toEqual<unknown>({
       passed: 0,
       failed: 1,
       flaky: 0,
@@ -493,7 +493,7 @@ test.describe('ResultsParser', () => {
     });
   });
 
-  test('getTestName(...) generates correct test name', async ({}) => {
+  test('getTestName(...) generates correct test name', async () => {
     expect(ResultsParser.getTestName({ name: 'Login' })).toEqual('Login');
     expect(
       ResultsParser.getTestName({
@@ -511,7 +511,7 @@ test.describe('ResultsParser', () => {
     ).toEqual('Login [Project Name: nightly_regression] using chrome');
   });
 
-  test('parse test results from json file that has retries, flakies and skipped tests', async ({}) => {
+  test('parse test results from json file that has retries, flakies and skipped tests', async () => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(
       __dirname,
@@ -528,7 +528,7 @@ test.describe('ResultsParser', () => {
     expect(resultSummary.tests.length).toEqual(10);
   });
 
-  test('throw an error when the results file is not a valid json', async ({}) => {
+  test('throw an error when the results file is not a valid json', async () => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(
       __dirname,
@@ -544,7 +544,7 @@ test.describe('ResultsParser', () => {
     }
   });
 
-  test('parse test results from a complicated json file', async ({}) => {
+  test('parse test results from a complicated json file', async () => {
     const resultsParser = new ResultsParser();
     const validTestResults = path.join(
       __dirname,
@@ -561,7 +561,7 @@ test.describe('ResultsParser', () => {
     expect(resultSummary.tests.length).toEqual(7);
   });
 
-  test('retrieve expected failure message from annotation', async ({}) => {
+  test('retrieve expected failure message from annotation', async () => {
     const resultsParser = new ResultsParser();
     const result = resultsParser.getExpectedFailure({
       annotations: [{ type: 'fail', description: 'This text will fail' }],
@@ -569,14 +569,14 @@ test.describe('ResultsParser', () => {
     expect(result).toEqual('This text will fail');
   });
 
-  test('empty failure message returned if annotation does not exist', async ({}) => {
+  test('empty failure message returned if annotation does not exist', async () => {
     const resultsParser = new ResultsParser();
     const result = resultsParser.getExpectedFailure({});
     expect(result).toEqual('');
   });
 
   // Tests for CLI mode retry logic fix
-  test('parseTests calculates effective retries correctly for flaky tests', async ({}) => {
+  test('parseTests calculates effective retries correctly for flaky tests', async () => {
     const resultsParser = new ResultsParser();
 
     // Mock test data representing a flaky test (failed on retry 0, passed on retry 1)
@@ -622,7 +622,7 @@ test.describe('ResultsParser', () => {
     expect(testResults[1].status).toBe('passed');
   });
 
-  test('parseTests handles single failure correctly', async ({}) => {
+  test('parseTests handles single failure correctly', async () => {
     const resultsParser = new ResultsParser();
 
     // Mock test data representing a true failure (no retries)
@@ -658,7 +658,7 @@ test.describe('ResultsParser', () => {
     expect(testResults[0].status).toBe('failed');
   });
 
-  test('parseTests uses global retries when higher than actual retries', async ({}) => {
+  test('parseTests uses global retries when higher than actual retries', async () => {
     const resultsParser = new ResultsParser();
 
     // Mock test data with global retries higher than actual attempts
@@ -690,7 +690,7 @@ test.describe('ResultsParser', () => {
     expect(testResults[0].status).toBe('passed');
   });
 
-  test('parseTests handles missing test.location in JSON result', async ({}) => {
+  test('parseTests handles missing test.location in JSON result', async () => {
     const resultsParser = new ResultsParser();
 
     const mockSpecs = [
@@ -721,7 +721,7 @@ test.describe('ResultsParser', () => {
     expect(testResults[0].status).toBe('passed');
   });
 
-  test('parseTests handles missing both test.location.file and spec.file', async ({}) => {
+  test('parseTests handles missing both test.location.file and spec.file', async () => {
     const resultsParser = new ResultsParser();
 
     const mockSpecs = [
@@ -754,7 +754,7 @@ test.describe('ResultsParser', () => {
     expect(testResults[0].name).toBe('No File Anywhere');
   });
 
-  test('parseTests handles test.location object without file and no spec.file', async ({}) => {
+  test('parseTests handles test.location object without file and no spec.file', async () => {
     const resultsParser = new ResultsParser();
 
     const mockSpecs = [
@@ -793,7 +793,7 @@ test.describe('ResultsParser', () => {
     expect(testResults[0].reason).toContain('Failure snippet');
   });
 
-  test('getFailures excludes flaky tests correctly with fix', async ({}) => {
+  test('getFailures excludes flaky tests correctly with fix', async () => {
     const resultsParser = new ResultsParser();
 
     // Add a flaky test (failed on retry 0, passed on retry 1) using parseTestSuite
@@ -865,7 +865,7 @@ test.describe('ResultsParser', () => {
     expect(failures[0].failureReason).toContain('Test failed permanently');
   });
 
-  test('getFailures includes test that failed on final retry', async ({}) => {
+  test('getFailures includes test that failed on final retry', async () => {
     const resultsParser = new ResultsParser();
 
     // Add a test that failed on its final retry attempt using parseTestSuite
@@ -914,7 +914,7 @@ test.describe('ResultsParser', () => {
     expect(failures[0].failureReason).toContain('Final failure');
   });
 
-  test('getFailures correctly handles many flaky tests with single real failure', async ({}) => {
+  test('getFailures correctly handles many flaky tests with single real failure', async () => {
     const resultsParser = new ResultsParser();
 
     // Add multiple flaky tests (failed then passed)

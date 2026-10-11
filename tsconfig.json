@@ -2,8 +2,8 @@
   "exclude": ["node_modules", "dist", "harness", "website"],
   "compilerOptions": {
       "target": "ESNext",
-      "module": "commonjs",
-      "moduleResolution": "node",
+      "module": "preserve",
+      "moduleResolution": "bundler",
       "sourceMap": true,
       "outDir": "./dist",
       "declaration": true,

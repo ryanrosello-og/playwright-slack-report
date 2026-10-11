@@ -40,8 +40,8 @@ program
     }
     let proxyFetch: FetchFunction | undefined;
     if (config.proxy) {
-      // Loading undici replaces the global dispatcher of Node's built-in fetch, so load it only when a proxy is used
-      const { ProxyAgent, fetch: undiciFetch } = await import('undici');
+      // Load lazily. The explicit entry bypasses Bun's undici shim, which ignores dispatchers.
+      const { ProxyAgent, fetch: undiciFetch } = await import('undici/index.js');
       proxyFetch = (url, init) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(config.proxy!) }) as unknown as ReturnType<FetchFunction>;

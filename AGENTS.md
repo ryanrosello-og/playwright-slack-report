@@ -1,7 +1,8 @@
 # Repository guidance
 
 This package sends Playwright test results to Slack through a reporter or a CLI.
-It uses TypeScript, Yarn Classic, Playwright Test, and nyc for coverage.
+It uses TypeScript and Bun for development, runtime, builds, and unit tests.
+Istanbul preserves all-source coverage; Playwright under Node validates consumers.
 
 ## Project structure
 
@@ -16,12 +17,12 @@ It uses TypeScript, Yarn Classic, Playwright Test, and nyc for coverage.
 
 ## Development and validation
 
-- Install dependencies with `yarn install --frozen-lockfile`.
-- Run `yarn build` to type-check and compile the project.
-- Run `yarn pw` for the unit suite and coverage report in `coverage/`.
-- Run targeted tests with `yarn playwright test tests/<file>.spec.ts --reporter=dot`.
-- Run `yarn lint` for source linting. Report existing failures separately from new ones.
-- Use `yarn harness:offline` when changes need packaged consumer validation.
+- Install dependencies with `bun install --frozen-lockfile`.
+- Run `bun run build` to type-check and compile the project.
+- Run `bun run test:coverage` for the unit suite and coverage report in `coverage/`.
+- Run targeted tests with `bun test tests/<file>.spec.ts`.
+- Run `bun run lint` for source linting. Report existing failures separately from new ones.
+- Use `bun run harness:offline` when changes need packaged consumer validation.
 - Run `git diff --check` before finishing changes.
 
 ## Testing expectations
@@ -45,11 +46,13 @@ differ. Preserve lazy loading of proxy dependencies and test both proxy and
 direct delivery when changing transport setup.
 
 Edit source files rather than generated `dist/` output. Keep changes focused and
-avoid unrelated formatting or dependency updates. Use `yarn.lock` for root
-dependency changes; the consumer harness has its own npm lockfile.
+avoid unrelated formatting or dependency updates. Use `bun.lock` for dependency
+changes. The root, consumer harness, and website each have a separate Bun lockfile.
+Keep Node consumer checks and npm provenance publishing as explicit exceptions
+to the Bun development runtime.
 
 When asked to increment the package version without a specified release type,
 bump the patch version in `package.json` and update the hardcoded `.version(...)`
-in `cli.ts` to match. Run `yarn harness:offline` before pushing a version bump;
+in `cli.ts` to match. Run `bun run harness:offline` before pushing a version bump;
 it checks that the packaged CLI version matches the package version.
 Do not publish a release unless asked.
