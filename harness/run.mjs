@@ -13,6 +13,13 @@ import { startProxy } from './proxy.mjs';
 
 const harness = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(harness);
+const bun = process.execPath;
+// bun run puts a Node-compatible Bun shim first on PATH. Skip it deliberately
+// so the installed-package checks actually exercise the consumer's Node runtime.
+const node = process.env.HARNESS_NODE || (process.env.PATH || '').split(path.delimiter)
+  .map(directory => Bun.which('node', { PATH: directory }))
+  .find(candidate => candidate && Bun.spawnSync([candidate, '-e', 'process.exit(process.versions.bun ? 1 : 0)']).exitCode === 0);
+assert(node, 'Install Node 24+ for the consumer compatibility checks');
 const offline = process.argv.includes('--offline');
 assert(process.argv.slice(2).every(arg => arg === '--offline'), 'Only --offline is supported');
 if (existsSync(path.join(harness, '.env'))) process.loadEnvFile(path.join(harness, '.env'));
@@ -44,20 +51,8 @@ function baseEnv() {
 // Execute commands directly with argument arrays to avoid shell interpretation.
 async function command(name, args, cwd, label, env = baseEnv(), expectedCode = 0) {
   console.log(`[harness] ${label}`);
-  let executable = name;
-  let argv = args;
-  if (process.platform === 'win32' && ['npm', 'yarn'].includes(name)) {
-    // Windows package managers are .cmd shims. Run their JavaScript CLI with
-    // Node instead, preserving argument arrays without invoking a shell.
-    const relativeCli = name === 'npm' ? 'npm/bin/npm-cli.js' : 'yarn/bin/yarn.js';
-    const directories = [path.dirname(process.execPath), ...(process.env.PATH || '').split(path.delimiter)];
-    const cli = directories.map(directory => path.join(directory, 'node_modules', relativeCli)).find(existsSync);
-    assert(cli, `Cannot locate ${name}'s JavaScript CLI; install ${name} on PATH`);
-    executable = process.execPath;
-    argv = [cli, ...args];
-  }
   const result = await new Promise((resolve, reject) => {
-    const child = spawn(executable, argv, { cwd, env, windowsHide: true, timeout: 600000 });
+    const child = spawn(name, args, { cwd, env, windowsHide: true, timeout: 600000 });
     let output = '';
     child.stdout.on('data', data => { output += data; });
     child.stderr.on('data', data => { output += data; });
@@ -246,7 +241,7 @@ async function verifyRunLevelScenarios(pw, cli) {
       report.paths.push(entry);
       try {
         await writeFile(capture, '');
-        await command(process.execPath, ['-r', preload, pw, 'test', '-c', 'run-errors.config.cjs'], consumer, label, env, fixture.code);
+        await command(node, ['-r', preload, pw, 'test', '-c', 'run-errors.config.cjs'], consumer, label, env, fixture.code);
         const fullResult = JSON.parse(await readFile(runInfo, 'utf8'));
         assert.equal(fullResult.status, fixture.status, `${label}: actual Playwright run status`);
         const json = JSON.parse(await readFile(resultsPath, 'utf8'));
@@ -290,7 +285,7 @@ async function verifyRunLevelScenarios(pw, cli) {
           ...(transport === 'bot' ? { sendUsingBot: { channels: ['harness-failures'] } }
             : { sendUsingWebhook: { webhookUrl: 'https://example.invalid/harness-webhook' } }),
         }));
-        await command(process.execPath, ['-r', preload, cli, '-c', configPath, '-j', resultsPath,
+        await command(node, ['-r', preload, cli, '-c', configPath, '-j', resultsPath,
           ...(fixture.status === 'timedout' ? ['--run-status', fullResult.status] : [])], consumer, `${label}-cli`, env);
         await verifyCapture('cli');
         entry.status = 'passed';
@@ -363,31 +358,36 @@ try {
     botChannel = await resolveChannel(channelName);
     webhookChannel = await resolveChannel(webhookChannelName);
   }
-  await command('yarn', ['build'], root, 'build');
+  await command(bun, ['run', 'build'], root, 'build');
+  await command(node, ['-e', 'if (process.versions.bun) process.exit(1)'], root, 'verify-node-runtime');
   consumer = await mkdtemp(path.join(tmpdir(), 'playwright-slack-harness-'));
   const packDir = path.join(consumer, 'packed');
   await mkdir(packDir);
-  const packOutput = await command('npm', ['pack', '--json', '--pack-destination', packDir], root, 'pack');
-  const pack = JSON.parse(packOutput.slice(packOutput.indexOf('[')))[0];
+  const manifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+  const filename = 'consumer.tgz';
+  await command(bun, ['pm', 'pack', '--filename', path.join(packDir, filename)], root, 'pack');
+  const archive = new Bun.Archive(await readFile(path.join(packDir, filename)));
+  const files = [...(await archive.files()).keys()].map(file => ({ path: file.replace(/^package\//, '') }));
+  const pack = { filename, version: manifest.version, files };
   for (const required of ['dist/cli.js', 'dist/src/SlackReporter.js']) {
     assert(pack.files.some(file => file.path === required), `Tarball missing ${required}`);
   }
   assert(!pack.files.some(file => /(^|\/)(harness|tests|\.env)(\/|$)/.test(file.path)), 'Tarball contains harness/tests/credentials');
   await save('package-contents.json', pack);
   await cp(path.join(harness, 'consumer'), consumer, { recursive: true });
-  for (const file of ['package.json', 'package-lock.json']) await cp(path.join(harness, file), path.join(consumer, file));
-  await command('npm', ['ci', '--no-audit', '--no-fund'], consumer, 'install-consumer');
-  await command('npm', ['install', '--no-save', '--package-lock=false', '--no-audit', '--no-fund', path.join(packDir, pack.filename)], consumer, 'install-tarball');
+  for (const file of ['package.json', 'bun.lock']) await cp(path.join(harness, file), path.join(consumer, file));
+  await command(bun, ['install', '--frozen-lockfile'], consumer, 'install-consumer');
+  await command(bun, ['add', '--no-save', path.join(packDir, pack.filename)], consumer, 'install-tarball');
   const requireConsumer = createRequire(path.join(consumer, 'package.json'));
   const packagePath = await realpath(requireConsumer.resolve('playwright-slack-report/package.json'));
   assert(packagePath.startsWith(`${await realpath(consumer)}${path.sep}`), 'Consumer resolved the package outside its isolated installation');
   const cli = path.join(consumer, 'node_modules', 'playwright-slack-report', 'dist', 'cli.js');
   const pw = requireConsumer.resolve('@playwright/test/cli');
-  await command(process.execPath, [cli, '--help'], consumer, 'cli-help');
-  const cliVersion = await command(process.execPath, [cli, '--version'], consumer, 'cli-version');
+  await command(node, [cli, '--help'], consumer, 'cli-help');
+  const cliVersion = await command(node, [cli, '--version'], consumer, 'cli-version');
   assert.equal(cliVersion.trim(), pack.version, 'CLI version differs from packaged version');
   await verifyRunLevelScenarios(pw, cli);
-  await command(process.execPath, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
+  await command(node, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
   started = String(Date.now() / 1000);
   const port = await freePort();
   if (!offline) proxy = await startProxy();
@@ -413,7 +413,7 @@ try {
       if (!mode.startsWith('cli-')) {
         resultsPath = path.join(consumer, `${label}-results.json`);
         env.HARNESS_JSON = resultsPath;
-        await command(process.execPath, [pw, 'test'], consumer, label, env, 1);
+        await command(node, [pw, 'test'], consumer, label, env, 1);
         await verifyPlaywright(resultsPath);
       } else {
         const configPath = path.join(consumer, 'cli-config.json');
@@ -425,7 +425,7 @@ try {
           ...(mode.endsWith('bot') ? { sendUsingBot: { channels: [channel] } } : { sendUsingWebhook: { webhookUrl: webhook } }),
         };
         await writeFile(configPath, JSON.stringify(config));
-        try { await command(process.execPath, [cli, '-c', configPath, '-j', resultsPath], consumer, label, env); }
+        try { await command(node, [cli, '-c', configPath, '-j', resultsPath], consumer, label, env); }
         finally { await rm(configPath, { force: true }); }
       }
       if (viaProxy) {

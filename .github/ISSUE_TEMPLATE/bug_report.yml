@@ -42,6 +42,7 @@ body:
       value: |
         - OS: <!--[e.g. macOS, Windows, Debian, CentOS, ...]-->
         - Node.js version: <!--[Run `node -v` to see your Node.js version]-->
+        - Bun version (contributor workflow only): <!--[Run `bun --version`]-->
     validations:
       required: true
   - type: textarea

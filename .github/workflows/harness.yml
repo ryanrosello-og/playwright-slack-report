@@ -24,20 +24,22 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24.x'
-          cache: yarn
-      - run: yarn install --frozen-lockfile
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
       - name: Verify tarball and browser outcomes (fork PR or missing secrets)
         if: >-
           (github.event_name == 'pull_request' &&
            github.event.pull_request.head.repo.full_name != github.repository) ||
           env.HAS_SLACK_SECRETS != 'true'
-        run: yarn harness:offline
+        run: bun run harness:offline
       - name: Verify direct and proxied Slack paths
         if: >-
           (github.event_name != 'pull_request' ||
            github.event.pull_request.head.repo.full_name == github.repository) &&
           env.HAS_SLACK_SECRETS == 'true'
-        run: yarn harness
+        run: bun run harness
         env:
           SLACK_BOT_USER_OAUTH_TOKEN: ${{ secrets.SLACK_BOT_USER_OAUTH_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -3,16 +3,16 @@ title: Website development
 description: Run, build, and publish the documentation website.
 ---
 
-The documentation lives in `website/`, with its own npm dependencies and lockfile. The reporter package continues to use the root Yarn setup.
+The documentation lives in `website/`, with its own dependencies and `bun.lock`. Install and execute Docusaurus with Bun.
 
 ## Run locally
 
-Use Node 24, matching the documentation workflow:
+Use the Bun version pinned in the repository’s `.bun-version`, matching the documentation workflow:
 
 ```sh
 cd website
-npm ci
-npm start
+bun install --frozen-lockfile
+bun run start
 ```
 
 Open the local URL printed by Docusaurus. Edit pages in `docs/`, navigation in `sidebars.js`, the homepage in `src/pages/index.jsx`, and shared styling in `src/css/custom.css`.
@@ -20,8 +20,8 @@ Open the local URL printed by Docusaurus. Edit pages in `docs/`, navigation in `
 ## Check the production site
 
 ```sh
-npm run build
-npm run serve
+bun run build
+bun run serve
 ```
 
 The build fails for broken links. Local search is generated during the production build; use the production preview to test it. Check desktop and mobile layouts, both color modes, navigation, and search before submitting changes.

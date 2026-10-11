@@ -29,7 +29,7 @@ module.exports = defineConfig({
   use: { browserName: 'chromium', baseURL: `http://127.0.0.1:${process.env.HARNESS_PORT}` },
   projects: [{ name: 'chromium' }],
   webServer: {
-    command: 'node server.cjs',
+    command: `"${process.execPath}" server.cjs`,
     url: `http://127.0.0.1:${process.env.HARNESS_PORT}`,
     reuseExistingServer: false,
     timeout: 15000,

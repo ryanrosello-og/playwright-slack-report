@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { afterEach, expect, test } from 'bun:test';
 import { WebClient } from '@slack/web-api';
 import { IncomingWebhook } from '@slack/webhook';
 import sinon from 'ts-sinon';
@@ -17,7 +17,7 @@ const options = {
   summaryResults: summary, showInThread: false,
 };
 
-test.afterEach(() => sinon.restore());
+afterEach(() => sinon.restore());
 
 test('missing channels reject before any Slack request', async () => {
   const web = new WebClient('unit-test');
@@ -65,7 +65,7 @@ test('bot delivery continues after a channel rejects or throws', async () => {
   const result = await new SlackClient(web).sendMessage({ options: {
     ...options, channelIds: ['first', 'second', 'third'], disableUnfurl: true,
   } });
-  expect(result).toEqual([
+  expect(result).toEqual<unknown>([
     { channel: 'first', outcome: expect.stringContaining('channel_not_found') },
     { channel: 'second', outcome: expect.stringContaining('transport unavailable') },
     { channel: 'third', outcome: '✅ Message sent to third', ts: '123' },
@@ -111,7 +111,7 @@ test('thread delivery logs errors while preserving the parent result', async () 
     ...options, channelIds: ['first'], customLayout: () => [{ type: 'divider' }, { type: 'divider' }],
     sendCustomBlocksInThreadAfterIndex: 1,
   } });
-  expect(result).toEqual([{ channel: 'first', outcome: '✅ Message sent to first', ts: 'parent' }]);
+  expect(result).toEqual<unknown>([{ channel: 'first', outcome: '✅ Message sent to first', ts: 'parent' }]);
   expect(log.calledOnceWithExactly('❌ Failed to send threaded message to first: thread unavailable')).toBe(true);
 });
 
@@ -126,7 +126,7 @@ test('failure details skip rejected responses and continue after transport error
     channelIds: ['first', 'second', 'third'], ts: 'parent', summaryResults: summary,
     maxNumberOfFailures: 10, disableUnfurl: false,
   });
-  expect(result).toEqual([
+  expect(result).toEqual<unknown>([
     { channel: 'second', outcome: '❌ Failed to send failure details to second within thread parent: unavailable' },
     { channel: 'third', outcome: '✅ Message sent to third within thread parent', ts: 'reply' },
   ]);
@@ -153,7 +153,7 @@ for (const asyncLayout of [false, true]) {
       customLayoutAsync: asyncLayout ? layout : undefined,
       maxNumberOfFailures: 10, summaryResults: summary, disableUnfurl: false,
     });
-    expect(result).toEqual({ outcome: 'ok' });
+    expect(result).toEqual<unknown>({ outcome: 'ok' });
     expect(layout.calledOnceWithExactly(summary)).toBe(true);
     expect(send.calledOnceWithExactly({ blocks, unfurl_links: true })).toBe(true);
   });

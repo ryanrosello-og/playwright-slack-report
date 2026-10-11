@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from 'bun:test';
 import ResultsParser from '../src/ResultsParser';
 
 test('JSON result insertion preserves timestamps, tags, attachments and failure details', async () => {

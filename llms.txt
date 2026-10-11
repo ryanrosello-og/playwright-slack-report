@@ -4,7 +4,7 @@
 
 This file is the repository's concise entry point for LLMs. Links are relative to the repository root. Read the linked source for exact behavior and defaults; README examples may differ from the current implementation. The project is MIT licensed, builds CommonJS JavaScript and TypeScript declarations into `dist/`, and uses Playwright Test for its test suite.
 
-Install repository dependencies with `yarn install --frozen-lockfile` (the checked-in lockfile is `yarn.lock`). Use `yarn build` to compile, `yarn lint` to lint `src`, and `yarn pw` to run tests with NYC coverage. For tests without the configured Slack reporter, use `yarn playwright test --reporter=dot`; the root Playwright configuration otherwise enables Slack delivery when credentials are available. The package consumer harness requires Node 24 or newer and Yarn 1. `yarn harness:offline` checks the packed package, isolated consumer installation, CLI startup, and browser outcomes without sending Slack messages. `yarn harness` exercises live bot/webhook delivery and proxy paths using credentials described in the harness documentation.
+Use the Bun version pinned in `.bun-version`. Install with `bun install --frozen-lockfile`; run `bun run build`, `bun run typecheck`, `bun run lint`, and `bun test`. Run `bun run test:coverage` for all-source Istanbul statement, branch, function, and line coverage, including subprocesses, with LCOV output for Coveralls. Root, harness, and website dependencies have separate `bun.lock` files. The Bun-driven package consumer harness requires Node 24+ for the installed consumer: `bun run harness:offline` validates packaging, CLI, lifecycle reporting, and browser outcomes without Slack traffic. `bun run harness` exercises live delivery and proxies. Published consumers still use their existing Node/npm/Yarn workflows. Releases retain `npm publish --provenance`.
 
 The installed reporter entry point is `playwright-slack-report/dist/src/SlackReporter.js`. Reporter options include `channels`, `onSuccessChannels`, `onFailureChannels`, `sendResults` (`always`, `on-failure`, or `off`), `slackOAuthToken`, `slackWebHookUrl`, `layout`, `layoutAsync`, `maxNumberOfFailuresToShow`, `meta`, `disableUnfurl`, `showInThread`, `sendCustomBlocksInThreadAfterIndex`, and `proxy`. Bot authentication can use `SLACK_BOT_USER_OAUTH_TOKEN`. Webhooks do not support failure threads or custom blocks in threads.
 
@@ -33,7 +33,7 @@ Custom layouts receive `SummaryResults` and return Slack Block Kit blocks, synch
 
 ## Verification
 
-- [Playwright configuration](playwright.config.ts): Repository test directory, project, retries, and enabled reporters.
+- [Bun configuration](bunfig.toml): Unit test directory, setup, and development runtime.
 - [Parser tests](tests/ResultsParser.spec.ts): Summary and outcome parsing expectations.
 - [Reporter tests](tests/SlackReporter.spec.ts): Reporter configuration and lifecycle expectations.
 - [Bot delivery tests](tests/SlackClient_send_message.spec.ts): Bot sending and thread behavior.

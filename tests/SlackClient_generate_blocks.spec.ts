@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { describe, expect, test } from 'bun:test';
 import { generateBlocks, generateFailures } from '../src/LayoutGenerator';
 
-test.describe('SlackClient.generateBlocks()', () => {
+describe('SlackClient.generateBlocks()', () => {
   test('includes warning message if number of failures exceeds maximum allowed', async () => {
     const generatedBlock = await generateBlocks(
       {

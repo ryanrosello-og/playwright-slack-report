@@ -7,12 +7,12 @@ This replaces the external `test-slick` consumer with a reproducible tarball tes
 
 ## Local execution
 
-Use Node 24 or newer and Yarn 1. From the repository root:
+Use the Bun version pinned in `.bun-version` and Node 24 or newer. Bun builds, packs, installs, and orchestrates the harness; Node runs the installed consumer fixtures. From the repository root:
 
 ```sh
-yarn install --frozen-lockfile
+bun install --frozen-lockfile
 # Copy harness/.env.example to harness/.env and fill in credentials.
-yarn harness
+bun run harness
 ```
 
 The command installs Chromium automatically and serves the checked-in static HTML on a free loopback port. On Linux it also installs browser system dependencies. Credentials from the environment take precedence over `harness/.env`. Never commit `.env`.
@@ -20,7 +20,7 @@ The command installs Chromium automatically and serves the checked-in static HTM
 Configure `SLACK_BOT_USER_OAUTH_TOKEN` and `SLACK_WEBHOOK_URL`. Bot reports use `SLACK_CHANNEL` (default `pw`); webhook reports are verified in `SLACK_WEBHOOK_CHANNEL` (default `webhook`), which must match the webhook's configured destination. Invite the bot into both channels; its bot scopes must include `chat:write`, `channels:read`, and `channels:history`. Reinstall the Slack app after adding scopes. The incoming webhook needs the `incoming-webhook` scope. Thread verification uses `conversations.replies`; the token must be permitted to read channel threads. Live runs fail before posting when basic read permissions are missing. Webhook reports are retained, so the webhook can use a separate integration from the bot token.
 
 ```sh
-yarn harness:offline
+bun run harness:offline
 ```
 
 Offline mode verifies tarball contents, isolated installation, CLI startup, and browser outcomes without sending messages. It explicitly skips live Slack delivery and API verification and is not a substitute for the full test.

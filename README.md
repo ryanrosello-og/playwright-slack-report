@@ -34,6 +34,8 @@ Run following commands:
 
 `npm install playwright-slack-report -D`
 
+Contributors use Bun, pinned in [`.bun-version`](./.bun-version). Run `bun install --frozen-lockfile`, `bun run build`, and `bun test`; use `bun run test:coverage` for coverage. See the [contributor guide](https://ryanrosello-og.github.io/playwright-slack-report/docs/contributing/) for the complete workflow. Consumers can keep their existing Node/npm/Yarn setup.
+
 Modify your `playwright.config.ts` file to include the following:
 
 ```typescript

@@ -1,13 +1,12 @@
-import { expect } from '@playwright/test';
+import { describe, expect } from 'bun:test';
 import { ChatPostMessageResponse } from '@slack/web-api';
 import generateCustomLayout from '../custom_block/my_block';
-import { test } from './fixtures';
+import { test } from 'bun:test';
+import { createFixtures } from './fixtures';
 
-test.describe('SlackClient.sendMessage()', () => {
-  test('sends message using default block layout', async ({
-    testSlackClient,
-    testSummaryAllTestsPassed,
-  }) => {
+describe('SlackClient.sendMessage()', () => {
+  test('sends message using default block layout', async () => {
+    const { testSlackClient, testSummaryAllTestsPassed } = createFixtures();
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
       ok: true,
     });
@@ -23,7 +22,7 @@ test.describe('SlackClient.sendMessage()', () => {
         showInThread: false,
       },
     });
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
@@ -31,10 +30,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('sends message using a custom block layout', async ({
-    testSlackClient,
-    testSummaryAllTestsFailed,
-  }) => {
+  test('sends message using a custom block layout', async () => {
+    const { testSlackClient, testSummaryAllTestsFailed } = createFixtures();
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
       ok: true,
     });
@@ -51,7 +48,7 @@ test.describe('SlackClient.sendMessage()', () => {
         showInThread: false,
       },
     });
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
@@ -59,10 +56,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('sends message with shownInThreads enabled', async ({
-    testSlackClient,
-    testSummaryAllTestsFailed,
-  }) => {
+  test('sends message with shownInThreads enabled', async () => {
+    const { testSlackClient, testSummaryAllTestsFailed } = createFixtures();
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
       ok: true,
     });
@@ -79,7 +74,7 @@ test.describe('SlackClient.sendMessage()', () => {
         showInThread: true,
       },
     });
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
@@ -87,10 +82,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('attach error details when showInThreads option is enabled', async ({
-    testSlackClient,
-    testSummaryAllTestsFailed,
-  }) => {
+  test('attach error details when showInThreads option is enabled', async () => {
+    const { testSlackClient, testSummaryAllTestsFailed } = createFixtures();
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => ({
       ok: true,
     });
@@ -103,7 +96,7 @@ test.describe('SlackClient.sendMessage()', () => {
       maxNumberOfFailures: 10,
       fakeRequest,
     });
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345 within thread 1684631671.947369',
@@ -111,10 +104,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('sends custom blocks in one message when sendCustomBlocksInThreadAfterIndex is not set', async ({
-    testSlackClient,
-    testSummaryAllTestsFailed,
-  }) => {
+  test('sends custom blocks in one message when sendCustomBlocksInThreadAfterIndex is not set', async () => {
+    const { testSlackClient, testSummaryAllTestsFailed } = createFixtures();
     let fakeRequestCallCounter = 0;
 
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
@@ -140,7 +131,7 @@ test.describe('SlackClient.sendMessage()', () => {
 
     expect(fakeRequestCallCounter).toBe(1);
 
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
@@ -148,10 +139,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('sends custom blocks in thread when sendCustomBlocksInThreadAfterIndex is set', async ({
-    testSlackClient,
-    testSummaryAllTestsFailed,
-  }) => {
+  test('sends custom blocks in thread when sendCustomBlocksInThreadAfterIndex is set', async () => {
+    const { testSlackClient, testSummaryAllTestsFailed } = createFixtures();
     let fakeRequestCallCounter = 0;
 
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
@@ -177,7 +166,7 @@ test.describe('SlackClient.sendMessage()', () => {
 
     expect(fakeRequestCallCounter).toBe(2);
 
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
@@ -185,10 +174,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('sends custom blocks in multiple threaded messages when more than 50 blocks', async ({
-    testSlackClient,
-    testSummaryAllTestsFailed,
-  }) => {
+  test('sends custom blocks in multiple threaded messages when more than 50 blocks', async () => {
+    const { testSlackClient, testSummaryAllTestsFailed } = createFixtures();
     let fakeRequestCallCounter = 0;
 
     const fakeRequest = async (): Promise<ChatPostMessageResponse> => {
@@ -244,7 +231,7 @@ test.describe('SlackClient.sendMessage()', () => {
     // (52 blocks split into 2 chunks of 50 and 2)
     expect(fakeRequestCallCounter).toBe(3);
 
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '✅ Message sent to C12345',
@@ -253,10 +240,8 @@ test.describe('SlackClient.sendMessage()', () => {
     ]);
   });
 
-  test('provides an error when posting message to Slack fails', async ({
-    testSlackClient,
-    testSummaryAllTestsPassed,
-  }) => {
+  test('provides an error when posting message to Slack fails', async () => {
+    const { testSlackClient, testSummaryAllTestsPassed } = createFixtures();
     const fakeFailedRequest = async (): Promise<ChatPostMessageResponse> => {
       throw new Error('Something went wrong');
     };
@@ -272,7 +257,7 @@ test.describe('SlackClient.sendMessage()', () => {
         showInThread: false,
       },
     });
-    expect(clientResponse).toEqual([
+    expect(clientResponse).toEqual<unknown>([
       {
         channel: channelId,
         outcome: '❌ Message not sent to C12345 \r\n Something went wrong',

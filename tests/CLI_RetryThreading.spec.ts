@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { describe, expect, test } from 'bun:test';
 import ResultsParser from '../src/ResultsParser';
 
-test.describe('CLI Mode Retry Threading Fix', () => {
+describe('CLI Mode Retry Threading Fix', () => {
   test('parseTests calculates effective retries correctly for CLI mode flaky tests', async () => {
     const resultsParser = new ResultsParser();
 

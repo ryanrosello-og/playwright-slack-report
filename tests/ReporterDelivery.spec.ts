@@ -1,15 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { beforeEach, afterEach, test, expect } from 'bun:test';
 import sinon from 'ts-sinon';
 import SlackReporter from '../src/SlackReporter';
 import SlackClient from '../src/SlackClient';
 import SlackWebhookClient from '../src/SlackWebhookClient';
 
 let previousToken: string | undefined;
-test.beforeEach(() => {
+beforeEach(() => {
   previousToken = process.env.SLACK_BOT_USER_OAUTH_TOKEN;
   delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
 });
-test.afterEach(() => {
+afterEach(() => {
   sinon.restore();
   if (previousToken === undefined) delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
   else process.env.SLACK_BOT_USER_OAUTH_TOKEN = previousToken;
@@ -65,6 +65,23 @@ test('reporter routes successful results to success channels', async () => {
     onFailureChannels: ['failure'], sendResults: 'always',
   }).onEnd();
   expect(send.firstCall.args[0].options.channelIds).toEqual(['success']);
+});
+
+test('reporter forwards custom block threading configuration', async () => {
+  const send = sinon.stub(SlackClient.prototype, 'sendMessage').resolves([]);
+  await reporter({ slackOAuthToken: 'unit-test', channels: ['success'],
+    sendCustomBlocksInThreadAfterIndex: 2,
+  }).onEnd();
+  expect(send.firstCall.args[0].options.sendCustomBlocksInThreadAfterIndex).toBe(2);
+});
+
+test('reporter rejects conflicting transports and missing failure channels', () => {
+  expect(reporter({ slackOAuthToken: 'unit-test', slackWebHookUrl: 'https://example.invalid/webhook',
+    channels: ['success'],
+  }).preChecks()).toMatchObject({ okToProceed: false, message: expect.stringContaining('single option') });
+  expect(reporter({ slackOAuthToken: 'unit-test', sendResults: 'on-failure',
+    onFailureChannels: [],
+  }).preChecks()).toMatchObject({ okToProceed: false, message: expect.stringContaining('failed tests') });
 });
 
 test('reporter skips an empty suite and passing tests in on-failure mode', async () => {

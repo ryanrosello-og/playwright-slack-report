@@ -1,13 +1,9 @@
-import { expect, test as base } from '@playwright/test';
-import { Suite, TestCase } from '@playwright/test/reporter';
+import { describe, beforeEach, test, expect } from 'bun:test';
+import { Suite } from '@playwright/test/reporter';
 import SlackReporter from '../src/SlackReporter';
 
-const test = base.extend<{
-  fullConfig: any;
-  fakeSlackReporter: SlackReporter;
-  suite: Suite;
-}>({
-  fullConfig: {
+function createFixtures() {
+  const fullConfig: any = {
     forbidOnly: false,
     fullyParallel: false,
     globalSetup: null,
@@ -91,48 +87,23 @@ const test = base.extend<{
     _globalOutputDir: '/home/ry/_repo/playwright-slack-report',
     _configDir: '/home/ry/_repo/playwright-slack-report',
     _testGroupsCount: 1,
-  },
-  suite: ({ fullConfig }, use) => {
-    const fakeSuite: {
-      project: any;
-      allTests(): TestCase[];
-      suites: any[];
-      tests: any[];
-      title: string;
-      titlePath(): string[];
-      entries(): Array<Suite | TestCase>;
-      type: 'root' | 'project' | 'file' | 'describe';
-    } = {
-      project: fullConfig,
-      allTests(): TestCase[] {
-        return [];
-      },
-      suites: [],
-      tests: [],
-      title: '',
-      titlePath(): string[] {
-        return [];
-      },
-      entries(): Array<TestCase | Suite> {
-        return [];
-      },
-      type: 'file',
-    };
-    use(fakeSuite);
-  },
-  fakeSlackReporter: async ({}, use) => {
-    const slackReporter = new SlackReporter();
-    await use(slackReporter);
-  },
-});
+  };
+  const suite: Suite = {
+    project: () => fullConfig,
+    allTests: () => [],
+    suites: [],
+    tests: [],
+    title: '',
+    titlePath: () => [],
+    entries: () => [],
+    type: 'file',
+  };
+  return { fullConfig, suite, fakeSlackReporter: new SlackReporter() };
+}
 
-test.describe('SlackReporter - onEnd()', () => {
-  test('onEnd should halt when configured to stop when no failures are encountered', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
-    test.fixme();
+describe('SlackReporter - onEnd()', () => {
+  test.skip('onEnd should halt when configured to stop when no failures are encountered', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
@@ -148,11 +119,8 @@ test.describe('SlackReporter - onEnd()', () => {
     ).toBeTruthy();
   });
 
-  test('onEnd should halt when the preChecks fail', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('onEnd should halt when the preChecks fail', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
@@ -171,27 +139,21 @@ test.describe('SlackReporter - onEnd()', () => {
   });
 });
 
-test.describe('SlackReporter - preChecks()', () => {
-  test.beforeEach(async ({}) => {
+describe('SlackReporter - preChecks()', () => {
+  beforeEach(async () => {
     process.env.SLACK_BOT_USER_OAUTH_TOKEN = 'xoxoSFDJLKSDJFLKS';
   });
 
-  test('okToProceed flag is set when no errors encountered', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set when no errors encountered', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     fakeSlackReporter.onBegin(fullConfig, suite);
 
     const result = fakeSlackReporter.preChecks();
     expect(result.okToProceed).toBeTruthy();
   });
 
-  test('okToProceed flag is set to false when SLACK_BOT_USER_OAUTH_TOKEN is not set', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set to false when SLACK_BOT_USER_OAUTH_TOKEN is not set', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
@@ -210,11 +172,8 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
-  test('okToProceed flag is set to false when the reporter is turned off', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set to false when the reporter is turned off', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
       [
@@ -231,11 +190,8 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
-  test('okToProceed flag is set to false when an invalid sendResults value is provided', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set to false when an invalid sendResults value is provided', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
       [
@@ -253,11 +209,8 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
-  test('okToProceed flag is set to false when no channel id supplied', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set to false when no channel id supplied', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
       [
@@ -275,11 +228,8 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
-  test('showInThread only supported for bots not webhooks', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('showInThread only supported for bots not webhooks', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
@@ -301,11 +251,8 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
-  test('okToProceed flag is set to false when the custom layout provided is not a Function', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set to false when the custom layout provided is not a Function', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
       [
@@ -325,11 +272,8 @@ test.describe('SlackReporter - preChecks()', () => {
     });
   });
 
-  test('okToProceed flag is set to false when the meta key is not an array', async ({
-    fakeSlackReporter,
-    suite,
-    fullConfig,
-  }) => {
+  test('okToProceed flag is set to false when the meta key is not an array', async () => {
+    const { fakeSlackReporter, suite, fullConfig } = createFixtures();
     const cloneFullConfig = JSON.parse(JSON.stringify(fullConfig));
     cloneFullConfig.reporter = [
       [

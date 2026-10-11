@@ -1,48 +1,49 @@
-import { test as base, expect } from '@playwright/test';
+import { describe, test, expect } from 'bun:test';
 import { IncomingWebhook } from '@slack/webhook';
 import { stubObject } from 'ts-sinon';
 import SlackWebhookClient from '../src/SlackWebhookClient';
 import { SummaryResults } from '../src';
 
-const test = base.extend<{ summaryResults: SummaryResults }>({
-  summaryResults: {
-    failed: 1,
-    passed: 1,
-    flaky: undefined,
-    skipped: 1,
-    failures: [
-      {
-        suite: 'smoke',
-        test: 'test',
-        failureReason: 'Unexpected error',
-      },
-    ],
-    meta: [
-      {
-        key: 'Build',
-        value: '1.0.0',
-      },
-    ],
-    tests: [
-      {
-        suiteName: 'checkout',
-        name: 'add to cart',
-        browser: 'chromium',
-        projectName: 'playwright-slack-report',
-        endedAt: '2021-08-04T14:00:00.000Z',
-        reason: 'Unexpected error',
-        retry: 0,
-        startedAt: '2021-08-04T14:00:00.000Z',
-        status: 'failed',
-      },
-    ],
-  },
-});
+function createFixtures(): { summaryResults: SummaryResults } {
+  return {
+    summaryResults: {
+      failed: 1,
+      passed: 1,
+      flaky: undefined,
+      skipped: 1,
+      failures: [
+        {
+          suite: 'smoke',
+          test: 'test',
+          failureReason: 'Unexpected error',
+        },
+      ],
+      meta: [
+        {
+          key: 'Build',
+          value: '1.0.0',
+        },
+      ],
+      tests: [
+        {
+          suiteName: 'checkout',
+          name: 'add to cart',
+          browser: 'chromium',
+          projectName: 'playwright-slack-report',
+          endedAt: '2021-08-04T14:00:00.000Z',
+          reason: 'Unexpected error',
+          retry: 0,
+          startedAt: '2021-08-04T14:00:00.000Z',
+          status: 'failed',
+        },
+      ],
+    },
+  };
+}
 
-test.describe('SlackWebhookClient.sendMessage()', () => {
-  test('returns ok when the message provided is valid', async ({
-    summaryResults,
-  }) => {
+describe('SlackWebhookClient.sendMessage()', () => {
+  test('returns ok when the message provided is valid', async () => {
+    const { summaryResults } = createFixtures();
     const webhook = new IncomingWebhook(
       'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
     );
@@ -95,9 +96,8 @@ test.describe('SlackWebhookClient.sendMessage()', () => {
     });
   });
 
-  test('returns an error message when sending message to webhook fails', async ({
-    summaryResults,
-  }) => {
+  test('returns an error message when sending message to webhook fails', async () => {
+    const { summaryResults } = createFixtures();
     const webhook = new IncomingWebhook(
       'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
     );

@@ -11,36 +11,41 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@slack/types": "^3.0.0",
+    "@types/bun": "1.4.2",
     "@types/node": ">=26.6.4",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
-    "eslint": "^10.12.0",
-    "@typescript-eslint/parser": "^8.71.1",    
+    "@typescript-eslint/parser": "^8.71.1",
     "dotenv": "^18.0.6",
+    "eslint": "^10.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-playwright": "^2.12.1",
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.13.0",
-    "nyc": "^17.1.0",
+    "istanbul-lib-coverage": "3.2.2",
+    "istanbul-lib-instrument": "6.0.3",
+    "istanbul-lib-report": "3.0.1",
+    "istanbul-reports": "3.2.0",
     "prettier": "^3.9.9",
-    "ts-node": "^10.9.2",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0"
   },
   "scripts": {
-    "harness": "node harness/run.mjs",
-    "harness:offline": "node harness/run.mjs --offline",
-    "prettier": "prettier --write --loglevel warn \"**/**/*.ts\"",
-    "pw": "nyc playwright test && nyc report --reporter=lcov",
-    "build": "tsc -p ./tsconfig.json",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "cli": "yarn build && node dist/cli.js",
-    "cli-debug": "yarn build && npx . -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
+    "test": "bun test",
+    "test:coverage": "bun scripts/coverage.ts",
+    "pw": "bun run test:coverage",
+    "harness": "bun harness/run.mjs",
+    "harness:offline": "bun harness/run.mjs --offline",
+    "prettier": "bun --bun x prettier --write --log-level warn \"**/**/*.ts\"",
+    "build": "bun scripts/build.ts",
+    "typecheck": "bun --bun x tsc --noEmit --noErrorTruncation --pretty false --incremental false -p tsconfig.json",
+    "lint": "bun --bun x eslint src",
+    "lint:fix": "bun --bun x eslint src --fix",
+    "cli": "bun run build && bun dist/cli.js",
+    "cli-debug": "bun run cli -- -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
   "version": "1.1.116",
@@ -68,13 +73,5 @@
     "playwright",
     "typescript"
   ],
-  "nyc": {
-    "all": true,
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "./custom_block/my_block.ts"
-    ]
-  }
+  "packageManager": "bun@1.4.3"
 }

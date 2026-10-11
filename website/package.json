@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "docusaurus start",
-    "build": "docusaurus build",
-    "serve": "docusaurus serve"
+    "start": "bun --bun x docusaurus start",
+    "build": "bun --bun x docusaurus build",
+    "serve": "bun --bun x docusaurus serve"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.2",
@@ -19,5 +19,6 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "packageManager": "bun@1.4.3"
 }

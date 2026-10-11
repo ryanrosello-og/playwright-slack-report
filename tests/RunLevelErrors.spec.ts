@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { coveragePreload } from './helpers/coverage';
+import { beforeEach, afterEach, expect, test } from 'bun:test';
 import { FullConfig, FullResult, Suite } from '@playwright/test/reporter';
 import sinon from 'ts-sinon';
 import { execFile } from 'node:child_process';
@@ -17,6 +18,10 @@ import {
   generateFallbackText,
 } from '../src/LayoutGenerator';
 import { getRunStatus, hasRunFailure } from '../src/RunResults';
+
+let testDirectory: string;
+beforeEach(async () => { testDirectory = await mkdtemp(path.join(tmpdir(), 'slack-run-test-')); });
+afterEach(async () => { await rm(testDirectory, { recursive: true, force: true }); });
 
 const empty: SummaryResults = {
   passed: 0,
@@ -85,7 +90,7 @@ const jsonWithNamedTests = (statuses: string[]) =>
     },
   });
 
-test.afterEach(() => sinon.restore());
+afterEach(() => sinon.restore());
 
 for (const outcome of ['expected', 'flaky', 'skipped'] as const) {
   test(`${outcome} tests alone do not trigger on-failure notifications`, async () => {
@@ -211,8 +216,8 @@ for (const sendResults of ['off', 'on-failure', 'always']) {
   });
 }
 
-test('JSON parser preserves global errors, strips ANSI and keeps test failure counts separate', async ({}, testInfo) => {
-  const file = testInfo.outputPath('results.json');
+test('JSON parser preserves global errors, strips ANSI and keeps test failure counts separate', async () => {
+  const file = path.join(testDirectory, 'results.json');
   await writeFile(
     file,
     JSON.stringify(
@@ -241,8 +246,8 @@ test('JSON parser preserves global errors, strips ANSI and keeps test failure co
   });
 });
 
-test('JSON parser infers interruptions from individual results', async ({}, testInfo) => {
-  const file = testInfo.outputPath('results.json');
+test('JSON parser infers interruptions from individual results', async () => {
+  const file = path.join(testDirectory, 'results.json');
   await writeFile(
     file,
     JSON.stringify(
@@ -279,10 +284,10 @@ test('JSON parser infers interruptions from individual results', async ({}, test
   expect(summary.failures).toEqual([]);
 });
 
-test('legacy JSON without an errors field remains supported', async ({}, testInfo) => {
+test('legacy JSON without an errors field remains supported', async () => {
   const data = json();
   delete data.errors;
-  const file = testInfo.outputPath('results.json');
+  const file = path.join(testDirectory, 'results.json');
   await writeFile(file, JSON.stringify(data));
   expect(await new ResultsParser().parseFromJsonFile(file)).toMatchObject({
     ...empty,
@@ -290,8 +295,8 @@ test('legacy JSON without an errors field remains supported', async ({}, testInf
   });
 });
 
-test('JSON interruption detection survives matching test titles across files', async ({}, testInfo) => {
-  const file = testInfo.outputPath('results.json');
+test('JSON interruption detection survives matching test titles across files', async () => {
+  const file = path.join(testDirectory, 'results.json');
   await writeFile(
     file,
     JSON.stringify(jsonWithNamedTests(['interrupted', 'passed'])),
@@ -301,8 +306,8 @@ test('JSON interruption detection survives matching test titles across files', a
   expect(hasRunFailure(summary)).toBe(true);
 });
 
-test('JSON failures take precedence over tests interrupted by fail-fast', async ({}, testInfo) => {
-  const file = testInfo.outputPath('results.json');
+test('JSON failures take precedence over tests interrupted by fail-fast', async () => {
+  const file = path.join(testDirectory, 'results.json');
   await writeFile(
     file,
     JSON.stringify(jsonWithNamedTests(['failed', 'interrupted'])),
@@ -477,9 +482,9 @@ for (const transport of ['bot', 'webhook'] as const) {
         delete env.SLACK_BOT_USER_OAUTH_TOKEN;
         if (transport === 'bot') env.SLACK_BOT_USER_OAUTH_TOKEN = 'unit-token';
         const args = [
-          '-r',
-          path.resolve('harness/consumer/capture-slack.cjs'),
-          path.resolve('tests/helpers/run-typescript.cjs'),
+          ...coveragePreload(),
+          '--preload',
+          path.resolve('tests/helpers/capture-slack.ts'),
           path.resolve('cli.ts'),
           '-c',
           configFile,
