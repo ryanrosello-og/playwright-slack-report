@@ -14,12 +14,14 @@ export default class SlackWebhookClient {
     customLayout,
     customLayoutAsync,
     maxNumberOfFailures,
+    maxNumberOfFlakyTests,
     summaryResults,
     disableUnfurl,
   }: {
     customLayout: Function | undefined;
     customLayoutAsync: Function | undefined;
     maxNumberOfFailures: number;
+    maxNumberOfFlakyTests?: number;
     summaryResults: SummaryResults;
     disableUnfurl: boolean;
   }): Promise<{ outcome: string }> {
@@ -29,7 +31,7 @@ export default class SlackWebhookClient {
     } else if (customLayoutAsync) {
       blocks = await customLayoutAsync(summaryResults);
     } else {
-      blocks = await generateBlocks(summaryResults, maxNumberOfFailures);
+      blocks = await generateBlocks(summaryResults, maxNumberOfFailures, maxNumberOfFlakyTests);
     }
     let result: IncomingWebhookResult;
     try {

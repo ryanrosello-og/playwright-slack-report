@@ -27,6 +27,8 @@ Offline mode verifies tarball contents, isolated installation, CLI startup, and 
 
 ## Coverage and success criteria
 
+Both offline and live runs capture local Slack payloads from the installed reporter and CLI for clean and flaky runs. Two projects, each repeated twice, exercise `on-flaky` alerts, actual retry counts, one entry per test/project/repetition, bot threads, inline webhook details, and reporter/CLI agreement. These eight checks use real Playwright runs and generated JSON without sending Slack messages.
+
 The browser fixtures exercise a passing interaction, permanent failure, unexpected pass, flaky retry, explicit skip, serial failure, and propagated serial skip. The runner checks each outcome and retry attempts, expecting 1 passed, 3 failed, 1 flaky, and 2 skipped. Playwright's deliberate exit code 1 is expected; any other exit code or different results fail the harness.
 
 All four live paths are verified twice: directly and through a local HTTP proxy.

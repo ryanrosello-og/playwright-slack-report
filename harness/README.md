@@ -35,6 +35,11 @@ actual generated JSON. This adds 24 reporter/CLI checks without Slack traffic.
 Only the external Slack SDK transports are replaced with a local payload capture;
 the Playwright runner, installed reporter, parsing, layouts, and CLI are real.
 
+Flaky alert fixtures add eight reporter/CLI checks across bot and webhook delivery.
+They run clean and recovering tests in two projects, each repeated twice, and
+verify `on-flaky` silence for clean runs, one entry per test/project/repetition,
+actual retry counts, bot threads, and agreement between reporter and CLI details.
+
 These checks assert the actual overall Playwright status, zero failed-test counts,
 notification delivery in `on-failure` mode, failure-channel routing, readable
 fallback text, global error details in bot threads or inline webhook reports,

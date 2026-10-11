@@ -205,7 +205,7 @@ describe('SlackReporter - preChecks()', () => {
     expect(result).toEqual({
       okToProceed: false,
       message:
-        "❌ \"sendResults\" is not valid. Expecting one of ['always', 'on-failure', 'off'].",
+        "❌ \"sendResults\" is not valid. Expecting one of ['always', 'on-failure', 'on-flaky', 'off'].",
     });
   });
 

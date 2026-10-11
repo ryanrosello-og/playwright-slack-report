@@ -11,6 +11,7 @@ const unsuccessfulRunLabel = (summaryResults: SummaryResults): string => {
 const generateBlocks = async (
   summaryResults: SummaryResults,
   maxNumberOfFailures: number,
+  maxNumberOfFlakyTests: number = 10,
 ): Promise<Array<KnownBlock | Block>> => {
   const meta = [];
   const header = {
@@ -33,6 +34,7 @@ const generateBlocks = async (
   };
 
   const fails = await generateFailures(summaryResults, maxNumberOfFailures);
+  const flaky = generateFlakyTests(summaryResults, maxNumberOfFlakyTests);
 
   if (summaryResults.meta) {
     for (let i = 0; i < summaryResults.meta.length; i += 1) {
@@ -52,7 +54,37 @@ const generateBlocks = async (
     type: 'section',
     text: { type: 'mrkdwn', text: `*Run status: ${runLabel}*` },
   }] : [];
-  return [header, summary, ...run, ...meta, ...fails];
+  return [header, summary, ...run, ...meta, ...fails, ...flaky];
+};
+
+const generateFlakyTests = (
+  summaryResults: SummaryResults,
+  maxNumberOfFlakyTests: number = 10,
+): Array<KnownBlock | Block> => {
+  const flakyTests = summaryResults.flakyTests ?? [];
+  if (maxNumberOfFlakyTests === 0 || flakyTests.length === 0) return [];
+  const displayed = flakyTests.slice(0, maxNumberOfFlakyTests);
+  const blocks: Array<KnownBlock | Block> = [
+    { type: 'divider' },
+    { type: 'section', text: { type: 'mrkdwn', text: '🟡 *Flaky tests*' } },
+    ...displayed.map(({ suite, test, retries }) => ({
+      type: 'section' as const,
+      text: {
+        type: 'mrkdwn' as const,
+        text: `*${suite} > ${test}*\n${retries} ${retries === 1 ? 'retry' : 'retries'}`,
+      },
+    })),
+  ];
+  if (displayed.length < flakyTests.length) {
+    blocks.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*⚠️ ${displayed.length} out of ${flakyTests.length} flaky tests shown*`,
+      },
+    });
+  }
+  return blocks;
 };
 
 const generateFailures = async (
@@ -122,4 +154,4 @@ const generateFallbackText = (summaryResults: SummaryResults): string => {
   }⏩ ${summaryResults.skipped}`;
 };
 
-export { generateBlocks, generateFailures, generateFallbackText };
+export { generateBlocks, generateFailures, generateFlakyTests, generateFallbackText };

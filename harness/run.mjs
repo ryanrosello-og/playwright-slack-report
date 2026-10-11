@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { startProxy } from './proxy.mjs';
+import { messageText, verifyFailureAndFlakyDetails } from './verify-message.mjs';
 
 const harness = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(harness);
@@ -113,15 +114,8 @@ const markerChannels = new Map();
 const webhookMarkers = new Set();
 const knownParents = new Map();
 const expectedStats = { expected: 1, unexpected: 3, flaky: 1, skipped: 2 };
-const failures = ['permanent failure', 'unexpected pass', 'serial failure'];
 function fromConfiguredBot(message) {
   return message.user === botUser || (botId && message.bot_id === botId);
-}
-function messageText(message) {
-  const text = (message.blocks || []).flatMap(block => [block.text?.text || '', ...(block.fields || []).map(field => field.text)]).join('\n');
-  // Slack converts Unicode emoji into shortcode names when returning messages.
-  const emoji = { white_check_mark: '✅', x: '❌', large_yellow_circle: '🟡', fast_forward: '⏩' };
-  return text.replace(/:(white_check_mark|x|large_yellow_circle|fast_forward):/g, (_, name) => emoji[name]);
 }
 async function parents(channelId = channel) {
   const messages = await pages('conversations.history', { channel: channelId, oldest: started, inclusive: true }, 'messages');
@@ -139,7 +133,6 @@ function verifyMessage(parent, replies, threaded, marker) {
   assert(text.includes(marker), 'Report missing run identifier');
   assert(text.includes('Playwright Results'), 'Report missing header');
   assert.match(text, /✅\s*\*1\*\s*\|\s*❌\s*\*3\*\s*\|\s*🟡\s*\*1\*\s*\|\s*⏩\s*\*2\*/, 'Incorrect Slack totals');
-  const details = threaded ? replies.map(messageText).join('\n') : text;
   if (threaded) {
     assert(replies.length > 0, 'Missing failure thread');
     for (const reply of replies) {
@@ -147,13 +140,11 @@ function verifyMessage(parent, replies, threaded, marker) {
       assert(fromConfiguredBot(reply), 'Reply sent by a different Slack app');
     }
     assert(!text.includes('permanent failure'), 'Failure details belong in the thread');
+    assert(!text.includes('flaky retry'), 'Flaky details belong in the thread');
   } else {
     assert.equal(parent.reply_count || 0, 0, 'Webhook report should not have a failure thread');
   }
-  for (const name of failures) assert(details.includes(name), `Missing failure details: ${name}`);
-  assert(details.includes('Deliberate failure'), 'Missing assertion failure reason');
-  assert(details.includes('Deliberate serial failure'), 'Missing serial failure reason');
-  assert(!details.includes('flaky retry'), 'Recovered flaky test reported as a failure');
+  verifyFailureAndFlakyDetails(threaded ? replies : [parent]);
 }
 
 async function verifySlack(mode, marker, label = mode) {
@@ -212,6 +203,68 @@ async function freePort() {
   const port = server.address().port;
   await new Promise(resolve => server.close(resolve));
   return String(port);
+}
+
+// Compare reporter and CLI alerts from actual retries, projects and repetitions.
+async function verifyFlakyScenarios(pw, cli) {
+  const preload = path.join(consumer, 'capture-slack.cjs');
+  for (const transport of ['bot', 'webhook']) {
+    for (const flaky of [false, true]) {
+      const label = `flaky-${transport}-${flaky ? 'retry' : 'clean'}`;
+      const results = path.join(consumer, `${label}-results.json`);
+      const capture = path.join(consumer, `${label}-capture.jsonl`);
+      const env = {
+        ...baseEnv(), HARNESS_MODE: `reporter-${transport}`, HARNESS_JSON: results,
+        HARNESS_CAPTURE: capture, HARNESS_FLAKY: String(flaky),
+        ...(transport === 'bot' ? { SLACK_BOT_USER_OAUTH_TOKEN: 'harness-unit-token' } : {}),
+      };
+      const entry = { mode: label, transport: 'local-capture', status: 'failed' };
+      report.paths.push(entry);
+      try {
+        const check = async mode => {
+          const data = (await readFile(capture, 'utf8')).trim();
+          const messages = data ? data.split('\n').map(line => JSON.parse(line)) : [];
+          await save(`${label}-${mode}-capture.json`, messages);
+          if (!flaky) {
+            assert.equal(messages.length, 0, `${label}: clean run must remain silent`);
+            return [];
+          }
+          assert.equal(messages.length, transport === 'bot' ? 2 : 1, `${label}: report and thread count`);
+          assert(messageText(messages[0].payload).includes('🟡 *4*'), `${label}: flaky count`);
+          const details = messages.at(-1).payload.blocks.filter(block => block.text?.text?.includes('passes on retry'));
+          assert.equal(details.length, 4, `${label}: one detail per project/repetition`);
+          for (const project of ['chromium', 'firefox']) {
+            assert.equal(details.filter(block => block.text.text.includes(`[${project}]`)).length, 2, `${label}: ${project} repetitions`);
+          }
+          assert(details.every(block => block.text.text.includes('1 retry')), `${label}: actual retries, not configured budget`);
+          if (transport === 'bot') {
+            assert.equal(messages[1].payload.thread_ts, messages[0].ts, `${label}: thread parent`);
+            assert(!messageText(messages[0].payload).includes('passes on retry'), `${label}: parent has counts only`);
+          }
+          return details.map(block => block.text.text).sort();
+        };
+        await writeFile(capture, '');
+        await command(node, ['--require', preload, pw, 'test', '-c', 'flaky.config.cjs'], consumer, label, env);
+        const parsed = JSON.parse(await readFile(results, 'utf8'));
+        assert.equal(parsed.stats.flaky, flaky ? 4 : 0, `${label}: Playwright flaky stats`);
+        assert.equal(parsed.stats.unexpected, 0, `${label}: all retries should recover`);
+        const reporterDetails = await check('reporter');
+        const config = path.join(consumer, `${label}-cli-config.json`);
+        await writeFile(config, JSON.stringify({
+          sendResults: 'on-flaky', slackLogLevel: 'error', showInThread: transport === 'bot',
+          ...(transport === 'bot' ? { sendUsingBot: { channels: ['harness-flaky'] } }
+            : { sendUsingWebhook: { webhookUrl: 'https://example.invalid/harness-webhook' } }),
+        }));
+        await writeFile(capture, '');
+        await command(node, ['--require', preload, cli, '-c', config, '-j', results], consumer, `${label}-cli`, env);
+        assert.deepEqual(await check('cli'), reporterDetails, `${label}: reporter and CLI agree`);
+        entry.status = 'passed';
+      } catch (error) {
+        entry.error = error.message;
+        report.errors.push(`${label}: ${error.message}`);
+      }
+    }
+  }
 }
 
 // Always test the installed package against real lifecycle failures, with only
@@ -387,6 +440,7 @@ try {
   const cliVersion = await command(node, [cli, '--version'], consumer, 'cli-version');
   assert.equal(cliVersion.trim(), pack.version, 'CLI version differs from packaged version');
   await verifyRunLevelScenarios(pw, cli);
+  await verifyFlakyScenarios(pw, cli);
   await command(node, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
   started = String(Date.now() / 1000);
   const port = await freePort();

@@ -37,6 +37,8 @@ _cli_config.json:_
 
 The config file also supports the follow extra options:
 
+- `sendResults` - `always`, `on-failure`, or `on-flaky`. `on-flaky` sends only when the merged report contains flaky tests, even if they passed on retry. Runs with failures but no flaky tests are skipped; `on-failure` continues to skip flaky-only runs.
+- `maxNumberOfFlakyTests` - Maximum flaky test details shown by the default layout, defaults to 10. Must be a non-negative integer; `0` hides details while keeping the count and notification behavior. Unlike the reporter's `maxNumberOfFlakyTestsToShow`, the CLI uses this shorter name.
 - `proxy` - String representation of your proxy server.
 - `sendUsingWebhook` - Object containing the webhook url to send the results to (see example below)
 - `customLayout` - Object specifying the custom layout relative path and function name:
@@ -46,6 +48,20 @@ The config file also supports the follow extra options:
     "source": "./custom_block/cli_block_with_meta.ts",
     "functionName": "generateCustomLayoutSimpleMeta"
   }
+```
+
+Flaky entries include suite, test name, project, and actual retry count, once per test/project/repetition. They appear alongside failures with an independent limit. With `showInThread: true`, bot messages put both types of details in the thread; webhooks show them inline. Custom layouts receive the complete `summaryResults.flakyTests` array.
+
+For a bot alert focused on flaky tests:
+
+```json
+{
+  "sendResults": "on-flaky",
+  "slackLogLevel": "error",
+  "sendUsingBot": { "channels": ["qa"] },
+  "maxNumberOfFlakyTests": 5,
+  "showInThread": true
+}
 ```
 
 - `customLayoutAsync` - Similar to `customLayout`, except this key requires an async function:

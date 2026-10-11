@@ -18,6 +18,7 @@ with bot and webhook delivery, see the [consumer harness](harness/README.md).
 - 💌 Send results your Playwright test results to one or more Slack channels
 - 🎚️ Leverage JSON results created by Playwright and seamlessly post them on Slack
 - 📊 Conditionally send results to Slack channels based on test results
+- 🟡 Show flaky test names and actual retry counts, with optional `on-flaky` alerts
 - 🚨 Report global errors, run timeouts, and graceful interruptions, including runs with zero failed tests
 - 📄 Include additional meta information into your test summary e.g. Branch, BuildId etc
 - 🧑‍🎨 Define your own custom Slack message layout!
@@ -378,10 +379,11 @@ An array of Slack channels to post to, at least one channel is required
 
 ### **sendResults**
 
-Can either be _"always"_, _"on-failure"_ or _"off"_, this configuration is required:
+Can be _"always"_, _"on-failure"_, _"on-flaky"_ or _"off"_:
 
 - **always** - will send the results to Slack at completion of the test run
 - **on-failure** - sends results for failed tests, global errors, run timeouts, and graceful interruptions, including when no tests failed
+- **on-flaky** - sends only when Playwright reports at least one flaky test, including tests that pass on retry. Runs with failures but no flaky tests are skipped; mixed runs with both are sent. Flaky-only runs use `onSuccessChannels`; mixed runs use `onFailureChannels`.
 - **off** - turns off the reporter, it will not send the results to Slack
 
 ### **layout**
@@ -428,6 +430,21 @@ layouts retain control of their output and must render these fields themselves.
 Notifications require Playwright to reach the reporter's completion callback;
 forced termination, `SIGKILL`, or loss of the CI machine can prevent delivery.
 
+### **maxNumberOfFlakyTestsToShow**
+
+Limits flaky test details in the default layout, defaults to 10. Must be a non-negative integer. Set to `0` to hide details while retaining the flaky count and notification behavior. Each entry shows the suite, test, project, and actual retry count, once per test/project/repetition. With `showInThread: true`, bot reports put these details in the thread.
+
+The CLI supports the same `sendResults: "on-flaky"` mode and uses `maxNumberOfFlakyTests` for this limit. Custom layouts receive the complete optional `summaryResults.flakyTests` array containing `{ suite, test, projectName, file, retries }`.
+
+```typescript
+{
+  channels: ['qa'],
+  sendResults: 'on-flaky',
+  maxNumberOfFlakyTestsToShow: 5,
+  showInThread: true,
+}
+```
+
 ### **slackOAuthToken**
 
 Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.
@@ -449,7 +466,7 @@ Enable or disable unfurling of links in Slack messages.
 
 ### **showInThread** (default: false)
 
-Instructs the reporter to show the failure details in a thread instead of the main channel.
+Instructs the reporter to show failure and flaky test details in a thread instead of the main channel. Summary counts remain in the parent message.
 
 ![Show failures in threads](./assets/threads.png)
 
