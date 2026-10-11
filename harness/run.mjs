@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { startProxy } from './proxy.mjs';
+import { messageText, verifyFailureAndFlakyDetails } from './verify-message.mjs';
 
 const harness = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(harness);
@@ -113,15 +114,8 @@ const markerChannels = new Map();
 const webhookMarkers = new Set();
 const knownParents = new Map();
 const expectedStats = { expected: 1, unexpected: 3, flaky: 1, skipped: 2 };
-const failures = ['permanent failure', 'unexpected pass', 'serial failure'];
 function fromConfiguredBot(message) {
   return message.user === botUser || (botId && message.bot_id === botId);
-}
-function messageText(message) {
-  const text = (message.blocks || []).flatMap(block => [block.text?.text || '', ...(block.fields || []).map(field => field.text)]).join('\n');
-  // Slack converts Unicode emoji into shortcode names when returning messages.
-  const emoji = { white_check_mark: '✅', x: '❌', large_yellow_circle: '🟡', fast_forward: '⏩' };
-  return text.replace(/:(white_check_mark|x|large_yellow_circle|fast_forward):/g, (_, name) => emoji[name]);
 }
 async function parents(channelId = channel) {
   const messages = await pages('conversations.history', { channel: channelId, oldest: started, inclusive: true }, 'messages');
@@ -139,7 +133,6 @@ function verifyMessage(parent, replies, threaded, marker) {
   assert(text.includes(marker), 'Report missing run identifier');
   assert(text.includes('Playwright Results'), 'Report missing header');
   assert.match(text, /✅\s*\*1\*\s*\|\s*❌\s*\*3\*\s*\|\s*🟡\s*\*1\*\s*\|\s*⏩\s*\*2\*/, 'Incorrect Slack totals');
-  const details = threaded ? replies.map(messageText).join('\n') : text;
   if (threaded) {
     assert(replies.length > 0, 'Missing failure thread');
     for (const reply of replies) {
@@ -147,13 +140,11 @@ function verifyMessage(parent, replies, threaded, marker) {
       assert(fromConfiguredBot(reply), 'Reply sent by a different Slack app');
     }
     assert(!text.includes('permanent failure'), 'Failure details belong in the thread');
+    assert(!text.includes('flaky retry'), 'Flaky details belong in the thread');
   } else {
     assert.equal(parent.reply_count || 0, 0, 'Webhook report should not have a failure thread');
   }
-  for (const name of failures) assert(details.includes(name), `Missing failure details: ${name}`);
-  assert(details.includes('Deliberate failure'), 'Missing assertion failure reason');
-  assert(details.includes('Deliberate serial failure'), 'Missing serial failure reason');
-  assert(!details.includes('flaky retry'), 'Recovered flaky test reported as a failure');
+  verifyFailureAndFlakyDetails(threaded ? replies : [parent]);
 }
 
 async function verifySlack(mode, marker, label = mode) {
