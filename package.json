@@ -48,7 +48,7 @@
     "cli-debug": "bun run cli -- -c ./cli_config.json -j ./tests/test_data/valid_test_results.json"
   },
   "name": "playwright-slack-report",
-  "version": "1.1.116",
+  "version": "1.1.117",
   "bin": {
     "playwright-slack-report": "dist/cli.js"
   },
