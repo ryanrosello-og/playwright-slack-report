@@ -1,0 +1,48 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🚨 Failure triage",
+        "emoji": true
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "🔴 Run failed · 126 passed · 2 failed · 0 flaky · 2 skipped",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "plain_text",
+        "text": "1. Guest can complete payment [chromium]\nSuite: Checkout\nExpected confirmation banner to be visible.\nTimed out after 5000 ms waiting for “Order confirmed”.",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "plain_text",
+        "text": "2. Password reset sends an email [firefox]\nSuite: Account\nExpected HTTP 200 from /api/password-reset.\nReceived HTTP 503: service temporarily unavailable.",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/reports/1842|Open HTML report>  •  <https://example.com/builds/1842|View CI build>"
+      }
+    }
+  ]
+}

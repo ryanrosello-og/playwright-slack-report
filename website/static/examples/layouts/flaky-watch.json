@@ -1,0 +1,85 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🟡 Flaky test watch",
+        "emoji": true
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "🟡 Passed with flaky tests",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "plain_text",
+        "text": "3 flaky tests · 4 retries across recorded flaky details",
+        "emoji": true
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "plain_text",
+          "text": "Filters update results\nSearch",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Project: chromium\nRetries: 1",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "plain_text",
+          "text": "Cart survives a page refresh\nCheckout",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Project: webkit\nRetries: 2",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "plain_text",
+          "text": "Profile avatar is displayed\nAccount",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Project: firefox\nRetries: 1",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/reports/1842|Open HTML report>  •  <https://example.com/builds/1842|View CI build>"
+      }
+    }
+  ]
+}

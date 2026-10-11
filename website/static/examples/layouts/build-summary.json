@@ -1,0 +1,57 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "✅ Run passed",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "plain_text",
+          "text": "✅ Passed\n128",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "🔴 Failed\n0",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "🟡 Flaky\n0",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "⏭ Skipped\n2",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "Branch: release/2.8 · Build: #1842",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/reports/1842|Open HTML report>  •  <https://example.com/builds/1842|View CI build>"
+      }
+    }
+  ]
+}
