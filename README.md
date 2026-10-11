@@ -1,5 +1,11 @@
 # playwright-slack-report
 
+[![Bun checks](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml/badge.svg?branch=main)](https://github.com/ryanrosello-og/playwright-slack-report/actions/workflows/playwright.yml?query=branch%3Amain)
+[![Coverage Status](https://coveralls.io/repos/github/ryanrosello-og/playwright-slack-report/badge.svg?branch=main)](https://coveralls.io/github/ryanrosello-og/playwright-slack-report?branch=main)
+[![npm version](https://img.shields.io/npm/v/playwright-slack-report)](https://www.npmjs.com/package/playwright-slack-report)
+[![npm downloads per month](https://img.shields.io/npm/dm/playwright-slack-report)](https://www.npmjs.com/package/playwright-slack-report)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Publish Playwright test results to the Slack channels where your team works. Supports incoming webhooks, Slack bots, failure threads, custom message layouts, and merged reports from sharded runs.
 
 [Documentation](https://ryanrosello-og.github.io/playwright-slack-report/) · [Getting started](https://ryanrosello-og.github.io/playwright-slack-report/docs/getting-started/) · [Configuration](https://ryanrosello-og.github.io/playwright-slack-report/docs/configuration/)
