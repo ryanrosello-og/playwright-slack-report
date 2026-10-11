@@ -31,7 +31,7 @@
     "prettier": "^3.9.9",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.67.0"
+    "typescript-eslint": "^8.71.1"
   },
   "scripts": {
     "test": "bun test",
