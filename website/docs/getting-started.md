@@ -38,6 +38,8 @@ Run `npx playwright test`. The reporter posts a summary to your webhook's Slack 
 
 ## Choose your Slack connection
 
+Compare [features by mode](./feature-comparison.md) to choose between webhook and bot delivery with the reporter or CLI.
+
 - [Incoming webhook](./webhooks.md): the shortest path to a report in one channel. Failure details appear inline.
 - [Slack bot](./slack-bot.md): send to multiple channels and put failure details in a thread.
 

@@ -1,0 +1,75 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "📋 Run context",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "plain_text",
+        "text": "✅ Run passed\n128 passed · 0 failed · 0 flaky · 2 skipped",
+        "emoji": true
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "plain_text",
+          "text": "Environment\nStaging / EU West",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Branch\nrelease/2.8",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Commit\na81c3e7",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Build\n#1842",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Owner\nCheckout team",
+          "emoji": true
+        },
+        {
+          "type": "plain_text",
+          "text": "Suite\nNightly regression",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/reports/1842|Open HTML report>  •  <https://example.com/builds/1842|View CI build>"
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "Use the linked report for test details and the CI build for logs and artifacts.",
+          "emoji": true
+        }
+      ]
+    }
+  ]
+}

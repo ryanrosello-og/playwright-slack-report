@@ -1,6 +1,7 @@
 module.exports = {
   docs: [
     'getting-started',
+    'feature-comparison',
     {
       type: 'category',
       label: 'Connect Slack',
@@ -11,7 +12,7 @@ module.exports = {
       type: 'category',
       label: 'Use the reporter',
       collapsed: false,
-      items: ['configuration', 'cli', 'custom-layouts'],
+      items: ['configuration', 'cli', 'custom-layouts', 'layout-gallery'],
     },
     {
       type: 'category',

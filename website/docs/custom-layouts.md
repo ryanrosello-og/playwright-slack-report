@@ -5,6 +5,8 @@ description: Build custom Slack blocks, add metadata, and upload screenshots and
 
 You can define your own Slack message layout to suit your needs.
 
+For ready-to-adapt examples, visit the [layout gallery](./layout-gallery.md): build summary, failure triage, flaky test watch, and run context, each with a screenshot preview, downloadable source, and sample Block Kit JSON.
+
 Firstly, install the necessary type definitions:
 
 `yarn add @slack/types -D`
