@@ -1,5 +1,6 @@
 module.exports = {
   docs: [
+    'overview',
     'getting-started',
     'feature-comparison',
     {

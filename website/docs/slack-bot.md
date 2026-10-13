@@ -3,38 +3,11 @@ title: Slack bot setup
 description: Create a Slack bot for channel delivery and failure threads.
 ---
 
-Configure the reporter with one or more channel names:
+Use a bot to send reports to multiple channels or put failure, global error, and flaky details in a thread. Complete the [installation prerequisites](./getting-started.md#prerequisites) first.
 
-```typescript
-import { defineConfig } from '@playwright/test';
+## Create and authorize the Slack app
 
-export default defineConfig({
-  reporter: [
-    ['dot'],
-    [
-      './node_modules/playwright-slack-report/dist/src/SlackReporter.js',
-      {
-        channels: ['pw-tests', 'ci'],
-        sendResults: 'always',
-        showInThread: true,
-      },
-    ],
-  ],
-});
-```
-
-Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
-
-`SLACK_BOT_USER_OAUTH_TOKEN=[your Slack bot user OAUTH token] npx playwright test`
-
-> **NOTE:** The Slack channel that you specify will need to be _public_, this app will not be able to publish messages to private channels.
-
----
-
-<details>
-<summary><b>🔎 How do I find my Slack bot oauth token?</b></summary>
-
-You will need to have Slack administrator rights to perform the steps below.
+You need permission to create and install an app in your workspace; your administrator may need to approve it. The screenshots illustrate the setup flow; Slack may change the appearance of these screens.
 
 1. Navigate to https://api.slack.com/apps
 2. Click the Create New App button and select "From scratch"
@@ -71,6 +44,48 @@ The final step will be to copy the generated Bot User OAuth Token aka `SLACK_BOT
 
 ![Final](../static/img/2022-08-09_5-53-17.png)
 
-</details>
+## Configure the reporter and run tests
 
----
+Configure the reporter with one or more channel names:
+
+```typescript
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  reporter: [
+    ['dot'],
+    [
+      './node_modules/playwright-slack-report/dist/src/SlackReporter.js',
+      {
+        channels: ['pw-tests', 'ci'],
+        sendResults: 'always',
+        showInThread: true,
+      },
+    ],
+  ],
+});
+```
+
+Run your tests by providing your `SLACK_BOT_USER_OAUTH_TOKEN` as an environment variable or specifying `slackOAuthToken` option in the config:
+
+**Bash / zsh**
+
+```sh
+export SLACK_BOT_USER_OAUTH_TOKEN='xoxb-your-bot-token'
+npx playwright test
+```
+
+**PowerShell**
+
+```powershell
+$env:SLACK_BOT_USER_OAUTH_TOKEN = 'xoxb-your-bot-token'
+npx playwright test
+```
+
+Public channel names work with the scopes above. For private channels, invite the bot to the channel and configure its channel ID. Slack requires membership for private-channel delivery; see [Slack channel permissions](https://docs.slack.dev/reference/methods/chat.postMessage/#channels).
+
+The reporter posts a summary to each configured channel when the run completes. With `showInThread: true`, details appear beneath the parent summary. Do not also configure `slackWebHookUrl`.
+
+## Next steps
+
+See [Configuration](./configuration.md) to route successful and unsuccessful runs separately, control notification rules, and add metadata. For existing JSON results, use [CLI bot delivery](./cli.md#configure-bot-delivery).

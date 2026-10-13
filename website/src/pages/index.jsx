@@ -5,10 +5,10 @@ import Link from '@docusaurus/Link';
 const paths = [
   [
     '01',
-    'Connect your workspace',
-    'Choose a webhook for a simple summary, or a bot for channels and failure threads.',
-    '/docs/webhooks',
-    'Explore Slack setup',
+    'Send your first report',
+    'Check prerequisites, install the reporter, and choose a webhook or bot for your workspace.',
+    '/docs/getting-started',
+    'Start the setup guide',
   ],
   [
     '02',
@@ -51,8 +51,8 @@ export default function Home() {
               <Link className="action-primary" to="/docs/getting-started">
                 Get started <span aria-hidden="true">↗</span>
               </Link>
-              <Link className="action-secondary" to="/docs/custom-layouts">
-                Make it your own <span aria-hidden="true">→</span>
+              <Link className="action-secondary" to="/docs/overview">
+                Explore the features <span aria-hidden="true">→</span>
               </Link>
             </div>
             <div className="install-line">
