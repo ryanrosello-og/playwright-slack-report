@@ -1,48 +1,48 @@
 :root {
-  --ifm-color-primary: #6550c4;
-  --ifm-color-primary-dark: #5742b2;
-  --ifm-color-primary-darker: #523ea8;
-  --ifm-color-primary-darkest: #43338a;
-  --ifm-color-primary-light: #7663cd;
-  --ifm-color-primary-lighter: #8070d2;
-  --ifm-color-primary-lightest: #9a8edc;
+  --ifm-color-primary: #1d4ed8;
+  --ifm-color-primary-dark: #1a46c2;
+  --ifm-color-primary-darker: #1942b8;
+  --ifm-color-primary-darkest: #153797;
+  --ifm-color-primary-light: #2b5bdd;
+  --ifm-color-primary-lighter: #3865df;
+  --ifm-color-primary-lightest: #6385e6;
   --ifm-font-family-base:
     'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
   --ifm-font-family-monospace:
     'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
   --ifm-heading-font-weight: 650;
-  --ifm-background-color: #faf9f6;
+  --ifm-background-color: #f8fafc;
   --ifm-background-surface-color: #fff;
-  --ifm-font-color-base: #282733;
-  --ifm-navbar-background-color: #faf9f6;
+  --ifm-font-color-base: #1e293b;
+  --ifm-navbar-background-color: #f8fafc;
   --ifm-navbar-shadow: none;
   --ifm-navbar-height: 5rem;
   --ifm-code-border-radius: 8px;
   --ifm-global-radius: 8px;
   --ifm-line-height: 1.75;
   --ifm-menu-color-active: var(--ifm-color-primary);
-  --site-line: #dedce5;
-  --site-muted: #666373;
+  --site-line: #cbd5e1;
+  --site-muted: #475569;
   --site-card: #fff;
-  --site-accent: #6550c4;
+  --site-accent: #1d4ed8;
 }
 [data-theme='dark'] {
-  --ifm-color-primary: #b6a6ff;
-  --ifm-color-primary-dark: #a18cff;
-  --ifm-color-primary-darker: #967fff;
-  --ifm-color-primary-darkest: #7658ff;
-  --ifm-color-primary-light: #cbbfff;
-  --ifm-color-primary-lighter: #d6ccff;
-  --ifm-color-primary-lightest: #f6f3ff;
-  --ifm-background-color: #121217;
-  --ifm-background-surface-color: #1b1b23;
-  --ifm-font-color-base: #eeedf4;
-  --ifm-navbar-background-color: #121217;
-  --ifm-toc-border-color: #30303b;
-  --site-line: #30303b;
-  --site-muted: #a3a0b2;
-  --site-card: #1b1b23;
-  --site-accent: #b6a6ff;
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #4092f9;
+  --ifm-color-primary-darker: #3089f9;
+  --ifm-color-primary-darkest: #0870f1;
+  --ifm-color-primary-light: #80b8fb;
+  --ifm-color-primary-lighter: #90c1fb;
+  --ifm-color-primary-lightest: #bfddfd;
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-font-color-base: #f1f5f9;
+  --ifm-navbar-background-color: #0f172a;
+  --ifm-toc-border-color: #334155;
+  --site-line: #334155;
+  --site-muted: #94a3b8;
+  --site-card: #1e293b;
+  --site-accent: #60a5fa;
 }
 html {
   scroll-behavior: smooth;
@@ -170,7 +170,7 @@ a {
   margin-left: 18px;
 }
 .signal-visual {
-  background: radial-gradient(ellipse at 70% 10%, #a99bff14, transparent 65%);
+  background: radial-gradient(ellipse at 70% 10%, #3b82f614, transparent 65%);
   padding: 22px;
   border: 1px solid var(--site-line);
   border-radius: 18px;
@@ -226,8 +226,8 @@ a {
 .report-avatar {
   width: 36px;
   height: 36px;
-  background: #b6a6ff;
-  color: #16131e;
+  background: #60a5fa;
+  color: #0f172a;
   border-radius: 10px;
   display: grid;
   place-items: center;
@@ -291,7 +291,7 @@ a {
   background: #ed8b99;
 }
 .skip-dot {
-  background: #baa0ed;
+  background: #94a3b8;
 }
 .report-context {
   display: flex;
@@ -423,23 +423,23 @@ a {
   margin-left: auto;
 }
 .footer {
-  background: #19191f;
-  border-top: 1px solid #30303b;
+  background: #0f172a;
+  border-top: 1px solid #334155;
   padding: 48px 5% 28px;
 }
 .footer__title {
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.65rem;
   letter-spacing: 0.1em;
-  color: #a3a0b2;
+  color: #94a3b8;
 }
 .footer__link-item {
   font-size: 0.85rem;
-  color: #eeedf4;
+  color: #f1f5f9;
 }
 .footer__copyright {
   font-size: 0.7rem;
-  color: #a3a0b2;
+  color: #94a3b8;
   text-align: left;
   margin-top: 25px;
 }
@@ -455,7 +455,7 @@ a {
   padding: 8px 12px;
 }
 .menu__link--active:not(.menu__link--sublist) {
-  background: #a99bff16;
+  background: #3b82f616;
   box-shadow: inset 2px 0 var(--site-accent);
 }
 .menu__list-item-collapsible {
