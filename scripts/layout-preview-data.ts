@@ -89,25 +89,52 @@ export const layoutPreviews = [
     layout: generateFailureArtifacts,
     summary: {
       ...base,
-      runStatus: 'failed', passed: 126, failed: 2,
+      runStatus: 'failed',
+      passed: 126,
+      failed: 2,
       meta: [{ key: 'Build URL', value: 'https://example.com/builds/1842' }],
       failures: [
         {
-          suite: 'Checkout', test: 'Guest can complete payment [chromium]',
+          suite: 'Checkout',
+          test: 'Guest can complete payment [chromium]',
           failureReason: 'Confirmation banner was not visible after 5000 ms.',
           artifacts: [
-            { name: 'HTML report', url: 'https://example.com/reports/1842/index.html' },
-            { name: 'Screenshot', url: 'https://example.com/artifacts/1842/checkout/screenshot.png', contentType: 'image/png' },
-            { name: 'Trace ZIP', url: 'https://example.com/artifacts/1842/checkout/trace.zip', contentType: 'application/zip' },
+            {
+              name: 'HTML report',
+              url: 'https://example.com/reports/1842/index.html',
+            },
+            {
+              name: 'Screenshot',
+              url: 'https://example.com/artifacts/1842/checkout/screenshot.png',
+              contentType: 'image/png',
+            },
+            {
+              name: 'Trace ZIP',
+              url: 'https://example.com/artifacts/1842/checkout/trace.zip',
+              contentType: 'application/zip',
+            },
           ],
         },
         {
-          suite: 'Account', test: 'Password reset sends an email [firefox]',
-          failureReason: 'Expected HTTP 200 from /api/password-reset. Received HTTP 503.',
+          suite: 'Account',
+          test: 'Password reset sends an email [firefox]',
+          failureReason:
+            'Expected HTTP 200 from /api/password-reset. Received HTTP 503.',
           artifacts: [
-            { name: 'HTML report', url: 'https://example.com/reports/1842/index.html' },
-            { name: 'Screenshot', url: 'https://example.com/artifacts/1842/account/screenshot.png', contentType: 'image/png' },
-            { name: 'Trace ZIP', url: 'https://example.com/artifacts/1842/account/trace.zip', contentType: 'application/zip' },
+            {
+              name: 'HTML report',
+              url: 'https://example.com/reports/1842/index.html',
+            },
+            {
+              name: 'Screenshot',
+              url: 'https://example.com/artifacts/1842/account/screenshot.png',
+              contentType: 'image/png',
+            },
+            {
+              name: 'Trace ZIP',
+              url: 'https://example.com/artifacts/1842/account/trace.zip',
+              contentType: 'application/zip',
+            },
           ],
         },
       ],

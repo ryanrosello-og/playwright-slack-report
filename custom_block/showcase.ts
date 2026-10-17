@@ -20,13 +20,11 @@ const context = (text: string): KnownBlock => ({
 });
 const fields = (values: string[]): KnownBlock => ({
   type: 'section',
-  fields: values
-    .slice(0, 10)
-    .map((text) => ({
-      type: 'plain_text',
-      text: clip(text, 1900),
-      emoji: true,
-    })),
+  fields: values.slice(0, 10).map((text) => ({
+    type: 'plain_text',
+    text: clip(text, 1900),
+    emoji: true,
+  })),
 });
 const metaValue = (summary: SummaryResults, key: string): string | undefined =>
   summary.meta?.find((item) => item.key === key)?.value;
@@ -125,31 +123,44 @@ export function generateFailureTriage(summary: SummaryResults): KnownBlock[] {
 }
 
 /** Hosted artifacts are resolved by artifactLinks before this layout is called. */
-export function generateFailureArtifacts(summary: SummaryResults): KnownBlock[] {
+export function generateFailureArtifacts(
+  summary: SummaryResults,
+): KnownBlock[] {
   const errors = summary.runErrors ?? [];
   const blocks: KnownBlock[] = [
     heading('📎 Failure artifacts'),
     context(`${runOutcome(summary)} · ${counts(summary)}`),
     { type: 'divider' },
-    ...errors.slice(0, 2).map((error) => section(`Run error\n${clip(error, 900)}`)),
+    ...errors
+      .slice(0, 2)
+      .map((error) => section(`Run error\n${clip(error, 900)}`)),
   ];
   for (const failure of summary.failures.slice(0, 3)) {
-    blocks.push(section(
-      `${clip(failure.test, 180)}\nSuite: ${clip(failure.suite, 120)}\n${clip(failure.failureReason, 500)}`,
-    ));
+    blocks.push(
+      section(
+        `${clip(failure.test, 180)}\nSuite: ${clip(failure.suite, 120)}\n${clip(failure.failureReason, 500)}`,
+      ),
+    );
     const links: string[] = [];
     const urls = new Set<string>();
     let omitted = 0;
     for (const artifact of failure.artifacts ?? []) {
       try {
         const url = new URL(artifact.url);
-        if (!/^https?:\/\//i.test(artifact.url) || url.username || url.password
-          || /[\s<>|\\]/.test(artifact.url)) continue;
+        if (
+          !/^https?:\/\//i.test(artifact.url) ||
+          url.username ||
+          url.password ||
+          /[\s<>|\\]/.test(artifact.url)
+        )
+          continue;
         if (urls.has(url.href)) continue;
         urls.add(url.href);
         const safeUrl = url.href.replace(/&/g, '&amp;');
         const label = clip(artifact.name || 'Artifact', 80)
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
           .replace(/[|\r\n*`_~]/g, ' ');
         const link = `<${safeUrl}|${label}>`;
         if (links.length === 3 || link.length > 900) omitted += 1;
@@ -158,15 +169,27 @@ export function generateFailureArtifacts(summary: SummaryResults): KnownBlock[] 
         // An invalid optional URL must not prevent the report being sent.
       }
     }
-    blocks.push(links.length
-      ? { type: 'section', text: { type: 'mrkdwn', text: links.join('  •  ') } }
-      : context('No hosted artifact links available.'));
-    if (omitted) blocks.push(context(`${omitted} additional artifact links omitted.`));
+    blocks.push(
+      links.length
+        ? {
+            type: 'section',
+            text: { type: 'mrkdwn', text: links.join('  •  ') },
+          }
+        : context('No hosted artifact links available.'),
+    );
+    if (omitted)
+      blocks.push(context(`${omitted} additional artifact links omitted.`));
   }
   if (!errors.length && !summary.failures.length)
     blocks.push(section('No failure details were recorded.'));
-  const omitted = Math.max(0, errors.length - 2) + Math.max(0, summary.failures.length - 3);
-  if (omitted) blocks.push(context(`${omitted} more error/failure entries omitted. See the full report.`));
+  const omitted =
+    Math.max(0, errors.length - 2) + Math.max(0, summary.failures.length - 3);
+  if (omitted)
+    blocks.push(
+      context(
+        `${omitted} more error/failure entries omitted. See the full report.`,
+      ),
+    );
   return [...blocks, ...reportLinks(summary)];
 }
 

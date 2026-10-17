@@ -114,11 +114,11 @@ Optional hosted links beside each test failure. Reporter and CLI configurations 
 }
 ```
 
-| Option | Meaning |
-| --- | --- |
-| `baseUrl` | HTTP(S) directory URL containing uploaded attachments. Query strings and fragments are not supported. |
-| `pathPrefix` | Local directory mirrored at `baseUrl`. Defaults to the current working directory. Requires `baseUrl`. |
-| `reportUrl` | Optional HTTP(S) HTML report URL. Can be used without `baseUrl`. Query strings and fragments are supported. |
+| Option       | Meaning                                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| `baseUrl`    | HTTP(S) directory URL containing uploaded attachments. Query strings and fragments are not supported.       |
+| `pathPrefix` | Local directory mirrored at `baseUrl`. Defaults to the current working directory. Requires `baseUrl`.       |
+| `reportUrl`  | Optional HTTP(S) HTML report URL. Can be used without `baseUrl`. Query strings and fragments are supported. |
 
 1. Upload the attachments to your artifact host with their directory structure intact.
 2. Set `baseUrl` to the uploaded directory URL.
@@ -226,9 +226,9 @@ show the details inline with `showInThread` left `false`.
 
 Custom layouts receive these optional `SummaryResults` fields:
 
-| Field | Meaning |
-| --- | --- |
-| `runStatus` | `passed`, `failed`, `timedout`, or `interrupted` |
+| Field       | Meaning                                                                       |
+| ----------- | ----------------------------------------------------------------------------- |
+| `runStatus` | `passed`, `failed`, `timedout`, or `interrupted`                              |
 | `runErrors` | Global error strings with ANSI formatting removed; absent when there are none |
 
 Use both fields when deciding whether a custom layout should display success;

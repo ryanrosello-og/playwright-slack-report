@@ -60,7 +60,7 @@ Failures without links remain visible. Invalid URLs and duplicate URLs are omitt
 
 [Download Block Kit JSON](pathname:///playwright-slack-report/examples/layouts/failure-artifacts.json) · [Download TypeScript template](pathname:///playwright-slack-report/examples/layouts/showcase.ts)
 
-This template requires the `artifactLinks` feature described in [Unreleased notes](./release-notes.md#unreleased).
+This template requires the `artifactLinks` feature prepared for [version 1.1.118](./release-notes.md#v11118).
 The sample URLs are placeholders. The package does not upload files or grant access to hosted artifacts.
 Trace links open ZIP files. The HTML link opens the configured report page.
 
@@ -86,17 +86,20 @@ export default defineConfig({
   reporter: [
     ['dot'],
     ['html', { open: 'never' }],
-    ['playwright-slack-report/dist/src/SlackReporter.js', {
-      slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
-      sendResults: 'on-failure',
-      layout: generateFailureArtifacts,
-      disableUnfurl: true,
-      artifactLinks: {
-        baseUrl: 'https://example.com/artifacts/1842/',
-        pathPrefix: 'test-results',
-        reportUrl: 'https://example.com/reports/1842/index.html',
+    [
+      'playwright-slack-report/dist/src/SlackReporter.js',
+      {
+        slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
+        sendResults: 'on-failure',
+        layout: generateFailureArtifacts,
+        disableUnfurl: true,
+        artifactLinks: {
+          baseUrl: 'https://example.com/artifacts/1842/',
+          pathPrefix: 'test-results',
+          reportUrl: 'https://example.com/reports/1842/index.html',
+        },
       },
-    }],
+    ],
   ],
 });
 ```
@@ -164,21 +167,24 @@ import { generateBuildSummary } from './showcase';
 export default defineConfig({
   reporter: [
     ['dot'],
-    ['playwright-slack-report/dist/src/SlackReporter.js', {
-      slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
-      sendResults: 'always',
-      layout: generateBuildSummary,
-      meta: [
-        { key: 'Environment', value: 'Staging / EU West' },
-        { key: 'Branch', value: process.env.GITHUB_REF_NAME || 'local' },
-        { key: 'Build', value: process.env.GITHUB_RUN_NUMBER || 'local' },
-        { key: 'Commit', value: process.env.GITHUB_SHA || 'local' },
-        { key: 'Owner', value: 'Checkout team' },
-        { key: 'Suite', value: 'Nightly regression' },
-        { key: 'Report URL', value: 'https://example.com/reports/1842' },
-        { key: 'Build URL', value: 'https://example.com/builds/1842' },
-      ],
-    }],
+    [
+      'playwright-slack-report/dist/src/SlackReporter.js',
+      {
+        slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
+        sendResults: 'always',
+        layout: generateBuildSummary,
+        meta: [
+          { key: 'Environment', value: 'Staging / EU West' },
+          { key: 'Branch', value: process.env.GITHUB_REF_NAME || 'local' },
+          { key: 'Build', value: process.env.GITHUB_RUN_NUMBER || 'local' },
+          { key: 'Commit', value: process.env.GITHUB_SHA || 'local' },
+          { key: 'Owner', value: 'Checkout team' },
+          { key: 'Suite', value: 'Nightly regression' },
+          { key: 'Report URL', value: 'https://example.com/reports/1842' },
+          { key: 'Build URL', value: 'https://example.com/builds/1842' },
+        ],
+      },
+    ],
   ],
 });
 ```

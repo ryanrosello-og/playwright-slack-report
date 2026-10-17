@@ -7,9 +7,11 @@ toc_max_heading_level: 2
 
 These notes cover changes that affect package users from **18 October 2025 to 18 October 2026**.
 The newest release appears first. Releases with only internal maintenance changes are omitted.
-Each entry links to its GitHub release. Older history is available in [all GitHub releases](https://github.com/ryanrosello-og/playwright-slack-report/releases).
+Each published entry links to its GitHub release. Older history is available in [all GitHub releases](https://github.com/ryanrosello-og/playwright-slack-report/releases).
 
-## Unreleased
+## 1.1.118 - Unreleased {#v11118}
+
+Version 1.1.118 is prepared for release. It is not yet published.
 
 ### Added
 

@@ -3,7 +3,15 @@
 
 import * as fs from 'fs';
 import { TestCase } from '@playwright/test/reporter';
-import { ArtifactLinksOptions, failure, FlakyTest, JSONResult, RunStatus, Spec, SummaryResults } from '.';
+import {
+  ArtifactLinksOptions,
+  failure,
+  FlakyTest,
+  JSONResult,
+  RunStatus,
+  Spec,
+  SummaryResults,
+} from '.';
 import { resolveArtifactLinks } from './ArtifactLinks';
 
 export type testResult = {
@@ -47,10 +55,16 @@ export default class ResultsParser {
 
   private runStatus?: RunStatus;
 
-  addRunError(error: { message?: string; stack?: string; value?: string; snippet?: string }): void {
+  addRunError(error: {
+    message?: string;
+    stack?: string;
+    value?: string;
+    snippet?: string;
+  }): void {
     const reason = this.cleanseReason(
       [error.snippet, error.stack || error.message || error.value]
-        .filter(Boolean).join('\n'),
+        .filter(Boolean)
+        .join('\n'),
     );
     this.runErrors.push(reason || 'Unknown run-level error');
   }
@@ -110,9 +124,12 @@ export default class ResultsParser {
     // Playwright's JSON reporter does not serialize FullResult.status.
     // Global timeouts need the CLI override to distinguish them from failures.
     // Fail-fast can interrupt other workers, so recorded failures take priority.
-    this.runStatus = summary.failed > 0 || this.runErrors.length > 0
-      ? 'failed'
-      : interrupted ? 'interrupted' : 'passed';
+    this.runStatus =
+      summary.failed > 0 || this.runErrors.length > 0
+        ? 'failed'
+        : interrupted
+          ? 'interrupted'
+          : 'passed';
     return this.addRunInfo(summary);
   }
 
@@ -165,16 +182,21 @@ export default class ResultsParser {
           testIndex,
         ]);
         const expected = expectedStatus ?? 'passed';
-        const completed = test.results.filter((result: any) =>
-          result.status !== 'skipped' && result.status !== 'interrupted');
-        const inferredFlaky = completed.some((result: any) => result.status === expected)
-          && completed.some((result: any) => result.status !== expected);
+        const completed = test.results.filter(
+          (result: any) =>
+            result.status !== 'skipped' && result.status !== 'interrupted',
+        );
+        const inferredFlaky =
+          completed.some((result: any) => result.status === expected) &&
+          completed.some((result: any) => result.status !== expected);
         const isFlaky = test.status ? test.status === 'flaky' : inferredFlaky;
         if (isFlaky) {
           this.flakyTests.set(identity, {
             suite: suiteName,
             test: ResultsParser.getTestName({
-              name: spec.title, browser: test.projectName, projectName: test.projectName,
+              name: spec.title,
+              browser: test.projectName,
+              projectName: test.projectName,
             }),
             projectName: test.projectName,
             file: testFile,
@@ -204,7 +226,10 @@ export default class ResultsParser {
             expectedStatus,
             tags: spec.tags,
           });
-          this.testIdentities.set(testResults[testResults.length - 1], identity);
+          this.testIdentities.set(
+            testResults[testResults.length - 1],
+            identity,
+          );
         }
       }
     }
@@ -244,7 +269,9 @@ export default class ResultsParser {
         flakyTests.push({
           suite: test.parent.title,
           test: ResultsParser.getTestName({
-            name: test.title, browser: projectName, projectName,
+            name: test.title,
+            browser: projectName,
+            projectName,
           }),
           projectName,
           file: test.location?.file,
@@ -278,7 +305,10 @@ export default class ResultsParser {
         ) {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
-            const artifacts = resolveArtifactLinks(test.attachments, this.artifactLinks);
+            const artifacts = resolveArtifactLinks(
+              test.attachments,
+              this.artifactLinks,
+            );
             failures.push({
               suite: test.suiteName,
               test: ResultsParser.getTestName(test),
@@ -327,8 +357,10 @@ export default class ResultsParser {
   }
 
   private testIdentity(test: testResult): string {
-    return this.testIdentities.get(test)
-      ?? JSON.stringify([test.file, test.projectName, test.name]);
+    return (
+      this.testIdentities.get(test) ??
+      JSON.stringify([test.file, test.projectName, test.name])
+    );
   }
 
   addTestResultFromJson({
@@ -403,9 +435,19 @@ export default class ResultsParser {
         tags: testCase.tags,
       });
       if (testCase.id || testCase.location?.file) {
-        this.testIdentities.set(testResults[testResults.length - 1],
-          JSON.stringify([testCase.id ?? [testCase.location.file, testCase.location.line,
-            testCase.location.column, projectSettings.projectName, testCase.title], testCase.repeatEachIndex]));
+        this.testIdentities.set(
+          testResults[testResults.length - 1],
+          JSON.stringify([
+            testCase.id ?? [
+              testCase.location.file,
+              testCase.location.line,
+              testCase.location.column,
+              projectSettings.projectName,
+              testCase.title,
+            ],
+            testCase.repeatEachIndex,
+          ]),
+        );
       }
     }
     this.updateResults({

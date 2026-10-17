@@ -5,6 +5,9 @@ test('failure with artifacts', async ({}, info) => {
   const file = info.outputPath(`attempt-${info.retry} # screenshot.png`);
   await writeFile(file, 'fixture attachment');
   await info.attach('Screenshot', { path: file, contentType: 'image/png' });
-  await info.attach('Inline body', { body: Buffer.from('not hosted'), contentType: 'text/plain' });
+  await info.attach('Inline body', {
+    body: Buffer.from('not hosted'),
+    contentType: 'text/plain',
+  });
   expect(false).toBe(true);
 });
