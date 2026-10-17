@@ -118,6 +118,7 @@ The config file also supports these options:
 - `sendResults` - `always`, `on-failure`, or `on-flaky`. `on-flaky` sends only when the merged report contains flaky tests, even if they passed on retry. Runs with failures but no flaky tests are skipped; `on-failure` continues to skip flaky-only runs.
 - `maxNumberOfFlakyTests` - Maximum flaky test details shown by the default layout, defaults to 10. Must be a non-negative integer; `0` hides details while keeping the count and notification behavior. Unlike the reporter's `maxNumberOfFlakyTestsToShow`, the CLI uses this shorter name.
 - `proxy` - String representation of your proxy server.
+- `artifactLinks` - Hosted attachment and HTML report links. Uses the same [mapping options](./configuration.md#artifactlinks) as the reporter.
 - `sendUsingWebhook` - Object containing the webhook URL to send the results to (see [webhook configuration](#webhook-configuration)).
 - `customLayout` - Object specifying the custom layout relative path and function name:
 
@@ -136,6 +137,30 @@ The config file also supports these options:
     "functionName": "generateCustomAsyncLayoutSimpleMeta"
   }
 ```
+
+### Hosted artifact links
+
+The CLI resolves attachments from Playwright JSON before it generates bot or webhook messages.
+
+```json
+{
+  "sendResults": "on-failure",
+  "slackLogLevel": "error",
+  "sendUsingBot": { "channels": ["qa"] },
+  "showInThread": true,
+  "artifactLinks": {
+    "baseUrl": "https://ci.example/runs/42/test-results/",
+    "pathPrefix": "/ci/workspace/test-results",
+    "reportUrl": "https://ci.example/runs/42/playwright-report/index.html"
+  }
+}
+```
+
+Before running the CLI, upload the artifacts with their directory structure intact.
+Set `pathPrefix` to the upload directory recorded in the JSON attachment paths.
+Relative paths resolve from the CLI working directory, independently of the JSON and configuration file locations.
+These options do not expand environment variables. Signed URLs are supported in `reportUrl` only.
+For webhook delivery, use `sendUsingWebhook` and remove `showInThread`.
 
 ### Flaky test alerts
 

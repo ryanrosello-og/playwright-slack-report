@@ -267,6 +267,70 @@ async function verifyFlakyScenarios(pw, cli) {
   }
 }
 
+async function verifyArtifactScenarios(pw, cli) {
+  for (const transport of ['bot', 'webhook']) {
+    const label = `artifacts-${transport}`;
+    const results = path.join(consumer, `${label}-results.json`);
+    const capture = path.join(consumer, `${label}-capture.jsonl`);
+    const preload = path.join(consumer, 'capture-slack.cjs');
+    const env = {
+      ...baseEnv(), HARNESS_MODE: `reporter-${transport}`, HARNESS_JSON: results, HARNESS_CAPTURE: capture,
+      ...(transport === 'bot' ? { SLACK_BOT_USER_OAUTH_TOKEN: 'harness-unit-token' } : {}),
+    };
+    const entry = { mode: label, transport: 'local-capture', status: 'failed' };
+    report.paths.push(entry);
+    try {
+      await writeFile(capture, '');
+      await command(node, ['--require', preload, pw, 'test', '-c', 'artifacts.config.cjs'], consumer, label, env, 1);
+      const json = JSON.parse(await readFile(results, 'utf8'));
+      assert.equal(json.stats.unexpected, 4, `${label}: failed projects/repetitions`);
+      const expectedUrls = [];
+      const visit = suite => {
+        for (const spec of suite.specs || []) for (const test of spec.tests) {
+          const file = test.results.at(-1).attachments.find(item => item.name === 'Screenshot').path;
+          const relative = path.relative(path.join(consumer, 'artifact-output'), file);
+          expectedUrls.push(`https://ci.example/artifacts/${relative.split(path.sep).map(encodeURIComponent).join('/')}`);
+        }
+        for (const nested of suite.suites || []) visit(nested);
+      };
+      json.suites.forEach(visit);
+      const check = async mode => {
+        const messages = (await readFile(capture, 'utf8')).trim().split('\n').map(line => JSON.parse(line));
+        await save(`${label}-${mode}-capture.json`, messages);
+        assert.equal(messages.length, transport === 'bot' ? 2 : 1, `${label}: message count`);
+        const details = messages.at(-1).payload.blocks.filter(block => block.text?.text?.includes('failure with artifacts'));
+        assert.equal(details.length, 4, `${label}: one failure per project/repetition`);
+        const links = details.flatMap(block => [...block.text.text.matchAll(/<([^>]+)\|Screenshot>/g)].map(match => match[1]));
+        assert.deepEqual(links.sort(), expectedUrls.sort(), `${label}: final-attempt attachment URLs`);
+        for (const detail of details) {
+          assert(detail.text.text.includes('<https://ci.example/report/index.html|HTML report>'), `${label}: HTML report link`);
+          assert(!detail.text.text.includes('|Inline body>'), `${label}: bodies must not become hosted links`);
+        }
+        if (transport === 'bot') {
+          assert.equal(messages[1].payload.thread_ts, messages[0].ts);
+          assert(!messageText(messages[0].payload).includes('|Screenshot>'));
+        }
+      };
+      await check('reporter');
+      const config = path.join(consumer, `${label}-cli.json`);
+      await writeFile(config, JSON.stringify({
+        sendResults: 'on-failure', slackLogLevel: 'error', showInThread: transport === 'bot',
+        artifactLinks: { baseUrl: 'https://ci.example/artifacts/', pathPrefix: path.join(consumer, 'artifact-output'),
+          reportUrl: 'https://ci.example/report/index.html' },
+        ...(transport === 'bot' ? { sendUsingBot: { channels: ['harness-artifacts'] } }
+          : { sendUsingWebhook: { webhookUrl: 'https://example.invalid/harness-webhook' } }),
+      }));
+      await writeFile(capture, '');
+      await command(node, ['--require', preload, cli, '-c', config, '-j', results], consumer, `${label}-cli`, env);
+      await check('cli');
+      entry.status = 'passed';
+    } catch (error) {
+      entry.error = error.message;
+      report.errors.push(`${label}: ${error.message}`);
+    }
+  }
+}
+
 // Always test the installed package against real lifecycle failures, with only
 // Slack's external transport captured locally in both live and offline mode.
 async function verifyRunLevelScenarios(pw, cli) {
@@ -441,6 +505,7 @@ try {
   assert.equal(cliVersion.trim(), pack.version, 'CLI version differs from packaged version');
   await verifyRunLevelScenarios(pw, cli);
   await verifyFlakyScenarios(pw, cli);
+  await verifyArtifactScenarios(pw, cli);
   await command(node, [pw, 'install', ...(process.platform === 'linux' ? ['--with-deps'] : []), 'chromium'], consumer, 'install-chromium');
   started = String(Date.now() / 1000);
   const port = await freePort();

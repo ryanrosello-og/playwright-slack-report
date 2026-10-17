@@ -100,6 +100,51 @@ Each flaky entry includes the suite, test name, project, and actual retries perf
 
 Custom layouts receive `summaryResults.flakyTests`, an optional array of `{ suite, test, projectName, file, retries }`. Layout callbacks control how these details appear; the default layout's display limit does not trim the array passed to callbacks.
 
+### **artifactLinks**
+
+Optional hosted links beside each test failure. Reporter and CLI configurations use the same option names.
+
+```typescript
+{
+  artifactLinks: {
+    baseUrl: 'https://ci.example/runs/42/test-results/',
+    pathPrefix: 'test-results',
+    reportUrl: 'https://ci.example/runs/42/playwright-report/index.html',
+  },
+}
+```
+
+| Option | Meaning |
+| --- | --- |
+| `baseUrl` | HTTP(S) directory URL containing uploaded attachments. Query strings and fragments are not supported. |
+| `pathPrefix` | Local directory mirrored at `baseUrl`. Defaults to the current working directory. Requires `baseUrl`. |
+| `reportUrl` | Optional HTTP(S) HTML report URL. Can be used without `baseUrl`. Query strings and fragments are supported. |
+
+1. Upload the attachments to your artifact host with their directory structure intact.
+2. Set `baseUrl` to the uploaded directory URL.
+3. Set `pathPrefix` to the corresponding local directory.
+4. To add an HTML report link, set `reportUrl` to its hosted URL.
+
+For example, `test-results/login/screenshot.png` becomes `https://ci.example/runs/42/test-results/login/screenshot.png` with this configuration.
+Relative attachment paths and relative `pathPrefix` values resolve from the process working directory.
+Absolute Windows and POSIX prefixes support JSON reports from other machines.
+If the JSON contains absolute paths from another machine, set `pathPrefix` to that machine's upload directory.
+For JSON with relative paths, run the CLI from the original working directory or preserve its directory structure.
+
+The resolver uses attachments from the final failing attempt. Screenshots, trace ZIP files, videos, and other file attachments use their attachment names.
+The HTML report link opens the configured report page. Trace links open the hosted ZIP file.
+Files outside `pathPrefix`, attachments without file paths, and duplicate URLs are omitted.
+The package does not upload files, check link availability, or grant access to hosted artifacts.
+Links can expire or require authentication, according to the artifact host.
+
+Bot messages show links with the failure details, including threads when `showInThread` is enabled.
+Webhook messages show links inline. Failure display limits also hide their links.
+The default layout omits links that exceed its text budget and shows an omission notice.
+Custom layouts receive all resolved links through `failures[].artifacts`, with `{ name, url, contentType? }` entries.
+Existing configurations remain unchanged when `artifactLinks` is absent.
+
+The [failure artifacts template](./layout-gallery.md#5-failure-artifacts) includes a screenshot, downloadable source, and reporter and CLI examples.
+
 ### **slackOAuthToken**
 
 Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.

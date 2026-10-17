@@ -3,7 +3,8 @@
 
 import * as fs from 'fs';
 import { TestCase } from '@playwright/test/reporter';
-import { failure, FlakyTest, JSONResult, RunStatus, Spec, SummaryResults } from '.';
+import { ArtifactLinksOptions, failure, FlakyTest, JSONResult, RunStatus, Spec, SummaryResults } from '.';
+import { resolveArtifactLinks } from './ArtifactLinks';
 
 export type testResult = {
   suiteName: string;
@@ -38,6 +39,8 @@ export type testSuite = {
 export default class ResultsParser {
   private result: testSuite[];
 
+  private testIdentities = new WeakMap<testResult, string>();
+
   private flakyTests = new Map<string, FlakyTest>();
 
   private runErrors: string[] = [];
@@ -62,8 +65,12 @@ export default class ResultsParser {
     return summary;
   }
 
-  constructor() {
+  constructor(private artifactLinks?: ArtifactLinksOptions) {
     this.result = [];
+  }
+
+  setArtifactLinks(options?: ArtifactLinksOptions): void {
+    this.artifactLinks = options;
   }
 
   async parseFromJsonFile(filePath: string) {
@@ -197,6 +204,7 @@ export default class ResultsParser {
             expectedStatus,
             tags: spec.tags,
           });
+          this.testIdentities.set(testResults[testResults.length - 1], identity);
         }
       }
     }
@@ -270,10 +278,12 @@ export default class ResultsParser {
         ) {
           // only flag as failed if the last attempt has failed
           if (test.retries === test.retry) {
+            const artifacts = resolveArtifactLinks(test.attachments, this.artifactLinks);
             failures.push({
               suite: test.suiteName,
               test: ResultsParser.getTestName(test),
               failureReason: test.reason,
+              ...(artifacts.length > 0 ? { artifacts } : {}),
             });
           }
         }
@@ -302,9 +312,7 @@ export default class ResultsParser {
       if (resIndex > -1) {
         for (const test of data.testSuite.tests) {
           const testIndex = this.result[resIndex].testSuite.tests.findIndex(
-            (tes) =>
-              `${tes.projectName}${tes.name}` ===
-              `${test.projectName}${test.name}`,
+            (tes) => this.testIdentity(tes) === this.testIdentity(test),
           );
           if (testIndex > -1) {
             this.result[resIndex].testSuite.tests[testIndex] = test;
@@ -316,6 +324,11 @@ export default class ResultsParser {
         this.result.push(data);
       }
     }
+  }
+
+  private testIdentity(test: testResult): string {
+    return this.testIdentities.get(test)
+      ?? JSON.stringify([test.file, test.projectName, test.name]);
   }
 
   addTestResultFromJson({
@@ -389,6 +402,11 @@ export default class ResultsParser {
         expectedStatus: testCase.expectedStatus,
         tags: testCase.tags,
       });
+      if (testCase.id || testCase.location?.file) {
+        this.testIdentities.set(testResults[testResults.length - 1],
+          JSON.stringify([testCase.id ?? [testCase.location.file, testCase.location.line,
+            testCase.location.column, projectSettings.projectName, testCase.title], testCase.repeatEachIndex]));
+      }
     }
     this.updateResults({
       testSuite: {

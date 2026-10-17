@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { LogLevel } from '@slack/web-api';
+import { ArtifactLinksSchema } from '../ArtifactLinks';
+import { ArtifactLinksOptions } from '..';
 
 const LogLevelEnum = z.nativeEnum(LogLevel);
 export const ZodCliSchema = z.object({
@@ -32,6 +34,7 @@ export const ZodCliSchema = z.object({
   disableUnfurl: z.boolean().default(false),
   showInThread: z.boolean().default(false),
   proxy: z.string().url().optional(),
+  artifactLinks: ArtifactLinksSchema.optional(),
   meta: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
   sendCustomBlocksInThreadAfterIndex: z.number().optional(),
 });
@@ -58,6 +61,7 @@ export interface ICliConfig {
   disableUnfurl: boolean;
   showInThread: boolean;
   proxy?: string;
+  artifactLinks?: ArtifactLinksOptions;
   meta?: Array<{ key: string; value: string }>;
   sendCustomBlocksInThreadAfterIndex?: number;
 }

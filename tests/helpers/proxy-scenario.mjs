@@ -84,6 +84,7 @@ class IncomingWebhook {
   }
 }
 class ResultsParser {
+  setArtifactLinks() {}
   async getParsedResults() {
     return {
       passed: scenario.empty ? 0 : 1,
