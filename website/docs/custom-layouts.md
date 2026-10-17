@@ -58,7 +58,7 @@ Layout callbacks receive `SummaryResults` from `playwright-slack-report/dist/src
 | Field | Meaning |
 | --- | --- |
 | `passed`, `failed`, `skipped`, `flaky` | Test outcome counts; `flaky` may be undefined. Global errors do not inflate these counts. |
-| `failures` | Test failures as `{ suite, test, failureReason }`. |
+| `failures` | Test failures as `{ suite, test, failureReason, artifacts? }`. With `artifactLinks` configured, `artifacts` contains hosted `{ name, url, contentType? }` links. |
 | `tests` | Test details, including suite/name, status, project/browser, timestamps, retries, reasons, tags, and optional attachments. |
 | `meta` | Optional array of `{ key, value }` supplied in the configuration. |
 | `flakyTests` | Optional array of `{ suite, test, projectName, file, retries }`; retries count actual attempts after the initial one, once per test/project/repetition. |

@@ -13,6 +13,7 @@ import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 import SlackWebhookClient from './SlackWebhookClient';
 import { hasRunFailure } from './RunResults';
+import { ArtifactLinksSchema } from './ArtifactLinks';
 
 class SlackReporter implements Reporter {
   private customLayout: Function | undefined;
@@ -48,6 +49,8 @@ class SlackReporter implements Reporter {
   private disableUnfurl: boolean | undefined;
 
   private proxy: string | undefined;
+
+  private artifactLinks: unknown;
 
   private browsers: { projectName: string; browser: string }[] = [];
 
@@ -104,6 +107,7 @@ class SlackReporter implements Reporter {
     }
     this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
     this.proxy = slackReporterConfig.proxy || undefined;
+    this.artifactLinks = slackReporterConfig.artifactLinks;
   }
 
 
@@ -324,6 +328,11 @@ class SlackReporter implements Reporter {
     if (!Number.isInteger(this.maxNumberOfFlakyTestsToShow) || this.maxNumberOfFlakyTestsToShow < 0) {
       return { okToProceed: false, message: '❌ maxNumberOfFlakyTestsToShow must be a non-negative integer' };
     }
+    const artifactLinks = ArtifactLinksSchema.optional().safeParse(this.artifactLinks);
+    if (!artifactLinks.success) {
+      return { okToProceed: false, message: `❌ Invalid artifactLinks: ${artifactLinks.error.message}` };
+    }
+    this.resultsParser.setArtifactLinks(artifactLinks.data);
     return { okToProceed: true };
   }
 

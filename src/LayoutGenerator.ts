@@ -1,6 +1,27 @@
 import { KnownBlock, Block } from '@slack/types';
-import { SummaryResults } from '.';
+import { ArtifactLink, failure, SummaryResults } from '.';
 import { getRunStatus } from './RunResults';
+import { isArtifactUrl } from './ArtifactLinks';
+
+const escapeSlackText = (value: string): string => value.replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const appendArtifactLinks = (text: string, artifacts: ArtifactLink[] = []): string => {
+  if (artifacts.length === 0) return text;
+  // Keep links whole, within the section's 3000-character limit, without adding blocks.
+  let result = text.substring(0, 2000);
+  let omitted = 0;
+  for (const artifact of artifacts) {
+    if (!isArtifactUrl(artifact.url)) continue;
+    const label = escapeSlackText((artifact.name || 'Artifact').substring(0, 100))
+      .replace(/[|\r\n*`_~]/g, ' ');
+    const link = `\n<${escapeSlackText(artifact.url)}|${label}>`;
+    if (result.length + link.length > 2950) omitted += 1;
+    else result += link;
+  }
+  if (omitted > 0) result += '\nAdditional artifact links omitted.';
+  return result;
+};
 
 const unsuccessfulRunLabel = (summaryResults: SummaryResults): string => {
   const status = getRunStatus(summaryResults);
@@ -94,7 +115,7 @@ const generateFailures = async (
   const maxNumberOfFailureLength = 650;
   const fails = [];
 
-  const details = [
+  const details: failure[] = [
     ...(summaryResults.runErrors || []).map((failureReason) => ({
       suite: 'Run-level error', test: '', failureReason,
     })),
@@ -106,7 +127,7 @@ const generateFailures = async (
   );
 
   for (let i = 0; i < numberOfFailuresToShow; i += 1) {
-    const { failureReason, test, suite } = details[i];
+    const { failureReason, test, suite, artifacts } = details[i];
     const formattedFailure = failureReason
       .substring(0, maxNumberOfFailureLength)
       .split('\n')
@@ -116,8 +137,8 @@ const generateFailures = async (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${test ? `${suite} > ${test}` : suite}*
-        \n${formattedFailure}`,
+        text: appendArtifactLinks(`*${test ? `${suite} > ${test}` : suite}*
+        \n${formattedFailure}`, artifacts),
       },
     });
   }

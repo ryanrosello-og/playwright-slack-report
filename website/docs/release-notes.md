@@ -5,9 +5,35 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-These notes cover changes that affect package users from **17 October 2025 to 17 October 2026**.
+These notes cover changes that affect package users from **18 October 2025 to 18 October 2026**.
 The newest release appears first. Releases with only internal maintenance changes are omitted.
 Each entry links to its GitHub release. Older history is available in [all GitHub releases](https://github.com/ryanrosello-og/playwright-slack-report/releases).
+
+## Unreleased
+
+### Added
+
+- Reporter and CLI configurations support `artifactLinks` for hosted screenshots, traces, other attachments, and HTML reports beside failures.
+- Bot reports include these links in failure threads when enabled. Webhook reports show links inline.
+- Custom layouts receive optional `failures[].artifacts` entries with names, URLs, and content types when available.
+- Attachment paths outside the configured upload directory are omitted. Oversized links are omitted with a notice in default layouts.
+
+### Fixed
+
+- Failure details keep same-named tests separate across files, projects, and repetitions, so each failure retains its own artifacts.
+
+### Upgrade instructions
+
+Upload the artifacts to your host with their directory structure intact.
+Set `artifactLinks.baseUrl` to the uploaded directory URL.
+Set `artifactLinks.pathPrefix` to the corresponding local directory.
+To add the HTML report, set `artifactLinks.reportUrl` to its hosted URL.
+
+The package does not upload files or change access permissions. Existing configurations require no changes.
+Links use the final failing attempt's attachments and follow the failure display limit.
+Reporter and CLI option names are identical. CLI paths resolve from its working directory.
+
+[Reporter options](./configuration.md#artifactlinks) · [CLI options](./cli.md#hosted-artifact-links)
 
 ## 1.1.117 - 11 October 2026
 

@@ -47,7 +47,7 @@ program
         undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(config.proxy!) }) as unknown as ReturnType<FetchFunction>;
     }
 
-    const resultsParser = new ResultsParser();
+    const resultsParser = new ResultsParser(config.artifactLinks);
     const resultSummary = await resultsParser.parseFromJsonFile(
       preCheckResult.jsonPath!,
     );

@@ -40,6 +40,10 @@ They run clean and recovering tests in two projects, each repeated twice, and
 verify `on-flaky` silence for clean runs, one entry per test/project/repetition,
 actual retry counts, bot threads, and agreement between reporter and CLI details.
 
+Artifact fixtures add four reporter/CLI checks across bot and webhook delivery.
+They verify hosted links from the final retry, separate project and repetition
+attachments, HTML report links, omitted inline bodies, and bot thread placement.
+
 These checks assert the actual overall Playwright status, zero failed-test counts,
 notification delivery in `on-failure` mode, failure-channel routing, readable
 fallback text, global error details in bot threads or inline webhook reports,
