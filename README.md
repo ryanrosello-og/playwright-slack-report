@@ -8,6 +8,8 @@
 
 Publish Playwright test results to the Slack channels where your team works. Supports incoming webhooks, Slack bots, failure and flaky test details, custom message layouts, and merged reports from sharded runs.
 
+See the [Release Notes](https://ryanrosello-og.github.io/playwright-slack-report/docs/release-notes/) for consumer changes and upgrade instructions.
+
 The [Docusaurus documentation](https://ryanrosello-og.github.io/playwright-slack-report/) contains the complete guides and reference:
 
 - [Overview and features](https://ryanrosello-og.github.io/playwright-slack-report/docs/overview/)
