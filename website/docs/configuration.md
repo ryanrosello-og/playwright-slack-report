@@ -3,7 +3,11 @@ title: Reporter configuration
 description: Control delivery, failure threads, metadata, logging, and custom layouts.
 ---
 
-An example advanced configuration is shown below:
+Start with [Getting started](./getting-started.md) and configure either a [webhook](./webhooks.md) or a [bot](./slack-bot.md). This page describes options for the Playwright reporter. The [CLI](./cli.md) uses a separate JSON configuration and different names for some options.
+
+## Configuration example
+
+This advanced bot configuration adds routing destinations, a custom layout, metadata, and threaded details. Define the named `generateCustomLayout` export using the [custom layout guide](./custom-layouts.md).
 
 ```typescript
   import { generateCustomLayout } from "./my_custom_layout";
@@ -32,7 +36,7 @@ An example advanced configuration is shown below:
                 value: '<https://your-build-artifacts.my.company.dev/pw/23887/playwright-report/index.html|📊>',
             },
         ],
-        slackOAuthToken: 'YOUR_SLACK_OAUTH_TOKEN',
+        slackOAuthToken: process.env.SLACK_BOT_USER_OAUTH_TOKEN,
         slackLogLevel: LogLevel.DEBUG,
         disableUnfurl: true,
         showInThread: true,
@@ -42,17 +46,19 @@ An example advanced configuration is shown below:
   ],
 ```
 
+## Options
+
 ### **channels**
 
-An array of Slack channels to post to, at least one channel is required
+An array of Slack channel names or IDs for bot delivery. Provide at least one destination for each enabled outcome, either through `channels` or the outcome-specific arrays below. Webhooks use the channel selected when their URL was created.
 
 ### **onSuccessChannels**
 
-(Optional) An array of Slack channels to post to when tests have passed. Value from `channels` is used if not defined here
+(Optional, bot only) An array of Slack channels to post to when the run is successful, including flaky-only runs. Value from `channels` is used if not defined here.
 
 ### **onFailureChannels**
 
-(Optional) An array of Slack channels to post to when tests have failed. Value from `channels` is used if not defined here
+(Optional, bot only) An array of Slack channels to post to when tests have failed, global errors occurred, or the run timed out or was interrupted. Value from `channels` is used if not defined here.
 
 ### **sendResults**
 
@@ -67,9 +73,7 @@ Flaky-only runs use `onSuccessChannels`; runs with flaky tests and a test or run
 
 ### **layout**
 
-A function that returns a layout object, this configuration is optional. See section below for more details.
-
-- meta - an array of meta data to be sent to Slack, this configuration is optional.
+An optional function that receives `SummaryResults` and returns an array of Slack blocks. See [Custom message layouts](./custom-layouts.md) for the signature, summary fields, and examples. Supply additional context through the `meta` option below.
 
 ### **layoutAsync**
 
@@ -77,7 +81,7 @@ Same as **layout** above, but asynchronous in that it returns a promise.
 
 ### **maxNumberOfFailuresToShow**
 
-Limits the number of failures shown in the Slack message, defaults to 10.
+Limits the combined number of global errors and test failures shown in the Slack message, defaults to 10. Global errors are shown first. Set to `0` to hide details; the overall unsuccessful run status remains visible. The CLI uses `maxNumberOfFailures` for the same limit, with a default of 5.
 
 ### **maxNumberOfFlakyTestsToShow**
 
@@ -109,7 +113,7 @@ This option allows you to control slack client severity levels for log entries. 
 - INFO
 - DEBUG
 
-Example: `slackLogLevel: "ERROR",` will only log errors to the console.
+Import `LogLevel` from `@slack/web-api` and set `slackLogLevel: LogLevel.ERROR` to log only errors. The corresponding string value is lowercase (`'error'`); CLI JSON uses these lowercase values.
 
 ### **disableUnfurl** (default: false)
 
@@ -117,7 +121,7 @@ Enable or disable unfurling of links in Slack messages.
 
 ### **showInThread** (default: false)
 
-Instructs the reporter to show failure and flaky test details in a thread instead of the main channel. The summary counts remain in the parent message. Webhooks show details inline.
+Instructs the reporter to show failure, global error, and flaky test details in a thread instead of the main channel. The summary counts and unsuccessful run status remain in the parent message. This is bot-only: leave it `false` for webhooks, which show details inline.
 
 ![Show failures in threads](../static/img/threads.png)
 
@@ -126,6 +130,8 @@ Instructs the reporter to show failure and flaky test details in a thread instea
 Instructs the reporter to send blocks provided by your [custom layout](./custom-layouts.md) to a thread following the index specified. _Example_:
 
 `sendCustomBlocksInThreadAfterIndex: 3`
+
+This option applies to bot delivery; webhooks do not support this reporter's thread splitting.
 
 ### **proxy** (optional)
 
@@ -158,3 +164,31 @@ meta: [
 ],
 ...
 ```
+
+## Run-level errors and interruptions
+
+The reporter captures Playwright's global `onError` events and the final run
+status from `onEnd`. Setup/teardown errors, worker errors, global timeouts, and
+gracefully interrupted runs can therefore notify Slack even when the failed-test
+count is zero. An actual Playwright "No tests found" error also sends a failure
+notification; a clean empty run without errors stays silent.
+
+The default layout shows an unsuccessful run status above the details. Global
+errors are separate from test failures, so they do not inflate test counts.
+With `showInThread: true`, bot reports put both kinds of error details in the
+report's thread while retaining the run status in the parent. Webhook reports
+show the details inline with `showInThread` left `false`.
+
+Custom layouts receive these optional `SummaryResults` fields:
+
+| Field | Meaning |
+| --- | --- |
+| `runStatus` | `passed`, `failed`, `timedout`, or `interrupted` |
+| `runErrors` | Global error strings with ANSI formatting removed; absent when there are none |
+
+Use both fields when deciding whether a custom layout should display success;
+`failed === 0` alone does not imply that the whole run succeeded. Existing custom
+layouts retain control of their output and must render these fields themselves.
+See the [summary fields and success check](./custom-layouts.md#summary-results) for examples.
+Notifications require Playwright to reach the reporter's completion callback;
+forced termination, `SIGKILL`, or loss of the CI machine can prevent delivery.

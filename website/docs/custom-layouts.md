@@ -3,7 +3,9 @@ title: Custom message layouts
 description: Build custom Slack blocks, add metadata, and upload screenshots and videos.
 ---
 
-You can define your own Slack message layout to suit your needs.
+You can define your own Slack message layout to suit your needs. First configure a working [reporter](./getting-started.md). Reporter callbacks use `layout` or `layoutAsync`; the [CLI](./cli.md#cli-custom-layouts) loads an exported function from a separate file.
+
+## Define a layout
 
 For ready-to-adapt examples, visit the [layout gallery](./layout-gallery.md): build summary, failure triage, flaky test watch, and run context, each with a screenshot preview, downloadable source, and sample Block Kit JSON.
 
@@ -20,7 +22,8 @@ import { SummaryResults } from 'playwright-slack-report/dist/src';
 const generateCustomLayout = (
   summaryResults: SummaryResults,
 ): Array<KnownBlock | Block> => {
-  // your implementation goes here
+  // Replace this block with your own implementation.
+  return [{ type: 'section', text: { type: 'mrkdwn', text: `Failed tests: ${summaryResults.failed}` } }];
 };
 
 export { generateCustomLayout };
@@ -48,9 +51,29 @@ In your, `playwright.config.ts` file, add your function into the config.
 
 > Pro Tip: You can use the [block-kit provided by Slack when creating your layout.](https://app.slack.com/block-kit-builder/)
 
-### Examples:
+## Summary results
 
-**Example 1: - very simple summary**
+Layout callbacks receive `SummaryResults` from `playwright-slack-report/dist/src`:
+
+| Field | Meaning |
+| --- | --- |
+| `passed`, `failed`, `skipped`, `flaky` | Test outcome counts; `flaky` may be undefined. Global errors do not inflate these counts. |
+| `failures` | Test failures as `{ suite, test, failureReason }`. |
+| `tests` | Test details, including suite/name, status, project/browser, timestamps, retries, reasons, tags, and optional attachments. |
+| `meta` | Optional array of `{ key, value }` supplied in the configuration. |
+| `flakyTests` | Optional array of `{ suite, test, projectName, file, retries }`; retries count actual attempts after the initial one, once per test/project/repetition. |
+| `runStatus` | Optional overall status: `passed`, `failed`, `timedout`, or `interrupted`. |
+| `runErrors` | Optional global error strings with ANSI formatting removed; absent when there are none. |
+
+Use `runStatus` and `runErrors` alongside `failed` when deciding whether the run succeeded. `failed === 0` alone does not imply success: setup/teardown errors, worker errors, timeouts, or interruptions can occur without a failed test. Global errors must remain visible even if the CLI's `--run-status` override is `passed`.
+
+The default layout's display limits do not trim the complete arrays passed to your callback. Custom layouts control their own output, including rendering run status, global errors, and flaky details. The simple examples below include run status and error counts; extend them with error text or other details as needed. See [run-level errors and delivery limits](./configuration.md#run-level-errors-and-interruptions).
+
+Use `layoutAsync` for asynchronous work such as uploading attachments. For bot messages, [`sendCustomBlocksInThreadAfterIndex`](./configuration.md#sendcustomblocksinthreadafterindex-default-undefined) can move later blocks into a thread.
+
+## Examples
+
+### Simple summary
 
 ```typescript
 import { Block, KnownBlock } from '@slack/types';
@@ -65,22 +88,24 @@ export default function generateCustomLayoutSimpleExample(
       text: {
         type: 'mrkdwn',
         text:
-          summaryResults.failed === 0
-            ? ':tada: All tests passed!'
-            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+          summaryResults.failed === 0 &&
+          (!summaryResults.runStatus || summaryResults.runStatus === 'passed') &&
+          !summaryResults.runErrors?.length
+            ? ':tada: Run completed successfully!'
+            : `⚠️ Run ${summaryResults.runStatus && summaryResults.runStatus !== 'passed' ? summaryResults.runStatus : 'failed'}: ${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests; ${summaryResults.runErrors?.length || 0} global error(s)`,
       },
     },
   ];
 }
 ```
 
-Generates the following message in Slack:
+Example of the summary layout (the screenshot shows the original success wording):
 
 ![Final](../static/img/2022-08-13_8-02-54.png)
 
-**Example 2: - very simple summary (with Meta information)**
+### Summary with metadata
 
-Add the meta block in your config:
+Import the example below with `import generateCustomLayout from './my_custom_layout'`, then add the metadata and layout callback to your reporter config:
 
 ```typescript
   reporter: [
@@ -110,7 +135,7 @@ import { SummaryResults } from 'playwright-slack-report/dist/src';
 export default function generateCustomLayoutSimpleMeta(
   summaryResults: SummaryResults,
 ): Array<Block | KnownBlock> {
-  const meta: { type: string; text: { type: string; text: string } }[] = [];
+  const meta: Array<Block | KnownBlock> = [];
   if (summaryResults.meta) {
     for (let i = 0; i < summaryResults.meta.length; i += 1) {
       const { key, value } = summaryResults.meta[i];
@@ -129,9 +154,11 @@ export default function generateCustomLayoutSimpleMeta(
       text: {
         type: 'mrkdwn',
         text:
-          summaryResults.failed === 0
-            ? ':tada: All tests passed!'
-            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+          summaryResults.failed === 0 &&
+          (!summaryResults.runStatus || summaryResults.runStatus === 'passed') &&
+          !summaryResults.runErrors?.length
+            ? ':tada: Run completed successfully!'
+            : `⚠️ Run ${summaryResults.runStatus && summaryResults.runStatus !== 'passed' ? summaryResults.runStatus : 'failed'}: ${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests; ${summaryResults.runErrors?.length || 0} global error(s)`,
       },
     },
     ...meta,
@@ -139,11 +166,13 @@ export default function generateCustomLayoutSimpleMeta(
 }
 ```
 
-Generates the following message in Slack:
+Example of the summary layout (the screenshot shows the original success wording):
 
 ![Final](../static/img/2022-08-13_8-17-46.png)
 
-**Example 3: - With screenshots and/or recorded videos (using AWS S3)**
+### Screenshots and videos using AWS S3
+
+Install `@aws-sdk/client-s3` and configure `S3_ACCESS_KEY`, `S3_SECRET`, `S3_REGION`, and `S3_BUCKET`. The generated attachment URLs must be accessible to their intended viewers.
 
 In your, `playwright.config.ts` file, add these params (Make sure you use **layoutAsync** rather than **layout**):
 
@@ -223,7 +252,7 @@ export async function generateCustomLayoutAsync(
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*\nRun status: ${summaryResults.runStatus || 'not provided'}\nGlobal errors: ${(summaryResults.runErrors || []).join('\n') || 'none'}`,
     },
   };
 
@@ -276,7 +305,7 @@ export async function generateCustomLayoutAsync(
 }
 ```
 
-**Example 4: - Upload the attachments to directly to Slack**
+### Upload attachments directly to Slack
 
 To enable this functionality, make sure the slackbot user has the following additional scopes:
 
@@ -294,6 +323,8 @@ The value of the channel_id should be the channel id of the channel you want to 
 ```typescript
 import web_api_1 from '@slack/web-api';
 import fs from 'fs';
+import { Block, KnownBlock } from '@slack/types';
+import { SummaryResults } from 'playwright-slack-report/dist/src';
 const slackClient = new web_api_1.WebClient(
   process.env.SLACK_BOT_USER_OAUTH_TOKEN,
 );
@@ -330,7 +361,7 @@ export default async function generateCustomLayout(
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*`,
+      text: `✅ *${summaryResults.passed}* | ❌ *${summaryResults.failed}* | ⏩ *${summaryResults.skipped}*\nRun status: ${summaryResults.runStatus || 'not provided'}\nGlobal errors: ${(summaryResults.runErrors || []).join('\n') || 'none'}`,
     },
   };
 

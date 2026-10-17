@@ -3,6 +3,8 @@ title: Contributing
 description: Develop and test changes to Playwright Slack Report.
 ---
 
+For an LLM-friendly repository overview, source map, and development commands, see [llms.txt](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/llms.txt).
+
 Install the Bun version pinned in `.bun-version`, then run from the repository root:
 
 ```sh
