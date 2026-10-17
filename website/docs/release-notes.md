@@ -16,6 +16,7 @@ Each entry links to its GitHub release. Older history is available in [all GitHu
 - Reporter and CLI configurations support `artifactLinks` for hosted screenshots, traces, other attachments, and HTML reports beside failures.
 - Bot reports include these links in failure threads when enabled. Webhook reports show links inline.
 - Custom layouts receive optional `failures[].artifacts` entries with names, URLs, and content types when available.
+- The [failure artifacts template](./layout-gallery.md#5-failure-artifacts) provides a preview, downloadable TypeScript and Block Kit JSON, and setup examples.
 - Attachment paths outside the configured upload directory are omitted. Oversized links are omitted with a notice in default layouts.
 
 ### Fixed

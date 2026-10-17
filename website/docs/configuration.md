@@ -143,6 +143,8 @@ The default layout omits links that exceed its text budget and shows an omission
 Custom layouts receive all resolved links through `failures[].artifacts`, with `{ name, url, contentType? }` entries.
 Existing configurations remain unchanged when `artifactLinks` is absent.
 
+The [failure artifacts template](./layout-gallery.md#5-failure-artifacts) includes a screenshot, downloadable source, and reporter and CLI examples.
+
 ### **slackOAuthToken**
 
 Instead of providing an environment variable `SLACK_BOT_USER_OAUTH_TOKEN` you can specify the token in the config in the `slackOAuthToken` field.

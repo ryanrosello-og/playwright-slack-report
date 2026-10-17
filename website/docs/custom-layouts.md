@@ -7,7 +7,7 @@ You can define your own Slack message layout to suit your needs. First configure
 
 ## Define a layout
 
-For ready-to-adapt examples, visit the [layout gallery](./layout-gallery.md): build summary, failure triage, flaky test watch, and run context, each with a screenshot preview, downloadable source, and sample Block Kit JSON.
+For ready-to-adapt examples, visit the [layout gallery](./layout-gallery.md): build summary, failure triage, flaky test watch, run context, and failure artifacts, each with a screenshot preview, downloadable source, and sample Block Kit JSON.
 
 Firstly, install the necessary type definitions:
 
