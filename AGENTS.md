@@ -18,6 +18,9 @@ Istanbul preserves all-source coverage; Playwright under Node validates consumer
 ## Development and validation
 
 - Install dependencies with `bun install --frozen-lockfile`.
+- For every code change, run `bun --bun x prettier --write <changed-files>` after the final edits and before validation or committing.
+- Include all changed Prettier-supported source, test, script, configuration, and example files. Use the repository's Prettier configuration and explicit file paths to avoid unrelated formatting.
+- Run `bun --bun x prettier --check <changed-files>` on the same files before finishing. If you edit them again, repeat formatting and the check.
 - Run `bun run build` to type-check and compile the project.
 - Run `bun run test:coverage` for the unit suite and coverage report in `coverage/`.
 - Run targeted tests with `bun test tests/<file>.spec.ts`.
