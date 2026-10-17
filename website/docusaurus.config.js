@@ -49,6 +49,7 @@ module.exports = {
           position: 'left',
         },
         { to: '/docs/cli', label: 'CLI', position: 'left' },
+        { to: '/docs/release-notes', label: 'Release Notes', position: 'left' },
         {
           href: 'https://github.com/ryanrosello-og/playwright-slack-report',
           label: 'GitHub',

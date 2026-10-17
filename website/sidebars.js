@@ -1,6 +1,7 @@
 module.exports = {
   docs: [
     'overview',
+    'release-notes',
     'getting-started',
     'feature-comparison',
     {
