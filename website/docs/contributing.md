@@ -30,6 +30,37 @@ Instrumentation measures TypeScript source directly, so counter totals differ fr
 
 ## Packaging and releases
 
+For each consumer feature or fix, update [Release Notes](./release-notes.md) in the same change.
+Add pending changes to an `Unreleased` section above the published versions.
+Explain the effect on package users and any required action.
+Omit changes that affect only contributor tools or internal code.
+
+During release preparation, move the relevant notes into the version section.
+Verify the changes against the source code.
+Confirm npm publication before you mark a version as published.
+Use the verified release date.
+Link the entry to its GitHub release.
+Keep published versions newest first.
+Remove the `Unreleased` section if it is empty.
+
+Keep the published history within 12 months of the release-note update date.
+Update the coverage dates at the top of the page.
+Remove older entries from the page.
+Keep the link to older GitHub releases.
+
+Use ASD-STE100 style for instructions.
+Use a single hyphen (`-`) for dash punctuation.
+Use imperative verbs.
+Give one instruction per sentence.
+Limit each instructional sentence to 20 words.
+Put conditions before instructions.
+Use consistent terms and exact configuration names.
+Keep explanations separate from instructions.
+Use only applicable sections: Added, Changed, Fixed, and Upgrade instructions.
+
+Run `bun run build` from `website/` after changes to release notes.
+Check the rendered page and its links.
+
 Run `bun pm pack` to create a local tarball. The release workflow installs and builds with Bun, then uses `npm publish --provenance` to preserve release provenance. Publishing still requires an intentional release tag.
 
 ## Test the packaged consumer

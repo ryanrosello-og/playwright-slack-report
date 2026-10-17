@@ -56,3 +56,35 @@ bump the patch version in `package.json` and update the hardcoded `.version(...)
 in `cli.ts` to match. Run `bun run harness:offline` before pushing a version bump;
 it checks that the packaged CLI version matches the package version.
 Do not publish a release unless asked.
+
+## Consumer release notes
+
+Use a single hyphen (`-`) for dash punctuation in documentation and responses.
+Do not use em dashes or en dashes.
+
+For every consumer-facing feature or fix, update `website/docs/release-notes.md`
+in the same change. Explain the effect on package users and any required action.
+Cover reporter and CLI differences, bot and webhook differences, configuration,
+compatibility, and security fixes when relevant. Omit contributor-only changes,
+refactoring, and dependency updates without verified consumer impact.
+
+Add pending changes to an `Unreleased` section above published versions. Create
+that section when needed. Do not assign an unpublished change to a released version
+or invent a release date. During release preparation, move the relevant entries
+into the version section. Confirm npm publication and the release date before
+presenting that section as published. Remove an empty `Unreleased` section.
+
+Keep published versions newest first. Maintain a rolling 12-month window based
+on the date of the release-note update. Update the page's coverage dates and
+remove entries outside that window. Preserve the link to older GitHub releases.
+Verify claims against source changes and published package versions. Link each
+published entry to its GitHub release. Use only applicable sections: Added,
+Changed, Fixed, and Upgrade instructions.
+
+Write consumer instructions in ASD-STE100 style: use imperative verbs, one
+instruction per sentence, and no more than 20 words per instructional sentence.
+Put a condition before its instruction. Use consistent terms and exact option
+names. Keep explanatory information separate from procedural steps.
+
+Build the website with `bun run build` from `website/` after release-note edits.
+Check links, navigation, and the rendered page. Run `git diff --check`.
