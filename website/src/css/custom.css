@@ -81,7 +81,7 @@ a {
 }
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 6%;
   align-items: center;
   padding: 90px 0 80px;
@@ -169,161 +169,27 @@ a {
   letter-spacing: 0.12em;
   margin-left: 18px;
 }
-.signal-visual {
-  background: radial-gradient(ellipse at 70% 10%, #3b82f614, transparent 65%);
-  padding: 22px;
+.report-preview {
+  margin: 0;
+  min-width: 0;
+}
+.report-preview > a {
+  display: block;
+  border-radius: 12px;
+}
+.report-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
   border: 1px solid var(--site-line);
-  border-radius: 18px;
-  transform: rotate(-1deg);
+  border-radius: 12px;
   box-shadow: 0 24px 70px #00000012;
 }
-.visual-top,
-.visual-bottom {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.6rem;
-  letter-spacing: 0.07em;
+.report-preview figcaption {
+  margin-top: 14px;
   color: var(--site-muted);
-}
-.visual-top > span:last-child,
-.visual-bottom > span:last-child {
-  margin-left: auto;
-  color: var(--site-accent);
-}
-.slack-preview {
-  background: var(--site-card);
-  border: 1px solid var(--site-line);
-  border-radius: 10px;
-  margin: 20px 0;
-  padding: 22px;
-}
-.channel-header {
-  font-size: 0.9rem;
-  font-weight: 650;
-  border-bottom: 1px solid var(--site-line);
-  padding-bottom: 16px;
-}
-.channel-header > span:first-child {
-  color: var(--site-muted);
-  margin-right: 5px;
-}
-.channel-meta {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 400;
-  color: var(--site-muted);
-  margin-top: 4px;
-}
-.report-header {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin: 22px 0;
-  font-size: 0.85rem;
-}
-.report-avatar {
-  width: 36px;
-  height: 36px;
-  background: #60a5fa;
-  color: #0f172a;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 1.3rem;
-  font-weight: 800;
-}
-.app-tag {
-  font-size: 0.5rem;
-  padding: 2px 5px;
-  background: var(--site-line);
-  border-radius: 3px;
-  margin-left: 5px;
-}
-.report-header small {
-  display: block;
-  color: var(--site-muted);
-  font-size: 0.6rem;
-}
-.slack-preview h2 {
-  font-size: 1.02rem;
-  letter-spacing: -0.03em;
-  margin-bottom: 5px;
-}
-.preview-caption {
-  font-size: 0.7rem;
-  color: var(--site-muted);
-}
-.report-counts {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 24px 0;
-}
-.report-counts > div {
-  border: 1px solid var(--site-line);
-  border-radius: 8px;
-  padding: 10px 14px;
-}
-.report-counts strong {
-  display: block;
-  font-size: 1.8rem;
-  letter-spacing: -0.04em;
-  font-weight: 550;
-}
-.report-counts span {
-  font-size: 0.65rem;
-  color: var(--site-muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.report-counts i {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-}
-.pass-dot {
-  background: #70bb99;
-}
-.fail-dot {
-  background: #ed8b99;
-}
-.skip-dot {
-  background: #94a3b8;
-}
-.report-context {
-  display: flex;
-  gap: 25px;
-  font-size: 0.55rem;
-  letter-spacing: 0.04em;
-  color: var(--site-muted);
-  padding-bottom: 18px;
-}
-.report-context b {
-  display: block;
-  font-family: var(--ifm-font-family-monospace);
-  color: var(--ifm-font-color-base);
-  font-size: 0.7rem;
-  font-weight: 400;
-}
-.thread-preview {
-  border-top: 1px solid var(--site-line);
-  padding-top: 15px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  color: var(--site-accent);
-  font-size: 0.7rem;
-}
-.thread-preview small {
-  display: block;
-  font-size: 0.6rem;
-  color: var(--site-muted);
-}
-.thread-preview > span:last-child {
-  margin-left: auto;
+  font-size: 0.8rem;
+  line-height: 1.6;
 }
 .capability-strip {
   display: flex;
@@ -518,17 +384,8 @@ a {
   .hero-copy h1 {
     font-size: 4rem;
   }
-  .signal-visual {
-    padding: 14px;
-  }
-  .slack-preview {
-    padding: 16px;
-  }
   .hero-actions {
     gap: 15px;
-  }
-  .report-counts > div {
-    padding: 8px;
   }
 }
 @media (max-width: 760px) {
@@ -541,10 +398,6 @@ a {
   }
   .hero-copy h1 {
     font-size: clamp(2.8rem, 14vw, 4.3rem);
-  }
-  .signal-visual {
-    transform: none;
-    margin-top: 15px;
   }
   .path-grid {
     grid-template-columns: 1fr;

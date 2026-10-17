@@ -1,6 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 const paths = [
   [
@@ -27,6 +28,8 @@ const paths = [
 ];
 
 export default function Home() {
+  const reportPreviewUrl = useBaseUrl('/img/run-context-preview.png');
+
   return (
     <Layout
       title="Test results, right where your team works"
@@ -61,69 +64,22 @@ export default function Home() {
               <span className="install-label">READY WHEN YOU ARE</span>
             </div>
           </div>
-          <div className="signal-visual" aria-label="Example Slack test report">
-            <div className="visual-top">
-              <span className="status-dot" /> DELIVERY PREVIEW <span>↗</span>
-            </div>
-            <div className="slack-preview">
-              <div className="channel-header">
-                <span>#</span> test-results{' '}
-                <span className="channel-meta">
-                  Your team's next move starts here
-                </span>
-              </div>
-              <div className="report-header">
-                <div className="report-avatar">✓</div>
-                <div>
-                  <strong>Playwright</strong>{' '}
-                  <span className="app-tag">APP</span>
-                  <small>Today at 10:42 AM</small>
-                </div>
-              </div>
-              <h2>Run complete. You’re in the loop.</h2>
-              <p className="preview-caption">E2E regression · Chromium</p>
-              <div className="report-counts">
-                <div>
-                  <strong>128</strong>
-                  <span>
-                    <i className="pass-dot" /> passed
-                  </span>
-                </div>
-                <div>
-                  <strong>2</strong>
-                  <span>
-                    <i className="fail-dot" /> failed
-                  </span>
-                </div>
-                <div>
-                  <strong>3</strong>
-                  <span>
-                    <i className="skip-dot" /> skipped
-                  </span>
-                </div>
-              </div>
-              <div className="report-context">
-                <span>
-                  BRANCH <b>main</b>
-                </span>
-                <span>
-                  BUILD <b>#482</b>
-                </span>
-              </div>
-              <div className="thread-preview">
-                <span aria-hidden="true">↳</span>
-                <div>
-                  <strong>2 failures in thread</strong>
-                  <small>Details that help you get to the fix.</small>
-                </div>
-                <span aria-hidden="true">→</span>
-              </div>
-            </div>
-            <div className="visual-bottom">
-              <span>FROM TEST RUN TO TEAM CONTEXT</span>
-              <span aria-hidden="true">● ───── ●</span>
-            </div>
-          </div>
+          <figure className="report-preview">
+            <a href={reportPreviewUrl} target="_blank" rel="noreferrer">
+              <img
+                src={reportPreviewUrl}
+                width="1720"
+                height="1254"
+                alt="Run context custom layout preview: 128 passed, 0 failed, 0 flaky, and 2 skipped tests, with environment, branch, commit, build, owner, suite, and report links. Open full-size preview."
+              />
+            </a>
+            <figcaption>
+              Custom layout preview using sample data.{' '}
+              <Link to="/docs/layout-gallery#4-run-context">
+                Use the Run context layout →
+              </Link>
+            </figcaption>
+          </figure>
         </section>
         <div className="capability-strip">
           <span>ONE RUN. THE WHOLE PICTURE.</span>
