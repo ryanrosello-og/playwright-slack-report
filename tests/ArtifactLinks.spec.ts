@@ -151,6 +151,37 @@ test('handles Windows and POSIX CI paths independently of the reporting host', (
   ).toBe(`${options.baseUrl}/test/screen.png`);
 });
 
+test('maps UNC upload paths and excludes paths outside the configured share directory', () => {
+  const prefix = '\\\\server\\share\\uploads';
+  const file = `${prefix}\\test #1\\a & b%.png`;
+  expect(
+    resolveArtifactLinks([attachment(file, 'Screenshot #1 & more')], {
+      baseUrl: options.baseUrl,
+      pathPrefix: prefix,
+    }),
+  ).toEqual([
+    {
+      name: 'Screenshot #1 & more',
+      contentType: 'image/png',
+      url: `${options.baseUrl}/test%20%231/a%20%26%20b%25.png`,
+    },
+  ]);
+
+  for (const fileOutsidePrefix of [
+    '\\\\server\\share\\uploads-other\\file.png',
+    `${prefix}\\..\\secret.png`,
+    '\\\\server\\other-share\\uploads\\file.png',
+    '\\\\other-server\\share\\uploads\\file.png',
+  ]) {
+    expect(
+      resolveArtifactLinks([attachment(fileOutsidePrefix)], {
+        baseUrl: options.baseUrl,
+        pathPrefix: prefix,
+      }),
+    ).toEqual([]);
+  }
+});
+
 test('rejects traversal, sibling directories, foreign drives and paths that are URLs', () => {
   for (const file of [
     '/ci/output/../secret',
