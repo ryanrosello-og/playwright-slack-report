@@ -1,0 +1,23 @@
+{
+  "name": "Playwright Slack Report",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:5-24-bookworm",
+  "remoteUser": "node",
+  "remoteEnv": {
+    "BUN_INSTALL": "/home/node/.bun",
+    "PATH": "/home/node/.bun/bin:${containerEnv:PATH}"
+  },
+  "postCreateCommand": ["bash", ".devcontainer/setup.sh"],
+  "customizations": {
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Documentation", "onAutoForward": "notify" }
+  }
+}

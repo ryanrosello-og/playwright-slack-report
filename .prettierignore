@@ -1,0 +1,10 @@
+# Generated output and dependencies are also excluded by .gitignore.
+node_modules/
+dist/
+coverage/
+website/build/
+website/.docusaurus/
+harness/artifacts/
+
+# Intentionally empty malformed-JSON fixture. Formatting would change the test input.
+tests/test_data/invalid_json_results.json

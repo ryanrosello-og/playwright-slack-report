@@ -34,6 +34,9 @@
     "typescript-eslint": "^8.71.1"
   },
   "scripts": {
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run build && bun run test:coverage",
+    "format": "bun scripts/format.ts --write",
+    "format:check": "bun scripts/format.ts",
     "test": "bun test",
     "test:coverage": "bun scripts/coverage.ts",
     "pw": "bun run test:coverage",
