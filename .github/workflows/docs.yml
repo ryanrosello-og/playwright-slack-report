@@ -7,22 +7,34 @@ on:
   pull_request:
     paths: ['website/**', '.bun-version', '.github/workflows/docs.yml']
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      release_ref:
+        description: Documentation commit produced after npm publication
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: docs-${{ github.ref }}
+  group: docs-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.source.outputs.commit }}
     defaults:
       run:
         working-directory: website
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.release_ref || github.sha }}
+      - id: source
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
@@ -37,14 +49,33 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages-deployment
+      cancel-in-progress: false
+      queue: max
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Prevent an older build from replacing current documentation
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_COMMIT: ${{ needs.build.outputs.source }}
+        run: |
+          latest=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          if [ "$latest" = "$EXPECTED_COMMIT" ]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'A newer main commit exists. This older documentation build will not replace it.' >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/configure-pages@v6
+        if: steps.current.outputs.deploy == 'true'
       - name: Deploy documentation
         id: deployment
+        if: steps.current.outputs.deploy == 'true'
         uses: actions/deploy-pages@v5

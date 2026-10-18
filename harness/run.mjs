@@ -44,6 +44,9 @@ const node =
     );
 assert(node, 'Install Node 24+ for the consumer compatibility checks');
 const offline = process.argv.includes('--offline');
+const suppliedTarball = process.env.HARNESS_TARBALL
+  ? path.resolve(process.env.HARNESS_TARBALL)
+  : undefined;
 assert(
   process.argv.slice(2).every((arg) => arg === '--offline'),
   'Only --offline is supported',
@@ -930,7 +933,7 @@ try {
     botChannel = await resolveChannel(channelName);
     webhookChannel = await resolveChannel(webhookChannelName);
   }
-  await command(bun, ['run', 'build'], root, 'build');
+  if (!suppliedTarball) await command(bun, ['run', 'build'], root, 'build');
   await command(
     node,
     ['-e', 'if (process.versions.bun) process.exit(1)'],
@@ -944,14 +947,32 @@ try {
     await readFile(path.join(root, 'package.json'), 'utf8'),
   );
   const filename = 'consumer.tgz';
-  await command(
-    bun,
-    ['pm', 'pack', '--filename', path.join(packDir, filename)],
-    root,
-    'pack',
-  );
+  if (suppliedTarball) {
+    await cp(suppliedTarball, path.join(packDir, filename));
+  } else {
+    await command(
+      bun,
+      ['pm', 'pack', '--filename', path.join(packDir, filename)],
+      root,
+      'pack',
+    );
+  }
   const archive = new Bun.Archive(await readFile(path.join(packDir, filename)));
-  const files = [...(await archive.files()).keys()].map((file) => ({
+  const archiveFiles = await archive.files();
+  const packedManifest = JSON.parse(
+    await archiveFiles.get('package/package.json').text(),
+  );
+  assert.equal(
+    packedManifest.name,
+    manifest.name,
+    'Supplied tarball package name differs',
+  );
+  assert.equal(
+    packedManifest.version,
+    manifest.version,
+    'Supplied tarball version differs',
+  );
+  const files = [...archiveFiles.keys()].map((file) => ({
     path: file.replace(/^package\//, ''),
   }));
   const pack = { filename, version: manifest.version, files };

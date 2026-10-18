@@ -61,7 +61,10 @@ Use only applicable sections: Added, Changed, Fixed, and Upgrade instructions.
 Run `bun run build` from `website/` after changes to release notes.
 Check the rendered page and its links.
 
-Run `bun pm pack` to create a local tarball. The release workflow installs and builds with Bun, then uses `npm publish --provenance` to preserve release provenance. Publishing still requires an intentional release tag.
+Run `bun pm pack` to create a local tarball.
+Merging a stable package version bump into `main` approves publication after the release checks pass.
+Dependency-only updates do not create a new package version.
+See [Automated releases](./releasing.md) for setup, validation, and recovery.
 
 ## Test the packaged consumer
 

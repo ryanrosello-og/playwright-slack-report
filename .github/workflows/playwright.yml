@@ -18,10 +18,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
+      - name: Check formatting of changed files
+        shell: bash
+        env:
+          FORMAT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: bun scripts/release/format.ts "$FORMAT_BASE"
       - run: bun run lint
       - run: bun run typecheck
       - run: bun run build
