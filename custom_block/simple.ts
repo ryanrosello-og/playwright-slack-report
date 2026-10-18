@@ -10,9 +10,12 @@ export default function generateCustomLayoutSimpleExample(
       text: {
         type: 'mrkdwn',
         text:
-          summaryResults.failed === 0
+          summaryResults.failed === 0 &&
+          (!summaryResults.runStatus ||
+            summaryResults.runStatus === 'passed') &&
+          !summaryResults.runErrors?.length
             ? ':tada: All tests passed!'
-            : `😭${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests`,
+            : `⚠️ Run ${summaryResults.runStatus && summaryResults.runStatus !== 'passed' ? summaryResults.runStatus : 'failed'}: ${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests; ${summaryResults.runErrors?.length || 0} global error(s)`,
       },
     },
   ];
