@@ -1,0 +1,11 @@
+{
+  "sendResults": "always",
+  "slackLogLevel": "error",
+  "sendUsingWebhook": {
+    "webhookUrl": "https://hooks.slack.com/services/test"
+  },
+  "customLayoutAsync": {
+    "source": "./custom_block/fail/cli_async_block.ts",
+    "functionName": "generateCustomLayoutSimpleExample"
+  }
+}
