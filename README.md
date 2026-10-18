@@ -20,4 +20,23 @@ The [Docusaurus documentation](https://ryanrosello-og.github.io/playwright-slack
 - [CLI and sharded runs](https://ryanrosello-og.github.io/playwright-slack-report/docs/cli/)
 - [Custom message layouts](https://ryanrosello-og.github.io/playwright-slack-report/docs/custom-layouts/)
 - [Layout gallery](https://ryanrosello-og.github.io/playwright-slack-report/docs/layout-gallery/)
-- [Contributing, testing, and development](https://ryanrosello-og.github.io/playwright-slack-report/docs/contributing/)
+- [Contributing, testing, and development](CONTRIBUTING.md)
+
+## Contribute
+
+Fixes, tests, documentation, and examples are welcome. No Slack account or credentials are required.
+
+Use the Bun version in [.bun-version](.bun-version). From your clone, run:
+
+```sh
+bun install --frozen-lockfile
+bun test
+# Make your change, then:
+bun run format
+bun run check
+```
+
+Start with the [contributor guide](CONTRIBUTING.md) or a [good first issue](https://github.com/ryanrosello-og/playwright-slack-report/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22).
+Draft PRs and questions are welcome. Small fixes do not need an issue first.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ryanrosello-og/playwright-slack-report)

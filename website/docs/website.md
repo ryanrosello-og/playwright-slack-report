@@ -56,4 +56,4 @@ For configuration and troubleshooting, see [Netlify Deploy Previews](https://doc
 
 ## Keep documentation authoritative
 
-Maintain detailed guidance here. Keep the repository README brief and link to the relevant documentation. `harness/README.md` points to the consumer harness page instead of duplicating it. Documentation currently covers the current release without separate version snapshots.
+Maintain detailed consumer and website guidance here. The root [contributor guide](https://github.com/ryanrosello-og/playwright-slack-report/blob/main/CONTRIBUTING.md) is authoritative for contributor setup, checks, and PR policies. Keep the repository README brief and link to the relevant guide. `harness/README.md` links to the consumer harness page. Documentation currently covers the current release without separate version snapshots.
