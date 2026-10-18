@@ -21,7 +21,7 @@ function escapeHtml(value: string): string {
 
 function renderText(text: TextObject): string {
   const escaped = escapeHtml(text.text);
-  // The only mrkdwn these examples emit is labelled report/build links.
+  // The only mrkdwn these examples emit is labelled report/build/artifact links.
   return (
     text.type === 'mrkdwn'
       ? escaped.replace(/&lt;(.*?)\|(.*?)&gt;/g, '<a href="$1">$2</a>')
@@ -90,6 +90,7 @@ const source = await readFile(
 await writeFile(
   path.join(examples, 'showcase.ts'),
   source
+    .replace(/\r\n/g, '\n')
     .replace(
       "// In your project, change '../src' to 'playwright-slack-report/dist/src'.\n",
       '',

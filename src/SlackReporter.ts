@@ -13,6 +13,7 @@ import ResultsParser from './ResultsParser';
 import SlackClient from './SlackClient';
 import SlackWebhookClient from './SlackWebhookClient';
 import { hasRunFailure } from './RunResults';
+import { ArtifactLinksSchema } from './ArtifactLinks';
 
 class SlackReporter implements Reporter {
   private customLayout: Function | undefined;
@@ -31,7 +32,8 @@ class SlackReporter implements Reporter {
 
   private resultsParser = new ResultsParser();
 
-  private sendResults: 'always' | 'on-failure' | 'on-flaky' | 'off' = 'on-failure';
+  private sendResults: 'always' | 'on-failure' | 'on-flaky' | 'off' =
+    'on-failure';
 
   private onSuccessSlackChannels: string[] = [];
 
@@ -49,6 +51,8 @@ class SlackReporter implements Reporter {
 
   private proxy: string | undefined;
 
+  private artifactLinks: unknown;
+
   private browsers: { projectName: string; browser: string }[] = [];
 
   private suite!: Suite;
@@ -62,11 +66,12 @@ class SlackReporter implements Reporter {
   onBegin(fullConfig: FullConfig, suite: Suite): void {
     this.suite = suite;
     this.logs = [];
-    const slackReporterConfig = fullConfig.reporter.find((f) => f[0].toLowerCase().includes('slackreporter'))?.[1];
+    const slackReporterConfig = fullConfig.reporter.find((f) =>
+      f[0].toLowerCase().includes('slackreporter'),
+    )?.[1];
     if (fullConfig.projects.length === 0) {
       this.browsers = [];
     } else {
-
       this.browsers = fullConfig.projects.map((obj) => ({
         projectName: obj.name,
         browser: obj.use.browserName
@@ -83,29 +88,30 @@ class SlackReporter implements Reporter {
     this.sendResults = slackReporterConfig.sendResults || 'always';
     this.customLayout = slackReporterConfig.layout;
     this.customLayoutAsync = slackReporterConfig.layoutAsync;
-    this.onSuccessSlackChannels
-      = slackReporterConfig.onSuccessChannels || slackReporterConfig.channels;
-    this.onFailureSlackChannels
-      = slackReporterConfig.onFailureChannels || slackReporterConfig.channels;
-    this.maxNumberOfFailuresToShow
-      = slackReporterConfig.maxNumberOfFailuresToShow !== undefined
+    this.onSuccessSlackChannels =
+      slackReporterConfig.onSuccessChannels || slackReporterConfig.channels;
+    this.onFailureSlackChannels =
+      slackReporterConfig.onFailureChannels || slackReporterConfig.channels;
+    this.maxNumberOfFailuresToShow =
+      slackReporterConfig.maxNumberOfFailuresToShow !== undefined
         ? slackReporterConfig.maxNumberOfFailuresToShow
         : 10;
-    this.maxNumberOfFlakyTestsToShow = slackReporterConfig.maxNumberOfFlakyTestsToShow ?? 10;
+    this.maxNumberOfFlakyTestsToShow =
+      slackReporterConfig.maxNumberOfFlakyTestsToShow ?? 10;
     this.slackOAuthToken = slackReporterConfig.slackOAuthToken || undefined;
     this.slackWebHookUrl = slackReporterConfig.slackWebHookUrl || undefined;
-    this.slackWebHookChannel
-      = slackReporterConfig.slackWebHookChannel || undefined;
+    this.slackWebHookChannel =
+      slackReporterConfig.slackWebHookChannel || undefined;
     this.disableUnfurl = slackReporterConfig.disableUnfurl || false;
     this.showInThread = slackReporterConfig.showInThread || false;
     if (slackReporterConfig.sendCustomBlocksInThreadAfterIndex) {
-      this.sendCustomBlocksInThreadAfterIndex
-        = slackReporterConfig.sendCustomBlocksInThreadAfterIndex;
+      this.sendCustomBlocksInThreadAfterIndex =
+        slackReporterConfig.sendCustomBlocksInThreadAfterIndex;
     }
     this.slackLogLevel = slackReporterConfig.slackLogLevel || LogLevel.DEBUG;
     this.proxy = slackReporterConfig.proxy || undefined;
+    this.artifactLinks = slackReporterConfig.artifactLinks;
   }
-
 
   onTestEnd(test: TestCase, _result: TestResult): void {
     void _result;
@@ -141,13 +147,13 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      resultSummary.passed === 0
-      && resultSummary.failed === 0
-      && resultSummary.flaky === 0
-      && resultSummary.skipped === 0
-      && resultSummary.failures.length === 0
-      && resultSummary.tests.length === 0
-      && !testsFailed
+      resultSummary.passed === 0 &&
+      resultSummary.failed === 0 &&
+      resultSummary.flaky === 0 &&
+      resultSummary.skipped === 0 &&
+      resultSummary.failures.length === 0 &&
+      resultSummary.tests.length === 0 &&
+      !testsFailed
     ) {
       this.log('⏩ Slack reporter - Playwright reported : "No tests found"');
       return;
@@ -157,9 +163,13 @@ class SlackReporter implements Reporter {
     if (this.proxy) {
       // Loading undici replaces the global dispatcher of Node's built-in fetch, so load it only when a proxy is used
       // Bypass Bun's undici shim so the configured proxy dispatcher is honored.
-      const { ProxyAgent, fetch: undiciFetch } = await import('undici/index.js');
+      const { ProxyAgent, fetch: undiciFetch } =
+        await import('undici/index.js');
       proxyFetch = (url, init) =>
-        undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(this.proxy!) }) as unknown as ReturnType<FetchFunction>;
+        undiciFetch(url as string, {
+          ...(init as any),
+          dispatcher: new ProxyAgent(this.proxy!),
+        }) as unknown as ReturnType<FetchFunction>;
     }
 
     if (this.slackWebHookUrl) {
@@ -203,14 +213,19 @@ class SlackReporter implements Reporter {
           disableUnfurl: this.disableUnfurl,
           summaryResults: resultSummary,
           showInThread: this.showInThread,
-          sendCustomBlocksInThreadAfterIndex: this.sendCustomBlocksInThreadAfterIndex,
+          sendCustomBlocksInThreadAfterIndex:
+            this.sendCustomBlocksInThreadAfterIndex,
         },
       });
 
       console.log(JSON.stringify(result, null, 2));
-      if (this.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0 || resultSummary.flakyTests?.length > 0)) {
+      if (
+        this.showInThread &&
+        (resultSummary.failures.length > 0 ||
+          resultSummary.runErrors?.length > 0 ||
+          resultSummary.flakyTests?.length > 0)
+      ) {
         for (let i = 0; i < result.length; i += 1) {
-
           await slackClient.attachDetailsToThread({
             channelIds: [result[i].channel],
             ts: result[i].ts,
@@ -229,9 +244,9 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      !this.slackWebHookUrl
-      && !this.slackOAuthToken
-      && !process.env.SLACK_BOT_USER_OAUTH_TOKEN
+      !this.slackWebHookUrl &&
+      !this.slackOAuthToken &&
+      !process.env.SLACK_BOT_USER_OAUTH_TOKEN
     ) {
       return {
         okToProceed: false,
@@ -241,8 +256,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      this.slackWebHookUrl
-      && (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
+      this.slackWebHookUrl &&
+      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
     ) {
       return {
         okToProceed: false,
@@ -260,8 +275,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      !this.sendResults
-      || !['always', 'on-failure', 'on-flaky', 'off'].includes(this.sendResults)
+      !this.sendResults ||
+      !['always', 'on-failure', 'on-flaky', 'off'].includes(this.sendResults)
     ) {
       return {
         okToProceed: false,
@@ -270,18 +285,18 @@ class SlackReporter implements Reporter {
       };
     }
 
-    const noSuccessChannelsProvided
-      = ['always', 'on-flaky'].includes(this.sendResults)
-      && (!this.onSuccessSlackChannels
-        || this.onSuccessSlackChannels.length === 0);
-    const noFailureChannelsProvided
-      = ['always', 'on-failure', 'on-flaky'].includes(this.sendResults)
-      && (!this.onFailureSlackChannels
-        || this.onFailureSlackChannels.length === 0);
+    const noSuccessChannelsProvided =
+      ['always', 'on-flaky'].includes(this.sendResults) &&
+      (!this.onSuccessSlackChannels ||
+        this.onSuccessSlackChannels.length === 0);
+    const noFailureChannelsProvided =
+      ['always', 'on-failure', 'on-flaky'].includes(this.sendResults) &&
+      (!this.onFailureSlackChannels ||
+        this.onFailureSlackChannels.length === 0);
 
     if (
-      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
-      && noSuccessChannelsProvided
+      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken) &&
+      noSuccessChannelsProvided
     ) {
       return {
         okToProceed: false,
@@ -291,8 +306,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken)
-      && noFailureChannelsProvided
+      (process.env.SLACK_BOT_USER_OAUTH_TOKEN || this.slackOAuthToken) &&
+      noFailureChannelsProvided
     ) {
       return {
         okToProceed: false,
@@ -309,8 +324,8 @@ class SlackReporter implements Reporter {
     }
 
     if (
-      this.customLayoutAsync
-      && typeof this.customLayoutAsync !== 'function'
+      this.customLayoutAsync &&
+      typeof this.customLayoutAsync !== 'function'
     ) {
       return {
         okToProceed: false,
@@ -321,20 +336,35 @@ class SlackReporter implements Reporter {
     if (this.meta && !Array.isArray(this.meta)) {
       return { okToProceed: false, message: '❌ Meta is not an array' };
     }
-    if (!Number.isInteger(this.maxNumberOfFlakyTestsToShow) || this.maxNumberOfFlakyTestsToShow < 0) {
-      return { okToProceed: false, message: '❌ maxNumberOfFlakyTestsToShow must be a non-negative integer' };
+    if (
+      !Number.isInteger(this.maxNumberOfFlakyTestsToShow) ||
+      this.maxNumberOfFlakyTestsToShow < 0
+    ) {
+      return {
+        okToProceed: false,
+        message:
+          '❌ maxNumberOfFlakyTestsToShow must be a non-negative integer',
+      };
     }
+    const artifactLinks = ArtifactLinksSchema.optional().safeParse(
+      this.artifactLinks,
+    );
+    if (!artifactLinks.success) {
+      return {
+        okToProceed: false,
+        message: `❌ Invalid artifactLinks: ${artifactLinks.error.message}`,
+      };
+    }
+    this.resultsParser.setArtifactLinks(artifactLinks.data);
     return { okToProceed: true };
   }
 
   log(message: string | undefined): void {
-
     console.log(message);
     if (message) {
       this.logs.push(message);
     }
   }
-
 
   printsToStdio(): boolean {
     return false;

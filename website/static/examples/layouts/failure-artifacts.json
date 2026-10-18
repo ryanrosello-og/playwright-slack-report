@@ -1,0 +1,62 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "📎 Failure artifacts",
+        "emoji": true
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "🔴 Run failed · 126 passed · 2 failed · 0 flaky · 2 skipped",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "plain_text",
+        "text": "Guest can complete payment [chromium]\nSuite: Checkout\nConfirmation banner was not visible after 5000 ms.",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/reports/1842/index.html|HTML report>  •  <https://example.com/artifacts/1842/checkout/screenshot.png|Screenshot>  •  <https://example.com/artifacts/1842/checkout/trace.zip|Trace ZIP>"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "plain_text",
+        "text": "Password reset sends an email [firefox]\nSuite: Account\nExpected HTTP 200 from /api/password-reset. Received HTTP 503.",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/reports/1842/index.html|HTML report>  •  <https://example.com/artifacts/1842/account/screenshot.png|Screenshot>  •  <https://example.com/artifacts/1842/account/trace.zip|Trace ZIP>"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "<https://example.com/builds/1842|View CI build>"
+      }
+    }
+  ]
+}

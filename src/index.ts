@@ -38,6 +38,23 @@ export type failure = {
   suite: string;
   test: string;
   failureReason: string;
+  /** Hosted links for the final failing attempt. Local attachments remain on tests. */
+  artifacts?: ArtifactLink[];
+};
+
+export type ArtifactLink = {
+  name: string;
+  url: string;
+  contentType?: string;
+};
+
+export type ArtifactLinksOptions = {
+  /** URL of the directory containing uploaded artifacts. */
+  baseUrl?: string;
+  /** Local directory mirrored at baseUrl. Defaults to the current working directory. */
+  pathPrefix?: string;
+  /** Hosted HTML report URL, included beside each failure. */
+  reportUrl?: string;
 };
 
 export type FlakyTest = {

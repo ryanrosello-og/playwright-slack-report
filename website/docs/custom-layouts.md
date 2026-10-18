@@ -7,7 +7,7 @@ You can define your own Slack message layout to suit your needs. First configure
 
 ## Define a layout
 
-For ready-to-adapt examples, visit the [layout gallery](./layout-gallery.md): build summary, failure triage, flaky test watch, and run context, each with a screenshot preview, downloadable source, and sample Block Kit JSON.
+For ready-to-adapt examples, visit the [layout gallery](./layout-gallery.md): build summary, failure triage, flaky test watch, run context, and failure artifacts, each with a screenshot preview, downloadable source, and sample Block Kit JSON.
 
 Firstly, install the necessary type definitions:
 
@@ -23,7 +23,12 @@ const generateCustomLayout = (
   summaryResults: SummaryResults,
 ): Array<KnownBlock | Block> => {
   // Replace this block with your own implementation.
-  return [{ type: 'section', text: { type: 'mrkdwn', text: `Failed tests: ${summaryResults.failed}` } }];
+  return [
+    {
+      type: 'section',
+      text: { type: 'mrkdwn', text: `Failed tests: ${summaryResults.failed}` },
+    },
+  ];
 };
 
 export { generateCustomLayout };
@@ -55,15 +60,15 @@ In your, `playwright.config.ts` file, add your function into the config.
 
 Layout callbacks receive `SummaryResults` from `playwright-slack-report/dist/src`:
 
-| Field | Meaning |
-| --- | --- |
-| `passed`, `failed`, `skipped`, `flaky` | Test outcome counts; `flaky` may be undefined. Global errors do not inflate these counts. |
-| `failures` | Test failures as `{ suite, test, failureReason }`. |
-| `tests` | Test details, including suite/name, status, project/browser, timestamps, retries, reasons, tags, and optional attachments. |
-| `meta` | Optional array of `{ key, value }` supplied in the configuration. |
-| `flakyTests` | Optional array of `{ suite, test, projectName, file, retries }`; retries count actual attempts after the initial one, once per test/project/repetition. |
-| `runStatus` | Optional overall status: `passed`, `failed`, `timedout`, or `interrupted`. |
-| `runErrors` | Optional global error strings with ANSI formatting removed; absent when there are none. |
+| Field                                  | Meaning                                                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `passed`, `failed`, `skipped`, `flaky` | Test outcome counts; `flaky` may be undefined. Global errors do not inflate these counts.                                                                        |
+| `failures`                             | Test failures as `{ suite, test, failureReason, artifacts? }`. With `artifactLinks` configured, `artifacts` contains hosted `{ name, url, contentType? }` links. |
+| `tests`                                | Test details, including suite/name, status, project/browser, timestamps, retries, reasons, tags, and optional attachments.                                       |
+| `meta`                                 | Optional array of `{ key, value }` supplied in the configuration.                                                                                                |
+| `flakyTests`                           | Optional array of `{ suite, test, projectName, file, retries }`; retries count actual attempts after the initial one, once per test/project/repetition.          |
+| `runStatus`                            | Optional overall status: `passed`, `failed`, `timedout`, or `interrupted`.                                                                                       |
+| `runErrors`                            | Optional global error strings with ANSI formatting removed; absent when there are none.                                                                          |
 
 Use `runStatus` and `runErrors` alongside `failed` when deciding whether the run succeeded. `failed === 0` alone does not imply success: setup/teardown errors, worker errors, timeouts, or interruptions can occur without a failed test. Global errors must remain visible even if the CLI's `--run-status` override is `passed`.
 
@@ -89,7 +94,8 @@ export default function generateCustomLayoutSimpleExample(
         type: 'mrkdwn',
         text:
           summaryResults.failed === 0 &&
-          (!summaryResults.runStatus || summaryResults.runStatus === 'passed') &&
+          (!summaryResults.runStatus ||
+            summaryResults.runStatus === 'passed') &&
           !summaryResults.runErrors?.length
             ? ':tada: Run completed successfully!'
             : `⚠️ Run ${summaryResults.runStatus && summaryResults.runStatus !== 'passed' ? summaryResults.runStatus : 'failed'}: ${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests; ${summaryResults.runErrors?.length || 0} global error(s)`,
@@ -155,7 +161,8 @@ export default function generateCustomLayoutSimpleMeta(
         type: 'mrkdwn',
         text:
           summaryResults.failed === 0 &&
-          (!summaryResults.runStatus || summaryResults.runStatus === 'passed') &&
+          (!summaryResults.runStatus ||
+            summaryResults.runStatus === 'passed') &&
           !summaryResults.runErrors?.length
             ? ':tada: Run completed successfully!'
             : `⚠️ Run ${summaryResults.runStatus && summaryResults.runStatus !== 'passed' ? summaryResults.runStatus : 'failed'}: ${summaryResults.failed} failure(s) out of ${summaryResults.tests.length} tests; ${summaryResults.runErrors?.length || 0} global error(s)`,

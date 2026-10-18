@@ -1,9 +1,9 @@
 ---
 title: Layout gallery
-description: Four ready-to-adapt custom Slack layouts with screenshots, source code, and Block Kit payloads.
+description: Five ready-to-adapt custom Slack layouts with screenshots, source code, and Block Kit payloads.
 ---
 
-Start with one of these four layouts and adapt it to your team's Slack channel. Each is a synchronous function that receives `SummaryResults` and returns Slack blocks. They work with reporter webhook and bot delivery.
+Start with one of these five layouts and adapt it to your team's Slack channel. Each is a synchronous function that receives `SummaryResults` and returns Slack blocks. They work with reporter webhook and bot delivery.
 
 The screenshots below are **local previews rendered from the examples' actual Block Kit output using sample data**. They illustrate the content and arrangement; Slack's fonts and spacing may differ. No Slack messages are sent when generating these previews.
 
@@ -47,9 +47,118 @@ Combine the outcome and counts with environment, branch, commit, build, owner, a
 
 [Download Block Kit JSON](pathname:///playwright-slack-report/examples/layouts/run-context.json)
 
+## 5. Failure artifacts
+
+**Function:** `generateFailureArtifacts` · **Best for:** opening debugging artifacts directly from a failure notification.
+
+Each failure has a short error summary and up to three hosted links: HTML report, screenshot, and trace ZIP.
+The template reads `failures[].artifacts`, which the reporter or CLI populates through `artifactLinks`.
+It shows up to three test failures and two global errors. Additional details and oversized links have omission notices.
+Failures without links remain visible. Invalid URLs and duplicate URLs are omitted.
+
+![Failure artifacts preview showing checkout and account failures, each with HTML report, screenshot, and trace ZIP links](../static/img/layouts/failure-artifacts.png)
+
+[Download Block Kit JSON](pathname:///playwright-slack-report/examples/layouts/failure-artifacts.json) · [Download TypeScript template](pathname:///playwright-slack-report/examples/layouts/showcase.ts)
+
+This template requires the `artifactLinks` feature prepared for [version 1.1.118](./release-notes.md#v11118).
+The sample URLs are placeholders. The package does not upload files or grant access to hosted artifacts.
+Trace links open ZIP files. The HTML link opens the configured report page.
+
+### Reporter setup
+
+1. Download `showcase.ts` from the link above.
+2. Save it beside `playwright.config.ts`.
+3. Install `@slack/types` as a development dependency.
+4. Set `SLACK_WEBHOOK_URL` to your incoming webhook URL.
+5. Replace the example URLs with your artifact host URLs.
+6. Set `pathPrefix` to the local directory mirrored at `baseUrl`.
+
+```typescript
+import { defineConfig } from '@playwright/test';
+import { generateFailureArtifacts } from './showcase';
+
+export default defineConfig({
+  outputDir: 'test-results',
+  use: {
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+  },
+  reporter: [
+    ['dot'],
+    ['html', { open: 'never' }],
+    [
+      'playwright-slack-report/dist/src/SlackReporter.js',
+      {
+        slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
+        sendResults: 'on-failure',
+        layout: generateFailureArtifacts,
+        disableUnfurl: true,
+        artifactLinks: {
+          baseUrl: 'https://example.com/artifacts/1842/',
+          pathPrefix: 'test-results',
+          reportUrl: 'https://example.com/reports/1842/index.html',
+        },
+      },
+    ],
+  ],
+});
+```
+
+Upload `test-results` and `playwright-report` to the configured destinations with their directory structures intact.
+The reporter sends links when the test run ends. Those links become usable after your upload finishes.
+If uploads must finish before notification, use the CLI workflow below.
+
+For bot delivery, replace `slackWebHookUrl` with `channels: ['ci-results']`.
+Set `SLACK_BOT_USER_OAUTH_TOKEN` to the bot token.
+This custom layout puts links inline. Keep `showInThread` off for the pictured result.
+For default failure threads, omit `layout` and enable `showInThread` with bot delivery.
+
+### CLI setup
+
+1. Generate Playwright JSON with the JSON reporter.
+2. Upload the artifacts and HTML report before sending the notification.
+3. Compile the downloaded template with the command below.
+
+```sh
+bun build ./showcase.ts --target=node --format=cjs --outfile=./showcase.cjs
+```
+
+4. Save this configuration as `cli-artifacts.json`.
+5. Replace the example URLs and channel name with your values.
+6. Set `pathPrefix` to the directory represented in the JSON attachment paths.
+7. Set `SLACK_BOT_USER_OAUTH_TOKEN` to the bot token.
+
+```json
+{
+  "sendResults": "on-failure",
+  "slackLogLevel": "error",
+  "sendUsingBot": { "channels": ["ci-results"] },
+  "disableUnfurl": true,
+  "customLayout": {
+    "source": "./showcase.cjs",
+    "functionName": "generateFailureArtifacts"
+  },
+  "artifactLinks": {
+    "baseUrl": "https://example.com/artifacts/1842/",
+    "pathPrefix": "test-results",
+    "reportUrl": "https://example.com/reports/1842/index.html"
+  }
+}
+```
+
+8. Send the report after the uploads finish.
+
+```sh
+bunx playwright-slack-report -c cli-artifacts.json -j results.json
+```
+
+Relative paths resolve from the CLI working directory.
+For JSON from another machine, use its absolute upload directory as `pathPrefix`.
+See [artifact mapping options](./configuration.md#artifactlinks) for path rules and [CLI configuration](./cli.md#hosted-artifact-links) for transport options.
+
 ## Use an example
 
-[Download showcase.ts](pathname:///playwright-slack-report/examples/layouts/showcase.ts) and save it in your project. The file contains all four functions and their shared helpers. Install `@slack/types` as a development dependency if needed, then select a function in `playwright.config.ts`:
+[Download showcase.ts](pathname:///playwright-slack-report/examples/layouts/showcase.ts) and save it in your project. The file contains all five functions and their shared helpers. Install `@slack/types` as a development dependency if needed, then select a function in `playwright.config.ts`:
 
 ```typescript
 import { defineConfig } from '@playwright/test';
@@ -58,21 +167,24 @@ import { generateBuildSummary } from './showcase';
 export default defineConfig({
   reporter: [
     ['dot'],
-    ['playwright-slack-report/dist/src/SlackReporter.js', {
-      slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
-      sendResults: 'always',
-      layout: generateBuildSummary,
-      meta: [
-        { key: 'Environment', value: 'Staging / EU West' },
-        { key: 'Branch', value: process.env.GITHUB_REF_NAME || 'local' },
-        { key: 'Build', value: process.env.GITHUB_RUN_NUMBER || 'local' },
-        { key: 'Commit', value: process.env.GITHUB_SHA || 'local' },
-        { key: 'Owner', value: 'Checkout team' },
-        { key: 'Suite', value: 'Nightly regression' },
-        { key: 'Report URL', value: 'https://example.com/reports/1842' },
-        { key: 'Build URL', value: 'https://example.com/builds/1842' },
-      ],
-    }],
+    [
+      'playwright-slack-report/dist/src/SlackReporter.js',
+      {
+        slackWebHookUrl: process.env.SLACK_WEBHOOK_URL,
+        sendResults: 'always',
+        layout: generateBuildSummary,
+        meta: [
+          { key: 'Environment', value: 'Staging / EU West' },
+          { key: 'Branch', value: process.env.GITHUB_REF_NAME || 'local' },
+          { key: 'Build', value: process.env.GITHUB_RUN_NUMBER || 'local' },
+          { key: 'Commit', value: process.env.GITHUB_SHA || 'local' },
+          { key: 'Owner', value: 'Checkout team' },
+          { key: 'Suite', value: 'Nightly regression' },
+          { key: 'Report URL', value: 'https://example.com/reports/1842' },
+          { key: 'Build URL', value: 'https://example.com/builds/1842' },
+        ],
+      },
+    ],
   ],
 });
 ```

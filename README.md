@@ -6,7 +6,7 @@
 [![npm downloads per month](https://img.shields.io/npm/dm/playwright-slack-report)](https://www.npmjs.com/package/playwright-slack-report)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Publish Playwright test results to the Slack channels where your team works. Supports incoming webhooks, Slack bots, failure and flaky test details, custom message layouts, and merged reports from sharded runs.
+Publish Playwright test results to the Slack channels where your team works. Supports incoming webhooks, Slack bots, failure and flaky test details, hosted artifact links, custom message layouts, and merged reports from sharded runs.
 
 See the [Release Notes](https://ryanrosello-og.github.io/playwright-slack-report/docs/release-notes/) for consumer changes and upgrade instructions.
 

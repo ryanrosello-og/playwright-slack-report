@@ -16,7 +16,7 @@ const program = new Command();
 
 program
   .name('playwright-slack-report - cli')
-  .version('1.1.117')
+  .version('1.1.118')
   .description('📦 Send Playwright json results to directly Slack ')
   .option(
     '-c, --config <path>',
@@ -26,8 +26,12 @@ program
     '-j, --json-results <path>',
     'Generated Playwright json results file e.g. ./results.json',
   )
-  .addOption(new Option('--run-status <status>', 'Overall Playwright run status (JSON omits this field)')
-    .choices(['passed', 'failed', 'timedout', 'interrupted']))
+  .addOption(
+    new Option(
+      '--run-status <status>',
+      'Overall Playwright run status (JSON omits this field)',
+    ).choices(['passed', 'failed', 'timedout', 'interrupted']),
+  )
   .action(async (options) => {
     const preCheckResult = await doPreChecks(
       options.jsonResults,
@@ -41,13 +45,17 @@ program
     let proxyFetch: FetchFunction | undefined;
     if (config.proxy) {
       // Load lazily. The explicit entry bypasses Bun's undici shim, which ignores dispatchers.
-      const { ProxyAgent, fetch: undiciFetch } = await import('undici/index.js');
+      const { ProxyAgent, fetch: undiciFetch } =
+        await import('undici/index.js');
       proxyFetch = (url, init) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        undiciFetch(url as string, { ...(init as any), dispatcher: new ProxyAgent(config.proxy!) }) as unknown as ReturnType<FetchFunction>;
+        undiciFetch(url as string, {
+          ...(init as any),
+          dispatcher: new ProxyAgent(config.proxy!),
+        }) as unknown as ReturnType<FetchFunction>;
     }
 
-    const resultsParser = new ResultsParser();
+    const resultsParser = new ResultsParser(config.artifactLinks);
     const resultSummary = await resultsParser.parseFromJsonFile(
       preCheckResult.jsonPath!,
     );
@@ -147,11 +155,17 @@ async function sendResultsUsingBot({
         disableUnfurl: config.disableUnfurl,
         summaryResults,
         showInThread: config.showInThread,
-        sendCustomBlocksInThreadAfterIndex: config.sendCustomBlocksInThreadAfterIndex,
+        sendCustomBlocksInThreadAfterIndex:
+          config.sendCustomBlocksInThreadAfterIndex,
       },
     });
 
-    if (config.showInThread && (resultSummary.failures.length > 0 || resultSummary.runErrors?.length > 0 || resultSummary.flakyTests?.length > 0)) {
+    if (
+      config.showInThread &&
+      (resultSummary.failures.length > 0 ||
+        resultSummary.runErrors?.length > 0 ||
+        resultSummary.flakyTests?.length > 0)
+    ) {
       for (let i = 0; i < result.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
         await slackClient.attachDetailsToThread({
@@ -165,8 +179,8 @@ async function sendResultsUsingBot({
     }
 
     if (
-      result.filter((r) => !r.outcome.includes('✅ Message sent to')).length
-      !== 0
+      result.filter((r) => !r.outcome.includes('✅ Message sent to')).length !==
+      0
     ) {
       return false;
     }

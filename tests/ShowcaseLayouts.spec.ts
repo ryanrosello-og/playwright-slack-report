@@ -3,6 +3,7 @@ import type { SummaryResults } from '../src';
 import {
   generateBuildSummary,
   generateFailureTriage,
+  generateFailureArtifacts,
   generateFlakyWatch,
   generateRunContext,
 } from '../custom_block/showcase';
@@ -10,6 +11,7 @@ import {
 const layouts = [
   generateBuildSummary,
   generateFailureTriage,
+  generateFailureArtifacts,
   generateFlakyWatch,
   generateRunContext,
 ];
@@ -21,6 +23,91 @@ const empty: SummaryResults = {
   failures: [],
   tests: [],
 };
+
+test('artifact template places escaped hosted links after the matching failure', () => {
+  const blocks = generateFailureArtifacts({
+    ...empty,
+    failed: 2,
+    failures: [
+      {
+        suite: 'Checkout',
+        test: 'Payment',
+        failureReason: 'Timed out',
+        artifacts: [
+          {
+            name: 'Screenshot <view> & retry|1',
+            url: 'https://example.com/payment.png?run=1&retry=2',
+          },
+          { name: 'Trace', url: 'https://example.com/trace.zip' },
+          { name: 'HTML report', url: 'https://example.com/report/' },
+          { name: 'Duplicate', url: 'https://example.com/trace.zip' },
+        ],
+      },
+      { suite: 'Account', test: 'Reset', failureReason: 'Service unavailable' },
+    ],
+  });
+  const failure = blocks.findIndex(
+    (block) => block.type === 'section' && block.text?.text.includes('Payment'),
+  );
+  const links = blocks[failure + 1];
+  expect(links.type).toBe('section');
+  expect(JSON.stringify(links)).toContain(
+    'payment.png?run=1&amp;retry=2|Screenshot &lt;view&gt; &amp; retry 1',
+  );
+  expect(JSON.stringify(links)).toContain('trace.zip|Trace');
+  expect(JSON.stringify(links)).toContain('/report/|HTML report');
+  expect(JSON.stringify(links)).not.toContain('Duplicate');
+  expect(JSON.stringify(blocks)).toContain(
+    'No hosted artifact links available.',
+  );
+});
+
+test('artifact template rejects unsafe URLs and limits links without cutting them', () => {
+  const artifacts = [
+    ...[
+      'javascript:alert(1)',
+      'file:///private',
+      'not a URL',
+      'https://user:password@example.com',
+      'https://example.com/<bad|link>',
+      'https://example.com/a b',
+    ].map((url) => ({ name: 'Unsafe', url })),
+    { name: 'Oversized', url: `https://example.com/${'x'.repeat(1000)}` },
+    ...Array.from({ length: 30 }, (_, i) => ({
+      name: `Screenshot ${i}`,
+      url: `https://example.com/${i}.png`,
+    })),
+  ];
+  const summary = {
+    ...empty,
+    failed: 100,
+    failures: Array.from({ length: 100 }, () => ({
+      suite: 'suite',
+      test: 'test',
+      failureReason: 'failure',
+      artifacts,
+    })),
+  };
+  const original = JSON.stringify(summary);
+  const blocks = generateFailureArtifacts(summary);
+  const output = JSON.stringify(blocks);
+  expect(blocks.length).toBeLessThanOrEqual(50);
+  expect(output).not.toContain('Unsafe');
+  expect(output).not.toContain('Oversized');
+  expect(output).toContain('28 additional artifact links omitted');
+  expect(output).toContain('97 more error/failure entries omitted');
+  const links = blocks.filter(
+    (block) => block.type === 'section' && block.text?.type === 'mrkdwn',
+  );
+  expect(links).toHaveLength(3);
+  for (const block of links) {
+    if (block.type !== 'section') continue;
+    expect(block.text!.text.length).toBeLessThanOrEqual(3000);
+    expect(block.text!.text.match(/<https:/g)).toHaveLength(3);
+    expect(block.text!.text.endsWith('>')).toBe(true);
+  }
+  expect(JSON.stringify(summary)).toBe(original);
+});
 
 test('showcase layouts keep global failures, timeouts and interruptions visible with zero failed tests', () => {
   for (const layout of layouts) {
