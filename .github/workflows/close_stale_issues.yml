@@ -1,7 +1,7 @@
-name: 'Close stale issues and PRs'
+name: 'Follow up on issues needing information'
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
   issues: write
 
 on:
@@ -14,6 +14,20 @@ jobs:
     steps:
       - uses: actions/stale@v11
         with:
-          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
-          days-before-stale: 30
-          days-before-close: 5
+          only-issue-labels: 'needs-info'
+          exempt-issue-labels: 'accepted,good first issue,help wanted'
+          exempt-all-issue-milestones: true
+          days-before-issue-stale: 30
+          days-before-issue-close: 14
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          remove-pr-stale-when-updated: false
+          stale-issue-label: 'Stale'
+          stale-issue-message: >-
+            We still need the information requested above to investigate this issue.
+            Please reply with the missing details or ask for help collecting them.
+            Without a reply, this issue will close in 14 days.
+          close-issue-message: >-
+            This issue was closed because the requested information is still missing.
+            Please add the details when available and ask us to reopen it.
+          labels-to-remove-when-unstale: 'needs-info'

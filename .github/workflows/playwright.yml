@@ -24,15 +24,9 @@ jobs:
         with:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
-      - name: Check formatting of changed files
-        shell: bash
+      - run: bun run check
         env:
-          FORMAT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: bun scripts/release/format.ts "$FORMAT_BASE"
-      - run: bun run lint
-      - run: bun run typecheck
-      - run: bun run build
-      - run: bun run test:coverage
+          FORMAT_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
