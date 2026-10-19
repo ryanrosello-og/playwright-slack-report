@@ -33,6 +33,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
       - id: plan
         run: bun scripts/release/plan.ts
       - name: Check release bot configuration before publication
@@ -72,15 +73,27 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ matrix.candidate.commit }}
+          ref: main
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+          package-manager-cache: false
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
+      - name: Verify and check out the release source from main history
+        env:
+          RELEASE_COMMIT: ${{ matrix.candidate.commit }}
+          RELEASE_BASE: ${{ matrix.candidate.base }}
+        run: bun scripts/release/checkout.ts
+      - name: Use the validated candidate's Bun version
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+          no-cache: true
       - run: bun install --frozen-lockfile
       - name: Check formatting of changed files
         shell: bash
@@ -138,14 +151,25 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ needs.plan.outputs.main }}
+          ref: main
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+          package-manager-cache: false
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
+      - name: Verify and check out the planned publisher source from main history
+        env:
+          RELEASE_COMMIT: ${{ needs.plan.outputs.main }}
+        run: bun scripts/release/checkout.ts
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+          no-cache: true
       - run: bun install --frozen-lockfile
       - uses: actions/download-artifact@v4
         with:

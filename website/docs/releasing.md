@@ -33,6 +33,10 @@ Each release candidate must pass these checks:
 - The offline consumer harness against the exact archive prepared for publication.
 
 The publisher verifies the archive checksum before using `npm publish --provenance`.
+Validation and publication start from a fresh `main` checkout.
+Each job verifies that its planned source belongs to `main`'s first-parent history before checking out that source.
+Validation also verifies the formatting base against the source commit's first parent.
+Release jobs disable shared Bun executable caching and automatic Node dependency caching.
 The archive contains `gitHead`, which identifies its source commit.
 Publication uses npm trusted publishing through `.github/workflows/publish.yml`.
 
