@@ -2,26 +2,218 @@ name: Publish Package
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
+# Preserve waiting runs. The planner also scans main's history, so run order
+# cannot drop a version or publish a newer candidate before an older one.
+concurrency:
+  group: package-release
+  cancel-in-progress: false
+  queue: max
+
 jobs:
-  publish:
+  plan:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      candidates: ${{ steps.plan.outputs.candidates }}
+      pending: ${{ steps.plan.outputs.pending }}
+      main: ${{ steps.plan.outputs.main }}
     steps:
       - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
+      - id: plan
+        run: bun scripts/release/plan.ts
+      - name: Check release bot configuration before publication
+        if: steps.plan.outputs.pending == 'true'
+        env:
+          CLIENT_ID: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          HAS_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY != '' }}
+        run: |
+          if [ -z "$CLIENT_ID" ] || [ "$HAS_PRIVATE_KEY" != 'true' ]; then
+            echo 'Configure RELEASE_APP_CLIENT_ID and RELEASE_APP_PRIVATE_KEY before enabling releases. See the releasing guide.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - uses: actions/create-github-app-token@v3
+        if: steps.plan.outputs.pending == 'true'
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-plan
+          path: .release/plan.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  validate:
+    needs: plan
+    if: needs.plan.outputs.pending == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        candidate: ${{ fromJSON(needs.plan.outputs.candidates) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+          no-cache: true
+      - name: Verify and check out the release source from main history
+        env:
+          RELEASE_COMMIT: ${{ matrix.candidate.commit }}
+          RELEASE_BASE: ${{ matrix.candidate.base }}
+        run: bun scripts/release/checkout.ts
+      - name: Use the validated candidate's Bun version
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+          no-cache: true
       - run: bun install --frozen-lockfile
+      - name: Check formatting of changed files
+        shell: bash
+        env:
+          RELEASE_BASE: ${{ matrix.candidate.base }}
+        run: bun scripts/release/format.ts "$RELEASE_BASE"
+      - run: bun run lint
+      - run: bun run typecheck
       - run: bun run build
-      # npm remains necessary for the existing provenance-enabled publication.
-      - run: npm publish --provenance
+      - run: bun run test:coverage
+      - run: git diff --check
+      - name: Build documentation
+        if: runner.os == 'Linux'
+        working-directory: website
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+      - name: Prepare immutable release archive
+        if: runner.os == 'Linux'
+        run: bun scripts/release/pack.ts
+      - name: Test the exact release archive under Node
+        if: runner.os == 'Linux'
+        env:
+          HARNESS_TARBALL: .release/package.tgz
+        run: bun run harness:offline
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux' && success()
+        with:
+          name: release-${{ matrix.candidate.version }}
+          path: |
+            .release/package.tgz
+            .release/archive.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-diagnostics-${{ matrix.candidate.version }}-${{ matrix.os }}
+          path: |
+            coverage/
+            harness/artifacts/
+          retention-days: 7
+
+  publish:
+    needs: [plan, validate]
+    if: needs.plan.outputs.pending == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      docs_commit: ${{ steps.publish.outputs.docs_commit }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+          no-cache: true
+      - name: Verify and check out the planned publisher source from main history
+        env:
+          RELEASE_COMMIT: ${{ needs.plan.outputs.main }}
+        run: bun scripts/release/checkout.ts
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+          no-cache: true
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-plan
+          path: .release
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: .release/artifacts
+      - uses: actions/create-github-app-token@v3
+        id: bot
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+      # Keep this filename: npm's existing trusted publisher uses it.
+      # npm handles trusted publishing and provenance; Bun handles builds.
+      - id: publish
+        env:
+          RELEASE_TOKEN: ${{ steps.bot.outputs.token }}
+        run: bun scripts/release/publish.ts
+
+  documentation:
+    needs: [plan, validate, publish]
+    if: >-
+      always() && needs.plan.result == 'success' &&
+      (needs.publish.result == 'success' || needs.plan.outputs.pending == 'false')
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml
+    with:
+      release_ref: ${{ needs.publish.outputs.docs_commit || needs.plan.outputs.main }}
+
+  result:
+    needs: [plan, validate, publish, documentation]
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain release outcome and recovery
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo '## Release results' >> "$GITHUB_STEP_SUMMARY"
+          echo "$RESULTS" >> "$GITHUB_STEP_SUMMARY"
+          echo 'If a stage failed, fix its reported problem and rerun Publish Package on main. Existing npm versions are verified and never republished. A documentation-only failure can be repaired by running Publish Package again. Never move a release tag or unpublish a package to retry.' >> "$GITHUB_STEP_SUMMARY"

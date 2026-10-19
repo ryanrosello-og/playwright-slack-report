@@ -19,7 +19,11 @@ For larger features, open an issue before implementation.
 
 - [Website development](./website.md): Local documentation previews, builds, and publishing.
 - [Consumer harness](./consumer-harness.md): Packaged reporter and CLI checks, including offline execution.
+- [Automated releases](./releasing.md): Release setup, validation, publication, and recovery.
 - [Release notes](./release-notes.md): Consumer changes and upgrade instructions.
 
 Maintainers handle live Slack verification, version bumps, and publishing.
 Fork PRs use the offline consumer harness without Slack credentials.
+
+Merging a stable package version bump into `main` approves publication after the release checks pass.
+Dependency-only updates do not create a new package version.

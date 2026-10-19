@@ -19,7 +19,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Contributing',
-      items: ['contributing', 'consumer-harness', 'website'],
+      items: ['contributing', 'consumer-harness', 'releasing', 'website'],
     },
   ],
 };

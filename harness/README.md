@@ -20,6 +20,10 @@ Configure `SLACK_BOT_USER_OAUTH_TOKEN` and `SLACK_WEBHOOK_URL`. Bot reports use 
 bun run harness:offline
 ```
 
+Set `HARNESS_TARBALL` to test an existing package archive without rebuilding or repacking it.
+The automated release workflow uses this option to validate the exact archive it publishes.
+See the [release guide](https://ryanrosello-og.github.io/playwright-slack-report/docs/releasing/) for examples.
+
 Offline mode verifies tarball contents, isolated installation, CLI startup,
 browser outcomes, and run-level reporting through a local transport capture.
 It explicitly skips live Slack delivery and API verification and is not a
