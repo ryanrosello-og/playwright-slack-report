@@ -23,6 +23,7 @@ Version 1.1.118 is prepared for release. It is not yet published.
 
 ### Fixed
 
+- CLI prechecks reject a missing `customLayoutAsync.source` file before loading the report.
 - Failure details keep same-named tests separate across files, projects, and repetitions, so each failure retains its own artifacts.
 - The checked-in `custom_block/simple.ts` example no longer reports success for unsuccessful runs or global errors. If you use a copied simple layout, include `runStatus` and `runErrors` in its success check.
 - CLI prechecks validate that configured `customLayoutAsync.source` files exist before checking credentials or sending reports.

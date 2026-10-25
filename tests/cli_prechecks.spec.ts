@@ -53,6 +53,29 @@ describe('CLI app - pre-check', () => {
     );
   });
 
+  test('throws an error when the custom async layout js file cannot be found', async () => {
+    const invalidConfig = path.join(
+      __dirname,
+      'test_data',
+      'invalid_cli_config_async_layout_not_found.json',
+    );
+    const result = await doPreChecks(validTestResults, invalidConfig);
+    expect(result.status).toEqual('error');
+    expect(result.message).toContain(
+      'Custom layout was not found in path: ./custom_block/fail/cli_async_block.ts',
+    );
+  });
+
+  test('accepts an existing custom async layout js file', async () => {
+    const validConfig = path.join(
+      __dirname,
+      'test_data',
+      'valid_cli_config_async_layout.json',
+    );
+    const result = await doPreChecks(validTestResults, validConfig);
+    expect(result.status).toEqual('ok');
+  });
+
   test('throws an error when the custom layout async file cannot be found before token validation', async () => {
     const tempDir = mkdtempSync(path.join(tmpdir(), 'cli-prechecks-async-'));
     const previousToken = process.env.SLACK_BOT_USER_OAUTH_TOKEN;
@@ -77,47 +100,6 @@ describe('CLI app - pre-check', () => {
       expect(result.message).toEqual(
         `Custom layout was not found in path: ${missingSource}`,
       );
-    } finally {
-      if (previousToken === undefined) {
-        delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
-      } else {
-        process.env.SLACK_BOT_USER_OAUTH_TOKEN = previousToken;
-      }
-      rmSync(tempDir, { recursive: true, force: true });
-    }
-  });
-
-  test('provides config value when customLayoutAsync points to an existing file', async () => {
-    const tempDir = mkdtempSync(path.join(tmpdir(), 'cli-prechecks-async-ok-'));
-    const previousToken = process.env.SLACK_BOT_USER_OAUTH_TOKEN;
-    try {
-      delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;
-      const layoutPath = path.join(tempDir, 'custom_layout_async.ts');
-      const validConfig = path.join(tempDir, 'config.json');
-      writeFileSync(
-        layoutPath,
-        'export default async function () { return []; }\n',
-      );
-      writeFileSync(
-        validConfig,
-        JSON.stringify({
-          sendUsingWebhook: {
-            webhookUrl: 'https://example.invalid/webhook',
-          },
-          sendResults: 'always',
-          customLayoutAsync: {
-            source: layoutPath,
-            functionName: 'default',
-          },
-          slackLogLevel: 'debug',
-        }),
-      );
-      const result = await doPreChecks(validTestResults, validConfig);
-      expect(result.status).toEqual('ok');
-      expect(result.config?.customLayoutAsync).toEqual({
-        source: layoutPath,
-        functionName: 'default',
-      });
     } finally {
       if (previousToken === undefined) {
         delete process.env.SLACK_BOT_USER_OAUTH_TOKEN;

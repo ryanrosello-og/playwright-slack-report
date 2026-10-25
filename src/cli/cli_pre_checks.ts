@@ -56,7 +56,7 @@ export const doPreChecks = async (
 
   if (
     config.customLayoutAsync?.source &&
-    !fileExists(config.customLayoutAsync?.source)
+    !fileExists(config.customLayoutAsync.source)
   ) {
     return {
       status: 'error',
