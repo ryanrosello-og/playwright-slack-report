@@ -9,9 +9,9 @@ These notes cover changes that affect package users from **18 October 2025 to 18
 The newest release appears first. Releases with only internal maintenance changes are omitted.
 Each published entry links to its GitHub release. Older history is available in [all GitHub releases](https://github.com/ryanrosello-og/playwright-slack-report/releases).
 
-## 1.1.118 - Unreleased {#v11118}
+## 1.1.118 - Released {#v11118}
 
-Version 1.1.118 is prepared for release. It is not yet published.
+Version 1.1.118 is published and available.
 
 ### Added
 
@@ -25,7 +25,7 @@ Version 1.1.118 is prepared for release. It is not yet published.
 
 - CLI prechecks reject a missing `customLayoutAsync.source` file before loading the report.
 - Failure details keep same-named tests separate across files, projects, and repetitions, so each failure retains its own artifacts.
-- The checked-in `custom_block/simple.ts` example no longer reports success for unsuccessful runs or global errors. If you use a copied simple layout, include `runStatus` and `runErrors` in its success check.
+- The checked-in `custom_block/simple.ts` example no longer reports success for unsuccessful runs or global errors. If you use a copied simple layout, include `runStatus` and `runErrors` in its summary checks.
 - CLI prechecks validate that configured `customLayoutAsync.source` files exist before checking credentials or sending reports.
 
 ### Upgrade instructions
