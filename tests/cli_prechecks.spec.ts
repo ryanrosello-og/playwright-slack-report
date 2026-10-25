@@ -52,7 +52,7 @@ describe('CLI app - pre-check', () => {
       'Custom layout was not found in path: ./custom_block/fail/cli_block_with_meta.ts',
     );
   });
-  
+
   test('throws an error when the custom async layout js file cannot be found', async () => {
     const invalidConfig = path.join(
       __dirname,
@@ -64,7 +64,7 @@ describe('CLI app - pre-check', () => {
     expect(result.message).toContain(
       'Custom layout was not found in path: ./custom_block/fail/cli_async_block.ts',
     );
-  });  
+  });
 
   test('accepts an existing custom async layout js file', async () => {
     const validConfig = path.join(
@@ -75,7 +75,7 @@ describe('CLI app - pre-check', () => {
     const result = await doPreChecks(validTestResults, validConfig);
     expect(result.status).toEqual('ok');
   });
-  
+
   test('throws an error when the custom layout async file cannot be found before token validation', async () => {
     const tempDir = mkdtempSync(path.join(tmpdir(), 'cli-prechecks-async-'));
     const previousToken = process.env.SLACK_BOT_USER_OAUTH_TOKEN;
@@ -108,7 +108,7 @@ describe('CLI app - pre-check', () => {
       }
       rmSync(tempDir, { recursive: true, force: true });
     }
-  });  
+  });
 
   test('throws an error when both sendUsingWebhook and showInThread is true', async () => {
     const invalidConfig = path.join(
