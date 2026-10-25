@@ -25,6 +25,7 @@ Version 1.1.118 is prepared for release. It is not yet published.
 
 - CLI prechecks reject a missing `customLayoutAsync.source` file before loading the report.
 - Failure details keep same-named tests separate across files, projects, and repetitions, so each failure retains its own artifacts.
+- CLI prechecks validate that configured `customLayoutAsync.source` files exist before checking credentials or sending reports.
 
 ### Upgrade instructions
 

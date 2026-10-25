@@ -151,6 +151,46 @@ test('handles Windows and POSIX CI paths independently of the reporting host', (
   ).toBe(`${options.baseUrl}/test/screen.png`);
 });
 
+test('maps UNC descendants and encodes each hosted URL segment', () => {
+  const pathPrefix = String.raw`\\fileserver\builds\artifacts`;
+
+  expect(
+    resolveArtifactLinks(
+      [
+        attachment(
+          String.raw`\\fileserver\builds\artifacts\suite #1\trace & video%.zip`,
+          'Trace',
+        ),
+      ],
+      { baseUrl: options.baseUrl, pathPrefix },
+    ),
+  ).toEqual([
+    {
+      name: 'Trace',
+      contentType: 'image/png',
+      url: `${options.baseUrl}/suite%20%231/trace%20%26%20video%25.zip`,
+    },
+  ]);
+});
+
+test('rejects UNC siblings, traversal, other shares and other servers', () => {
+  const pathPrefix = String.raw`\\fileserver\builds\artifacts`;
+
+  for (const file of [
+    String.raw`\\fileserver\builds\artifacts-sibling\file.png`,
+    String.raw`\\fileserver\builds\artifacts\..\secret\file.png`,
+    String.raw`\\fileserver\releases\file.png`,
+    String.raw`\\other-server\builds\artifacts\file.png`,
+  ]) {
+    expect(
+      resolveArtifactLinks([attachment(file)], {
+        baseUrl: options.baseUrl,
+        pathPrefix,
+      }),
+    ).toEqual([]);
+  }
+});
+
 test('rejects traversal, sibling directories, foreign drives and paths that are URLs', () => {
   for (const file of [
     '/ci/output/../secret',
