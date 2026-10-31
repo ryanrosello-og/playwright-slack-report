@@ -13,7 +13,7 @@
     "@slack/types": "^3.0.0",
     "@types/bun": "1.4.2",
     "@types/node": ">=26.6.4",
-    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.71.1",
     "dotenv": "^18.0.8",
     "eslint": "^10.12.0",
